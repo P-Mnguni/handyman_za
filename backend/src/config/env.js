@@ -59,3 +59,111 @@ const envSchema = z.object({
     PLATFORM_COMMISSION_PERCENT: z.string().transform(Number).default("15"),
     MAX_RADIUS_KM: z.string().transform(Number).default("50")
 });
+
+// Parse and validate environment variables
+let parsedEnv;
+try {
+    parsedEnv = envSchema.parse(process.env);
+} catch (error) {
+    console.error("❌ Invalid environment variables:", error.errors);
+    process.exit(1);
+}
+
+// Export typed environment variables
+export const env = {
+    nodeEnv: parsedEnv.NODE_ENV,
+    port: parsedEnv.PORT,
+    isProduction: parsedEnv.NODE_ENV === "production",
+    isDevelopment: parsedEnv.NODE_ENV === "development",
+
+    // Database
+    mongoUri: parsedEnv.MONGO_URI,
+
+    // Authentication
+    jwtSecret: parsedEnv.JWT_SECRET,
+    jwtExpiresIn: parsedEnv.JWT_EXPIRES_IN,
+    jwtRefreshSecret: parsedEnv.JWT_REFRESH_SECRET,
+    jwtRefreshExpiresIn: parsedEnv.JWT_REFRESH_EXPIRES_IN,
+
+    // Payment Gateways
+    payfast: {
+        merchantId: parsedEnv.PAYFAST_MERCHANT_ID,
+        merchantKey: parsedEnv.PAYFAST_MERCHANT_KEY,
+        passphrase: parsedEnv.PAYFAST_PASSPHRASE,
+        environment: parsedEnv.PAYFAST_ENV,
+        isEnabled: !!parsedEnv.PAYFAST_MERCHANT_ID
+    },
+
+    stripe: {
+        secretKey: parsedEnv.STRIPE_SECRET_KEY,
+        webhookSecret: parsedEnv.STRIPE_WEBHOOK_SECRET,
+        isEnabled: !!parsedEnv.STRIPE_SECRET_KEY
+    },
+
+    // Email Service
+    email: {
+        provider: parsedEnv.EMAIL_PROVIDER,
+        sendgridApiKey: parsedEnv.SENDGRID_API_KEY,
+        resendApiKey: parsedEnv.RESEND_API_KEY,
+        systemEmail: parsedEnv.SYSTEM_EMAIL
+    },
+
+    // SMS Service
+    sms: {
+        twilioAccountSid: parsedEnv.TWILIO_ACCOUNT_SID,
+        twilioAuthToken: parsedEnv.TWILIO_AUTH_TOKEN,
+        twilioPhoneNumber: parsedEnv.TWILIO_PHONE_NUMBER,
+        isEnabled: !!parsedEnv.TWILIO_ACCOUNT_SID
+    },
+
+    // Redis
+    redisUrl: parsedEnv.REDIS_URL,
+
+    // File Storage
+    cloudinary: {
+        cloudName: parsedEnv.CLOUDINARY_CLOUD_NAME,
+        apiKey: parsedEnv.CLOUDINARY_API_KEY,
+        apiSecret: parsedEnv.CLOUDINARY_API_SECRET,
+        isEnabled: !!parsedEnv.CLOUDINARY_CLOUD_NAME
+    },
+
+    // Frontend
+    frontendUrl: parsedEnv.FRONTEND_URL,
+    adminUrl: parsedEnv.ADMIN_URL,
+    corsOrigins: [parsedEnv.FRONTEND_URL, parsedEnv.ADMIN_URL],
+
+    // Monitoring
+    sentryDsn: parsedEnv.SENTRY_DSN,
+    logLevel: parsedEnv.LOG_LEVEL,
+
+    // Platform Settings
+    platformCommissionPercent: parsedEnv.PLATFORM_COMMISSION_PERCENT,
+    maxRadiusKm: parsedEnv.MAX_RADIUS_KM,
+
+    // Helper functions
+    getPaymentProvider: () => {
+        // Prioritize Stripe if available, else Payfast
+        return parsedEnv.STRIPE_SECRET_KEY ? "stripe" : "payfast";
+    },
+
+    getEmailConfig: () => {
+        if (parsedEnv.EMAIL_PROVIDER === "sendgrid" && parsedEnv.SENDGRID_API_KEY) {
+            return {
+                provider: "sendgrid",
+                apiKey: parsedEnv.SENDGRID_API_KEY,
+            };
+        }
+
+        if (parsedEnv.EMAIL_PROVIDER === "resend" && parsedEnv.RESEND_API_KEY) {
+            return {
+                provider: "resend",
+                apiKey: parsedEnv.RESEND_API_KEY,
+            };
+        }
+
+        // Fallback to console logging in development
+        return {
+            provider: "console"
+        };
+    },
+};
