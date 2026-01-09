@@ -5,6 +5,8 @@ import { z } from 'zod';            // for runtime validation
 dotenv.config();
 
 // Define schema for validation 
+// Catches missing/invalid env variables Early
+// Prevents runtime errors in production
 const envSchema = z.object({
     // Core
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
@@ -86,6 +88,7 @@ export const env = {
     jwtRefreshExpiresIn: parsedEnv.JWT_REFRESH_EXPIRES_IN,
 
     // Payment Gateways
+    // PayFast (SA-focused), Stripe (International)
     payfast: {
         merchantId: parsedEnv.PAYFAST_MERCHANT_ID,
         merchantKey: parsedEnv.PAYFAST_MERCHANT_KEY,
@@ -120,6 +123,8 @@ export const env = {
     redisUrl: parsedEnv.REDIS_URL,
 
     // File Storage
+    // For handyman verification documents
+    // Matches schema's documents field
     cloudinary: {
         cloudName: parsedEnv.CLOUDINARY_CLOUD_NAME,
         apiKey: parsedEnv.CLOUDINARY_API_KEY,
@@ -137,8 +142,9 @@ export const env = {
     logLevel: parsedEnv.LOG_LEVEL,
 
     // Platform Settings
-    platformCommissionPercent: parsedEnv.PLATFORM_COMMISSION_PERCENT,
-    maxRadiusKm: parsedEnv.MAX_RADIUS_KM,
+    // Business logic in config
+    platformCommissionPercent: parsedEnv.PLATFORM_COMMISSION_PERCENT,       // Revenue model
+    maxRadiusKm: parsedEnv.MAX_RADIUS_KM,                                   // Job matching radius
 
     // Helper functions
     getPaymentProvider: () => {
@@ -146,6 +152,7 @@ export const env = {
         return parsedEnv.STRIPE_SECRET_KEY ? "stripe" : "payfast";
     },
 
+    // Returns active email provider
     getEmailConfig: () => {
         if (parsedEnv.EMAIL_PROVIDER === "sendgrid" && parsedEnv.SENDGRID_API_KEY) {
             return {
