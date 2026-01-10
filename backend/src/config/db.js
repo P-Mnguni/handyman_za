@@ -109,3 +109,11 @@ export async function disconnectedDB() {
         throw error;        
     }
 }
+
+/**
+ * Check if MongoDB is connected
+ * @returns {boolean} Connection status
+ */
+export function isConnected() {
+    return mongoose.connection.readyState === 1;
+}
