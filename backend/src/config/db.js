@@ -92,3 +92,20 @@ export async function connectDB() {
 
     return cached.conn;
 }
+
+/** Disconnect from MongoDB
+ * Useful for testing and graceful shutdown
+ */
+export async function disconnectedDB() {
+    try {
+        if (cached.conn) {
+            await mongoose.disconnect();
+            cached.conn = null;
+            cached.promise = null;
+            console.log('✅ MongoDB disconnected successfully');
+        }
+    } catch (error) {
+        console.error('❌ Error disconnecting from MongoDB:', error.message);
+        throw error;        
+    }
+}
