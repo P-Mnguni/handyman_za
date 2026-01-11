@@ -117,3 +117,26 @@ export async function disconnectedDB() {
 export function isConnected() {
     return mongoose.connection.readyState === 1;
 }
+
+/**
+ * Get MongoDB connection stats
+ * @returns {Object} Connection statistics
+ */
+export function getDBStats() {
+    if (!isConnected) {
+        return { connected: false };
+    }
+
+    const { host, port, name } = mongoose.connection;
+    const collections = mongoose.connection.collections
+                                ? Object.keys(mongoose.connection.collections)
+                                : [];
+    return {
+        connected: true,
+        host: `${host}:${port}`,
+        database: name,
+        collectionsCount: collections.length,
+        collections,
+        readyState: mongoose.connection.readyState,
+    };
+}
