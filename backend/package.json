@@ -1,8 +1,9 @@
 {
-  "name": "backend",
+  "name": "handyman-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Handyman.za Backend API",
   "main": "package.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
@@ -10,10 +11,13 @@
     "lint": "eslint . --ext .js",
     "format": "prettier --write ."
   },
-  "keywords": [],
+  "keywords": [
+    "handyman",
+    "service",
+    "south-africa"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
