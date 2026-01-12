@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { z } from 'zod';            // for runtime validation
+import { url, z } from 'zod';            // for runtime validation
 
 // Load environment variables from .env file
 dotenv.config();
@@ -13,12 +13,16 @@ const envSchema = z.object({
     PORT: z.string().transform(Number).default("5000"),
 
     // Database
-    MONGO_URI: z.string().url(),
+    MONGO_URI: z.string()
+                .min(1, 'MONGO_URI is required')
+                .refine((uri) => uri.startsWith('mongo://') || uri.startsWith('mongodb+srv://'), {
+                    message: "MONGO_URI must start with mongodb:// or mongodb+srv://"
+                }),
 
     // Authentication
-    JWT_SECRET: z.string().min(32),
+    JWT_SECRET: z.string().min(32, "JWT_SECRET must be at 32 characters"),
     JWT_EXPIRES_IN: z.string().default("15m"),
-    JWT_REFRESH_SECRET: z.string().min(32),
+    JWT_REFRESH_SECRET: z.string().min(32, "JWT_REFRESH_SECRET must be at least 32 characters"),
     JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
 
     // Payment Gateway
@@ -34,7 +38,12 @@ const envSchema = z.object({
     EMAIL_PROVIDER: z.enum(["sendgrid", "resend"]).default("sendgrid"),
     SENDGRID_API_KEY: z.string().optional(),
     RESEND_API_KEY: z.string().optional(),
-    SYSTEM_EMAIL: z.string().email(),
+    SYSTEM_EMAIL: z.string()
+                    .optional()
+                    .refine((email) => !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                    .test(email), {
+                        message: "SYSTEM_EMAIL must be a valid email address"
+                    }),
 
     // SMS Service (Twilio)
     TWILIO_ACCOUNT_SID: z.string().optional(),
@@ -42,7 +51,11 @@ const envSchema = z.object({
     TWILIO_PHONE_NUMBER: z.string().optional(),
 
     // Redis for rate limiting/caching
-    REDIS_URL: z.string().url().optional(),
+    REDIS_URL: z.string()
+                .optional()
+                .refine((url) => !url || url.startsWith('redis://') || url.startsWith('rediss://'), {
+                    message: "REDIS_URL must start with redis:// or rediss://"
+                }),
 
     // File Upload (Cloudinary/AWS S3)
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
@@ -50,8 +63,19 @@ const envSchema = z.object({
     CLOUDINARY_API_SECRET: z.string().optional(),
 
     // Frontend URLs for CORS
-    FRONTEND_URL: z.string().url().default('http://localhost:3000'),
-    ADMIN_URL: z.string().url().default("http://localhost:3001"),
+    FRONTEND_URL: z.string()
+                    .default('http://localhost:3000')
+                    .refine((url) => /^https?:\/\/[^\s$.?#].[^\s]*$/
+                    .test(url), {
+                        message: "FRONTEND_URL must be a valid URL"
+                    }),
+
+    ADMIN_URL: z.string()
+                .default("http://localhost:3001")
+                .refine((url) => /^https?:\/\/[^\s$.?#].[^\s]*$/
+                .test(url), {
+                    message: "ADMIN_URL must be a valid URL"
+                }),
 
     // Monitoring & Logging
     SENTRY_DSN: z.string().optional(),
@@ -68,7 +92,36 @@ try {
     parsedEnv = envSchema.parse(process.env);
 } catch (error) {
     console.error("❌ Invalid environment variables:", error.errors);
-    process.exit(1);
+    
+    if (error.errors) {
+        error.errors.forEach(err => {
+            console.log(`   - ${err.path.join('.')}: ${err.message}`);
+
+            // Show current value if available
+            const currentValue = process.env[err.path[0]];
+            if (currentValue) {
+                console.log(`       Current: "${currentValue.substring(0, 50)}${currentValue.length > 50 ? '...' : ''}"`);
+            }
+        });
+    }
+
+    console.log("\n💡 Check your .env file for these variables.");
+
+    // In development, we can exit gracefully
+    if (process.env.NODE_ENV === 'production') {
+        process.exit(1);
+    } else {
+        console.log("⚠️ Using development defaults for missing/invalid variables...");
+        // Fall back to process.env with defaults
+        parsedEnv = {
+            NODE_ENV: 'development',
+            PORT: '5000',
+            MONGO_URI: process.env.MONGO_URI,
+            JWT_SECRET: process.env.JWT_SECRET,
+            JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+            // .. other variables from process.env with defaults
+        };
+    }
 }
 
 // Export typed environment variables
@@ -146,31 +199,7 @@ export const env = {
     platformCommissionPercent: parsedEnv.PLATFORM_COMMISSION_PERCENT,       // Revenue model
     maxRadiusKm: parsedEnv.MAX_RADIUS_KM,                                   // Job matching radius
 
-    // Helper functions
-    getPaymentProvider: () => {
-        // Prioritize Stripe if available, else Payfast
-        return parsedEnv.STRIPE_SECRET_KEY ? "stripe" : "payfast";
-    },
-
-    // Returns active email provider
-    getEmailConfig: () => {
-        if (parsedEnv.EMAIL_PROVIDER === "sendgrid" && parsedEnv.SENDGRID_API_KEY) {
-            return {
-                provider: "sendgrid",
-                apiKey: parsedEnv.SENDGRID_API_KEY,
-            };
-        }
-
-        if (parsedEnv.EMAIL_PROVIDER === "resend" && parsedEnv.RESEND_API_KEY) {
-            return {
-                provider: "resend",
-                apiKey: parsedEnv.RESEND_API_KEY,
-            };
-        }
-
-        // Fallback to console logging in development
-        return {
-            provider: "console"
-        };
-    },
 };
+
+console.log(`✅ Environment loaded: ${env.nodeEnv}`);
+console.log(`📦 Database: ${env.mongoUri ? env.mongoUri.split('/').pop().split('?')[0] : 'Not set'}`);
