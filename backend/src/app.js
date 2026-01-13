@@ -6,6 +6,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { success } from 'zod';
+import { version } from 'react';
 
 /**
  * Create and configure Express application
@@ -93,5 +94,22 @@ export function createApp() {
     // Apply to all requests
     app.use(limiter);
 
-    
+    // =====================
+    // 5. Health Check Route
+    // =====================
+
+    app.get('/api/v1/health', (req, res) => {
+        res.status(200).json({
+            success: true,
+            message: '🟢 Handyman.za API is running',
+            timestamp: new Date().toISOString(),
+            environment: env.nodeEnv,
+            version: process.env.npm_package_version || '1.0.0',
+            uptime: process.uptime(),
+        });
+    });
+
+    // ====================
+    // 6. API Documentation
+    // ====================
 }
