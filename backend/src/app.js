@@ -150,4 +150,39 @@ export function createApp() {
             next();
         });
     }
+
+    // =======================
+    // 8. Error Handling Setup
+    // =======================
+
+    // 404 handler for undefined routes
+    app.use('*', (req, res) => {
+        res.status(404).json({
+            success: false,
+            error: '🔍 Route not found',
+            message: `Cannot ${req.method} ${req.originalUrl}`,
+            suggestion: 'Check the API documentation at /api/v1',
+        });
+    });
+
+    // Global error handler (will be enhanced later)
+    app.use((error, req, res, next) => {
+        console.error('🚨 Unhandled error:', error);
+
+        const statusCode = error.statusCode || 500;
+        const message = env.isProduction && statusCode === 500 
+                                        ? 'Internal server error'
+                                        : error.message || 'Something went wrong';
+        
+        res.status(statusCode).json({
+            success: false,
+            error: message,
+            ...(env.isDevelopment && { stack: error.stack }),
+        });
+    });
+
+    return app;
 }
+
+// Export the createApp function
+export default createApp;
