@@ -29,4 +29,19 @@ async function bootstrap() {
         console.log(`   ⚠️ Using development JWT secrets`);
     }
 
+    // ======================
+    // 2. Connect to Database
+    // ======================
+    console.log('\n🔌 Step 1: Connecting to database...');
+    try {
+        await connectDB();
+        console.log('   ✅ Database connection established');
+    } catch (error) {
+        console.error(' ❌ Database connection failed:', error.message);
+        console.error('\nTroubleshooting:');
+        console.error(' 1. Check if MongoDB is running');
+        console.error(' 2. Verify MONGO_URI in .env file');
+        console.error(' 3. Check firewall settings for port 27017');
+        process.exit(1);
+    }
 }
