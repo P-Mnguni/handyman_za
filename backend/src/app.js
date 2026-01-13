@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
+import { success } from 'zod';
 
 /**
  * Create and configure Express application
@@ -67,4 +68,30 @@ export function createApp() {
     } else {
         app.use(morgan('combined'));                // Standard Apache combined log for production
     }
+
+    // ================
+    // 4. Rate Limiting
+    // ================
+
+    // Apply rate limiting to all requests
+    const limiter = rateLimit({
+        windowMs: 17 * 60 * 1000,                   // 15 minutes
+        max: env.isDevelopment ? 1000 : 100,        // Limit each IP to 100 requests per windowMs
+        standardHeaders: true,                      // Return rate limit info in the 'RateLimit-*' headers
+        legacyHeaders: false,                       // Disable the 'X-RateLimit-*' headers
+        message: {
+            success: false,
+            error: 'Too many requests from this IP, please try again later.',
+        },
+        skip: (req) => {
+            // Skip rate limiting for health checks in development
+            if (env.isDevelopment && req.path === '/api/v1/health') return true;
+            return false;
+        },
+    });
+
+    // Apply to all requests
+    app.use(limiter);
+
+    
 }
