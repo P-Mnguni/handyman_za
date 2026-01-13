@@ -44,4 +44,17 @@ async function bootstrap() {
         console.error(' 3. Check firewall settings for port 27017');
         process.exit(1);
     }
+
+    // =====================
+    // 3. Create Express App
+    // =====================
+    console.log('⚙️ Step 2: Configuring Express application...');
+    let app;
+    try {
+        app = createApp();
+        console.log('   ✅ Express app configured');
+    } catch (error) {
+        console.error(' ❌ Express configuration failed:', error.message);
+        process.exit(1);
+    }
 }
