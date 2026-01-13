@@ -131,4 +131,23 @@ export function createApp() {
             },
         });
     });
+
+    // ===========================
+    // 7. Request Logging (Custom)
+    // ===========================
+
+    // Custom request logger for development
+    if (env.isDevelopment) {
+        app.use((req, res, next) => {
+            const start = Date.now();
+
+            // Log when response finishes
+            res.on('finish', () => {
+                const duration = Date.now() - start;
+                console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms`);
+            });
+
+            next();
+        });
+    }
 }
