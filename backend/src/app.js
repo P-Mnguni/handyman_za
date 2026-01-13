@@ -112,4 +112,23 @@ export function createApp() {
     // ====================
     // 6. API Documentation
     // ====================
+
+    app.get('/api/v1', (req, res) => {
+        res.status(200).json({
+            success: true,
+            message: '🚀 Handyman.za API v1',
+            document: 'https://docs.handyman.za',
+            endpoints: {
+                auth: '/api/v1/auth',
+                users: '/api/v1/users',
+                handymen: '/api/v1/handymen',
+                jobs: '/api/v1/jobs',
+                services: '/api/v1/services',
+                payments: '/api/v1/payments',
+                reviews: '/api/v1/reviews',
+                notifications: '/api/v1/notifications',
+                admin: '/api/v1/admin',
+            },
+        });
+    });
 }
