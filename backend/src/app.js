@@ -38,4 +38,19 @@ export function createApp() {
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     }));
+
+    // ==================
+    // 2. Request Parsing
+    // ==================
+
+    // Parse JSON bodies (with size limit)
+    app.use(express.json({ 
+        limit: '10mb' 
+    }));
+
+    // Parse URL-encoded bodies
+    app.use(express.urlencoded({ 
+        extended: true,
+        limit: '10mb'
+    }));
 }
