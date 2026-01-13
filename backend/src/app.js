@@ -53,4 +53,18 @@ export function createApp() {
         extended: true,
         limit: '10mb'
     }));
+
+    // ========================
+    // 3. Performance & Logging
+    // ========================
+
+    // Compress responses
+    app.use(compression());
+
+    // HTTP request logging
+    if (env.isDevelopment) {
+        app.use(morgan('dev'));                     // Colored, concise logs for development
+    } else {
+        app.use(morgan('combined'));                // Standard Apache combined log for production
+    }
 }
