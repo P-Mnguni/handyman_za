@@ -135,4 +135,25 @@ async function bootstrap() {
         console.error('Reason', reason);
         shutdown('UNHANDLED_REJECTION');
     });
+
+    // =======================
+    // 6. Development Features
+    // =======================
+    if (env.isDevelopment) {
+        // Display memory usage periodically
+        setInterval(() => {
+            const memoryUsage = process.memoryUsage();
+            const mbUsed = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+            const mbTotal = Math.round(memoryUsage.heapTotal / 1024 / 1024);
+            console.log(`🧠 Memory: ${mbUsed}MB / ${mbTotal}MB`);
+        }, 60000);              // Every minute
+    }
 }
+
+// =====================
+// Start the application
+// =====================
+bootstrap().catch((error) => {
+    console.error('💥 Failed to bootstrap application:', error);
+    process.exit(1);
+});
