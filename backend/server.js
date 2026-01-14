@@ -1,3 +1,4 @@
+import { promise } from 'zod';
 import { createApp } from './src/app.js';
 import { connectDB } from './src/config/db.js';
 import { env } from './src/config/env.js';
@@ -85,5 +86,53 @@ async function bootstrap() {
         }
 
         console.log('\n📡 Ready to handle requests!');
+    });
+
+    // ====================
+    // 5. Graceful Shutdown
+    // ====================
+    const shutdown = async (signal) => {
+        console.log(`\n${signal} received. Initiating graceful shutdown...`);
+
+        // Stop accepting new connections
+        server.close(async () => {
+            console.log('   ✅ HTTP server closed');
+
+            // Close database connection
+            try {
+                const mongoose = await import ('mongoose');
+                if (mongoose.connection.readyState !== 0) {
+                    await mongoose.disconnect();
+                    console.log('   ✅ Database connection closed');
+                }
+            } catch (dbError) {
+                console.error(' ❌ Error closing database:', dbError.message);
+            }
+
+            console.log('\n👋 Shutdown complete. Goodbye!');
+            process.exit(0);
+        });
+
+        // Force shutdown after 10 seconds
+        setTimeout(() => {
+            console.error('\n⏰ Force shutdown after timeout');
+            process.exit(1);
+        }, 10000);
+    };
+
+    // Handle termination signals
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+
+    // Handle uncaught errors
+    process.on('uncaughtException', (error) => {
+        console.error('🚨 Uncaught Exception:', error);
+        shutdown('UNCAUGHT_EXCEPTION');
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+        console.error('🚨 Unhandled Rejection at:', promise);
+        console.error('Reason', reason);
+        shutdown('UNHANDLED_REJECTION');
     });
 }
