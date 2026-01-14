@@ -57,4 +57,33 @@ async function bootstrap() {
         console.error(' ❌ Express configuration failed:', error.message);
         process.exit(1);
     }
+
+    // ====================
+    // 4. Start HTTP Server
+    // ====================
+    console.log('🚀 Step 3: Starting HTTP server...');
+    const server = app.listen(env.port, () => {
+        console.log(`
+            ||==============================================================================||
+            ||                                                                              ||
+            ||                                                                              ||
+            ||                       Server Started Successfully!                           ||
+            ||                                                                              ||
+            ||                                                                              ||
+            ||==============================================================================||
+        `);
+
+        console.log('🌐 Server Information:');
+        console.log(`   URL: http://localhost:${env.port}`);
+        console.log(`   API Base: http://localhost:${env.port}/api/v1`);
+        console.log(`   Health: http://localhost:${env.port}/api/v1/health`);
+
+        if (env.isDevelopment) {
+            console.log('\n🔧 Development Tools:');
+            console.log(`   Frontend: ${env.frontendUrl}`);
+            console.log(`   Admin: ${env.adminUrl}`);
+        }
+
+        console.log('\n📡 Ready to handle requests!');
+    });
 }
