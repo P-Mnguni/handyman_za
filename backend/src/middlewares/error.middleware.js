@@ -77,3 +77,16 @@ const handleDuplicateKeyError = (err) => {
     return new AppError(message, 400);
 };
 
+/**
+ * MongoDB validation error handler
+ */
+const handleValidationError = (err) => {
+    const errors = Object.values(err.errors).map(el => ({
+        field: el.path,
+        message: el.message,
+    }));
+
+    const message = `Invalid input data: ${errors.map(e => e.field).join(', ')}`;
+    return new AppError(message, 400, true, errors);
+};
+
