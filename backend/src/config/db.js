@@ -98,15 +98,15 @@ export async function connectDB() {
  */
 export async function disconnectDB() {
     try {
-        if (cached.conn) {
+        if (mongoose.connection.readyState !== 0) {
             await mongoose.disconnect();
-            cached.conn = null;
-            cached.promise = null;
             console.log('✅ MongoDB disconnected successfully');
+            return true;
         }
+        return false;
     } catch (error) {
         console.error('❌ Error disconnecting from MongoDB:', error.message);
-        throw error;        
+        throw error;
     }
 }
 
