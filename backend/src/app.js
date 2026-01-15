@@ -6,7 +6,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { success } from 'zod';
-import { version } from 'react';
+//import { version } from 'react';
 
 /**
  * Create and configure Express application
@@ -20,8 +20,10 @@ export function createApp() {
     // ======================
 
     // Set security HTTP headers
+    app.use(helmet());                      // Default security headers
+    /*
     app.use(helmet({
-        crossOriginEmbedderPolicy: { policy: "cross-origin" },
+        crossOriginEmbedderPolicy: { policy: false },
         contentSecurityPolicy: {
             directives: {
                 defaultSrc: ["'self'"],
@@ -32,7 +34,7 @@ export function createApp() {
             },
         },
     }));
-
+*/
     // Enable CORS
     app.use(cors({
         origin: env.corsOrigins,
@@ -156,7 +158,7 @@ export function createApp() {
     // =======================
 
     // 404 handler for undefined routes
-    app.use('*', (req, res) => {
+    app.use((req, res) => {
         res.status(404).json({
             success: false,
             error: '🔍 Route not found',
