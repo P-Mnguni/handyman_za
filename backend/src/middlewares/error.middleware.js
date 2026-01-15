@@ -90,3 +90,13 @@ const handleValidationError = (err) => {
     return new AppError(message, 400, true, errors);
 };
 
+/**
+ * JWT error handler
+ */
+const handleJWTError = () => {
+    return new AuthenticationError('Invalid token. Please log in again.');
+};
+
+const handleJWTExpiredError = () => {
+    return new AuthenticationError('Your token has expired. Please log in again.');
+};
