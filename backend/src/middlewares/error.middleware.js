@@ -21,3 +21,47 @@ export class AppError extends Error {
     }
 }
 
+/**
+ * Custom error types for specific scenarios
+ */
+export class ValidationError extends AppError {
+    constructor(message, errors = null) {
+        super(message, 400, true, errors);
+        this.name = 'ValidationError';
+    }
+}
+
+export class AuthenticationError extends AppError {
+    constructor(message = 'Authentication failed') {
+        super(message, 401);
+        this.name = 'AuthenticationError';
+    }
+}
+
+export class AuthorizationError extends AppError {
+    constructor(message = 'You do not have permission to perform this action') {
+        super(message, 403);
+        this.name = 'AuthorizationError'
+    }
+}
+
+export class NotFoundError extends AppError {
+    constructor(resource = 'Resource') {
+        super(`${resource} not found`, 404);
+        this.name = 'NotFoundError';
+    }
+}
+
+export class ConflictError extends AppError {
+    constructor(message = 'Resource already exists') {
+        super(message, 409);
+        this.name = 'ConflictError';
+    }
+}
+
+export class RateLimitError extends AppError {
+    constructor(message = 'Too many requests, please try again later') {
+        super(message, 429);
+        this.name = 'RateLimitError';
+    }
+}
