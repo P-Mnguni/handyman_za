@@ -1,6 +1,5 @@
-import { promise } from 'zod';
 import { createApp } from './src/app.js';
-import { connectDB } from './src/config/db.js';
+import { connectDB, disconnectDB } from './src/config/db.js';
 import { env } from './src/config/env.js';
 
 /**
@@ -100,11 +99,8 @@ async function bootstrap() {
 
             // Close database connection
             try {
-                const mongoose = await import ('mongoose');
-                if (mongoose.connection.readyState !== 0) {
-                    await mongoose.disconnect();
-                    console.log('   ✅ Database connection closed');
-                }
+                await disconnectDB();
+                console.log('   ✅ Database connection closed');
             } catch (dbError) {
                 console.error(' ❌ Error closing database:', dbError.message);
             }
