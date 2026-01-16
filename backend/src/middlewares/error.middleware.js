@@ -100,3 +100,32 @@ const handleJWTError = () => {
 const handleJWTExpiredError = () => {
     return new AuthenticationError('Your token has expired. Please log in again.');
 };
+
+/**
+ * Global error handler middleware
+ * @param {Error} err - The error object
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next function
+ */
+export const errorHandler = (err, req, res, next) => {
+    // Set default values
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+    err.message = err.message || 'Something went wrong';
+
+    let error = { ...err };
+    error.message = err.message;
+    error.stack = err.stack;
+
+    // Log the error (with different detail levels based on environment)
+    logError(error, req);
+
+    // Handle specific error types
+    if (error.name === 'JsonWebTokenError') error = handleJWTError();
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+    if (error.code === 11000) error = handleDuplicateKeyError();
+    if (error.name === 'ValidationError' || error._message?.includes('validation')) {
+        error = handleValidationError(error);
+    }
+}
