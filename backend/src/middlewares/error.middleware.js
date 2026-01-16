@@ -207,3 +207,11 @@ const logError = (error, req) => {
         console.error('========================================\n');
     }
 };
+
+/**
+ * 404 Not Found handler middleware
+ */
+export const notFoundHandler = (req, res, next) => {
+    const error = new NotFoundError(`Route ${req.originalUrl} not found`);
+    next(error);
+};
