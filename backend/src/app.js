@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
+import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import { success } from 'zod';
 //import { version } from 'react';
 
@@ -158,6 +159,8 @@ export function createApp() {
     // =======================
 
     // 404 handler for undefined routes
+    app.use(notFoundHandler);
+    /*
     app.use((req, res) => {
         res.status(404).json({
             success: false,
@@ -166,8 +169,11 @@ export function createApp() {
             suggestion: 'Check the API documentation at /api/v1',
         });
     });
+    */
 
     // Global error handler (will be enhanced later)
+    app.use(errorHandler);
+    /*
     app.use((error, req, res, next) => {
         console.error('🚨 Unhandled error:', error);
 
@@ -182,7 +188,7 @@ export function createApp() {
             ...(env.isDevelopment && { stack: error.stack }),
         });
     });
-
+    */
     return app;
 }
 
