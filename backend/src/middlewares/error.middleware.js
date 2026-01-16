@@ -1,5 +1,6 @@
 import { th } from 'zod/v4/locales';
 import { env } from '../config/env.js';
+import { success } from 'zod';
 
 /**
  * Custom AppError class for consistent error handling
@@ -128,4 +129,24 @@ export const errorHandler = (err, req, res, next) => {
     if (error.name === 'ValidationError' || error._message?.includes('validation')) {
         error = handleValidationError(error);
     }
+
+    // Format the error response
+    const response = {
+        success: false,
+        error: {
+            message: error.message,
+            status: error.status,
+            statusCode: error.statusCode,
+            timestamp: error.timestamp || new Date().toISOString(),
+            path: req.originalUrl,
+            method: req.method,
+        },
+    };
+
+    // Includes validation errors if they exist
+    if (error.errors) {
+        response.error.errors = error.errors;
+    }
+
+    
 }
