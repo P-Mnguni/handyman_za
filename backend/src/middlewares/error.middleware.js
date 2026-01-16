@@ -148,5 +148,15 @@ export const errorHandler = (err, req, res, next) => {
         response.error.errors = error.errors;
     }
 
-    
-}
+    // Include stack trace in development only
+    if (env.isDevelopment) {
+        response.error.stack = error.stack;
+
+        // Additional debugging info in development
+        response.error.name = error.name;
+        response.error.isOperational = error.isOperational;
+    }
+
+    // Send the error response
+    res.status(error.statusCode).json(response);
+};
