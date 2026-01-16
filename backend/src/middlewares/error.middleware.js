@@ -1,6 +1,6 @@
 import { th } from 'zod/v4/locales';
 import { env } from '../config/env.js';
-import { success } from 'zod';
+import { object, success } from 'zod';
 
 /**
  * Custom AppError class for consistent error handling
@@ -82,12 +82,24 @@ const handleDuplicateKeyError = (err) => {
  * MongoDB validation error handler
  */
 const handleValidationError = (err) => {
-    const errors = Object.values(err.errors).map(el => ({
-        field: el.path,
-        message: el.message,
-    }));
+    let errors = [];
 
-    const message = `Invalid input data: ${errors.map(e => e.field).join(', ')}`;
+    // Handle Mongoose validation errors
+    if (err.errors && typeof err.errors === 'object') {
+        errors = Object.values(err.errors).map(el => ({
+            field: el.path || el.field || 'unknown',
+            message: el.message || 'Validation failed',
+        }));
+    }
+    // Handle generic validation errors with errors array
+    else if (Array.isArray(err.errors)) {
+        errors = err.errors;
+    }
+
+    const message = errors.length > 0 
+                    ? `Invalid input data: ${errors.map(e => e.field).join(', ')}`
+                    : 'Validation failed';
+    
     return new AppError(message, 400, true, errors);
 };
 
