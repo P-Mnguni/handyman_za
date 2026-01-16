@@ -215,3 +215,14 @@ export const notFoundHandler = (req, res, next) => {
     const error = new NotFoundError(`Route ${req.originalUrl} not found`);
     next(error);
 };
+
+/**
+ * Async handler wrapper to avoid try/catch in controllers
+ * @param {Function} fn - Async controller function
+ * @returns {Function} Wrapped function with error handling
+ */
+export const asyncHandler = (fn) => {
+    return (req, res, next) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+    };
+};
