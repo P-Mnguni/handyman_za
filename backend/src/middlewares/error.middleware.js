@@ -160,3 +160,50 @@ export const errorHandler = (err, req, res, next) => {
     // Send the error response
     res.status(error.statusCode).json(response);
 };
+
+/**
+ * Log errors with appropriate detail
+ */
+const logError = (error, req) => {
+    const logEntry = {
+        timestamp: new Date().toISOString(),
+        method: req.method,
+        url: req.originalUrl,
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+        error: {
+            name: error.name,
+            message: error.message,
+            statusCode: error.statusCode,
+            stack: error.stack,
+        },
+    };
+
+    if (env.isProduction) {
+        // Production: Log minimal info to console, 
+        // send full details to monitoring service
+        console.error(`[${logEntry.timestamp}] ${error.statusCode} 
+                        ${req.method} ${req.originalUrl} - ${error.message}`);
+        
+        // Send to Sentry/DataDog/etc.
+        // if (env.sentryDsn) {
+        //      Sentry.captureException(error);
+        // }
+    } else {
+        // Development: Full detailed logging
+        console.error('\n🚨 ========== ERROR DETAILS ==========');
+        console.error(`Timestamp: ${logEntry.timestamp}`);
+        console.error(`Request: ${req.method} ${req.originalUrl}`);
+        console.error(`IP: ${req.ip}`);
+        console.error(`Status Code: ${error.statusCode}`);
+        console.error(`Error Name: ${error.name}`);
+        console.error(`Error Message: ${error.message}`);
+
+        if (error.stack) {
+            console.error('\nStack Trace:');
+            console.error(error.stack);
+        }
+
+        console.error('========================================\n');
+    }
+};
