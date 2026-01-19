@@ -50,5 +50,12 @@ export class ApiError extends Error {
         return new ApiError(message, 403);
     }
 
-    
+    /**
+     * Create a Not Found error (404)
+     * @param {string} resource - Name of the resource not found
+     * @returns {ApiError}
+     */
+    static notFound(resource = 'Resource') {
+        return new ApiError(`${resource} not found`, 404);
+    }
 }
