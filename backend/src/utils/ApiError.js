@@ -42,7 +42,26 @@ export class ApiError extends Error {
     }
 
     /**
-     * Create an Unauthorized error (403)
+     * Create a Bad Request error (400)
+     * @param {string} message - Error message
+     * @param {Array|null} errors - Optional validation errors
+     * @returns {ApiError}
+     */
+    static badRequest(message = 'Bad Request', errors = null) {
+        return new ApiError(message, 400, true, errors);
+    }
+
+    /**
+     * Create an Unauthorized error (401)
+     * @param {string} message - Error message
+     * @returns {ApiError}
+     */
+    static unauthorized(message = 'Unauthorized') {
+        return new ApiError(message, 401);
+    }
+
+    /**
+     * Create an Forbidden error (403)
      * @param {string} message - Error message
      * @returns {ApiError}
      */
@@ -58,4 +77,10 @@ export class ApiError extends Error {
     static notFound(resource = 'Resource') {
         return new ApiError(`${resource} not found`, 404);
     }
+
+    /**
+     * Create a Conflict error (409)
+     * @param {string} message - Error message
+     * @returns {ApiError}
+     */
 }
