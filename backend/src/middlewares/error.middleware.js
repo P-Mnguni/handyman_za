@@ -104,23 +104,22 @@ const handleDuplicateKeyError = (err) => {
 const handleValidationError = (err) => {
     let errors = [];
 
-    // Handle Mongoose validation errors
     if (err.errors && typeof err.errors === 'object') {
         errors = Object.values(err.errors).map(el => ({
             field: el.path || el.field || 'unknown',
             message: el.message || 'Validation failed',
         }));
-    }
-    // Handle generic validation errors with errors array
-    else if (Array.isArray(err.errors)) {
+    } else if (Array.isArray(err.errors)) {
         errors = err.errors;
     }
 
     const message = errors.length > 0 
-                    ? `Invalid input data: ${errors.map(e => e.field).join(', ')}`
+                    ? `Invalid input data: ${errors.map(e => e.failed).join(', ')}` 
                     : 'Validation failed';
-    
-    return new AppError(message, 400, true, errors);
+
+    const error = new AppError(message, 400, true, errors);
+    error.name = err.name || 'ValidationError';
+    return error;
 };
 
 /**
