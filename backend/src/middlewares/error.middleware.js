@@ -71,9 +71,29 @@ export class RateLimitError extends AppError {
  * MongoDB duplicate key error handler
  */
 const handleDuplicateKeyError = (err) => {
-    const field = Object.keys(err.keyValue)[0];
-    const value = err.keyValue[field];
-    const message = `Duplicate field value: ${value}. Please use another value.`;
+    // Extract field and value from various possible structures
+    let field = 'unknown';
+    let value = '';
+
+    if (err.keyValue) {
+        // Mongoose style: { keyValue: { email: 'test@example.com' } }
+        field = Object.keys(err.keyValue)[0];
+        value = err.keyValue[field];
+    } else if (err.keyPattern) {
+        // Alternatively Mongoose style: { keyPattern: { email: 1 } }
+        field = Object.keys(err.keyPattern)[0];
+        value = 'provided value';
+    } else if (err.errmsg) {
+        // MongoDB driver style: parse from error message
+        const match = err.errmsg.match(/index: (.+?) dup key:/);
+        if (match) {
+            field = match[1].split('_')[1] || 'unknown';        // Extract field from index name
+        }
+    }
+
+    const message = field !== 'unknown' 
+                ? `Duplicate field value for '${field}': ${value}. Please Use another value.`
+                : 'Duplicate key error. The resource already exists.';
 
     return new AppError(message, 400);
 };
@@ -106,12 +126,16 @@ const handleValidationError = (err) => {
 /**
  * JWT error handler
  */
-const handleJWTError = () => {
-    return new AuthenticationError('Invalid token. Please log in again.');
+const handleJWTError = (originalError) => {
+    const error = new AppError('Invalid token. Please log in again.', 401);
+    error.name = originalError.name || 'JsonWebTokenError';         // Preserve original name
+    return error;
 };
 
-const handleJWTExpiredError = () => {
-    return new AuthenticationError('Your token has expired. Please log in again.');
+const handleJWTExpiredError = (originalError) => {
+    const error = new AppError('Your token has expired. Please log in again.', 401);
+    error.name = originalError.name || 'TokenExpiredError';
+    return error;
 };
 
 /**
@@ -122,24 +146,50 @@ const handleJWTExpiredError = () => {
  * @param {NextFunction} next - Express next function
  */
 export const errorHandler = (err, req, res, next) => {
-    // Set default values
-    err.statusCode = err.statusCode || 500;
-    err.status = err.status || 'error';
-    err.message = err.message || 'Something went wrong';
+    // Create a proper copy of the error with all properties
+    let error = Object.assign(
+        {
+            statusCode: err.statusCode || 500,
+            status: err.status || 'error',
+            message: err.message || 'Something went wrong',
+        },
+        err
+    );
 
-    let error = { ...err };
-    error.message = err.message;
-    error.stack = err.stack;
+    // Ensure we have the stack trace
+    if (!error.stack && err.stack) {
+        error.name = err.name;
+    }
 
     // Log the error (with different detail levels based on environment)
     logError(error, req);
 
+    // Debug log
+    console.log('🔍 Error handler received:', {
+        name: error.name,
+        code: error.code,
+        statusCode: error.statusCode,
+        keyValue: error.keyValue,
+    });
+
     // Handle specific error types
-    if (error.name === 'JsonWebTokenError') error = handleJWTError();
-    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
-    if (error.code === 11000) error = handleDuplicateKeyError();
+    if (error.name === 'JsonWebTokenError') {
+        error = handleJWTError(error);
+    }
+
+    if (error.name === 'TokenExpiredError') {
+        error = handleJWTExpiredError(error);
+    }
+
+    if (error.code === 11000 || error.code === 11001) {
+        console.log('🔍 Handling duplicate key error, code:', error.code);
+        const duplicateError = handleDuplicateKeyError(error);
+        Object.assign(error, duplicateError);
+    }
+
     if (error.name === 'ValidationError' || error._message?.includes('validation')) {
-        error = handleValidationError(error);
+        const validationError = handleValidationError(error);
+        error = { ...error, ...validationError };
     }
 
     // Format the error response
