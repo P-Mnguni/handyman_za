@@ -40,4 +40,15 @@ export class ApiError extends Error {
         // Capture stack trace (excluding constructor call from stack)
         Error.captureStackTrace(this, this.constructor);
     }
+
+    /**
+     * Create an Unauthorized error (403)
+     * @param {string} message - Error message
+     * @returns {ApiError}
+     */
+    static forbidden(message = 'Forbidden') {
+        return new ApiError(message, 403);
+    }
+
+    
 }
