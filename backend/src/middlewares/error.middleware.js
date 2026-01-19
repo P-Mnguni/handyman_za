@@ -146,51 +146,40 @@ const handleJWTExpiredError = (originalError) => {
  * @param {NextFunction} next - Express next function
  */
 export const errorHandler = (err, req, res, next) => {
-    // Create a proper copy of the error with all properties
-    let error = Object.assign(
-        {
-            statusCode: err.statusCode || 500,
-            status: err.status || 'error',
-            message: err.message || 'Something went wrong',
-        },
-        err
-    );
+    // Start with the original error
+    let error = {
+        // Copy all properties including non-enumerable ones
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+        ...err,             // Spread enumerable properties
+    };
 
-    // Ensure we have the stack trace
-    if (!error.stack && err.stack) {
-        error.name = err.name;
-    }
-
-    // Log the error (with different detail levels based on environment)
-    logError(error, req);
-
-    // Debug log
-    console.log('🔍 Error handler received:', {
-        name: error.name,
-        code: error.code,
-        statusCode: error.statusCode,
-        keyValue: error.keyValue,
-    });
-
-    // Handle specific error types
+    // Handle specific error types FIRST 
     if (error.name === 'JsonWebTokenError') {
         error = handleJWTError(error);
     }
-
     if (error.name === 'TokenExpiredError') {
         error = handleJWTExpiredError(error);
     }
-
     if (error.code === 11000 || error.code === 11001) {
-        console.log('🔍 Handling duplicate key error, code:', error.code);
-        const duplicateError = handleDuplicateKeyError(error);
-        Object.assign(error, duplicateError);
+        error = handleDuplicateKeyError(error);
+    }
+    if (error.name === 'ValidateError' || error._message?.includes('validation')) {
+        error = handleValidationError(error);
+    }
+    if (error.name === 'CastError') {
+        error = new AppError(`Invalid ${error.path}: ${error.value}`, 400);
     }
 
-    if (error.name === 'ValidationError' || error._message?.includes('validation')) {
-        const validationError = handleValidationError(error);
-        error = { ...error, ...validationError };
-    }
+    // NOW set defaults (only if not already set by handlers)
+    error.statusCode = error.statusCode || 500;
+    error.status = error.status || `${error.statusCode}`.startsWith('4') ? 'fail' : 'error';
+    error.message = error.message || 'Something went wrong';
+    error.timestamp = error.timestamp || new Date().toISOString();
+
+    // Log the error (now it will show the correct status code)
+    logError(error, req);
 
     // Format the error response
     const response = {
@@ -199,13 +188,13 @@ export const errorHandler = (err, req, res, next) => {
             message: error.message,
             status: error.status,
             statusCode: error.statusCode,
-            timestamp: error.timestamp || new Date().toISOString(),
+            timestamp: error.timestamp,
             path: req.originalUrl,
             method: req.method,
         },
     };
 
-    // Includes validation errors if they exist
+    // Include validation errors if they exist
     if (error.errors) {
         response.error.errors = error.errors;
     }
@@ -213,8 +202,6 @@ export const errorHandler = (err, req, res, next) => {
     // Include stack trace in development only
     if (env.isDevelopment) {
         response.error.stack = error.stack;
-
-        // Additional debugging info in development
         response.error.name = error.name;
         response.error.isOperational = error.isOperational;
     }
