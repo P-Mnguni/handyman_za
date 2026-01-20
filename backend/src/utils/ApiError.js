@@ -141,3 +141,18 @@ export class ApiError extends Error {
 export function isApiError(error) {
     return error instanceof ApiError;
 }
+
+/**
+ * Convenience function to create validation errors with field details
+ * @param {Array<{field: string, message: string}>} fieldErrors - Array of field errors
+ * @param {string} message - Overall error message
+ * @returns {ApiError} Validation error
+ */
+export function createValidationError(fieldErrors, message = 'Validation Failed') {
+    return ApiError.validation(message, fieldErrors);
+}
+
+/**
+ * Export the ApiError class as default
+ */
+export default ApiError;
