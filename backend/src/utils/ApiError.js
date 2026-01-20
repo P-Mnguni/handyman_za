@@ -96,4 +96,13 @@ export class ApiError extends Error {
     static validation(message = 'Validation Failed', errors = []) {
         return new ApiError(message, 422, true, errors);
     }
+
+    /**
+     * Create an Internal Server Error (500)
+     * @param {string} message - Error message
+     * @returns {ApiError}
+     */
+    static internal(message = 'Internal Server Error') {
+        return new ApiError(message, 500, false);       // Not operational
+    }
 }
