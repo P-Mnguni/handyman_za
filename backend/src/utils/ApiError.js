@@ -132,3 +132,12 @@ export class ApiError extends Error {
         return `[${this.name}] ${this.statusCode} ${this.status}: ${this.message}`;
     }
 }
+
+/**
+ * Convenience function to check if an error is an ApiError
+ * @param {Error} error - The error to check
+ * @returns {boolean} True if the error is an ApiError
+ */
+export function isApiError(error) {
+    return error instanceof ApiError;
+}
