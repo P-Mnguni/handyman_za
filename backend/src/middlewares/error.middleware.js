@@ -170,6 +170,10 @@ export const errorHandler = (err, req, res, next) => {
     if (error.name === 'CastError') {
         error = new AppError(`Invalid ${error.path}: ${error.value}`, 400);
     }
+    if (error.name === 'ApiError') {
+        error.statusCode = error.statusCode || 500;
+        error.status = error.status || `${error.statusCode}`.startsWith('4') ? 'fail' : 'error';
+    }
 
     // NOW set defaults (only if not already set by handlers)
     error.statusCode = error.statusCode || 500;
