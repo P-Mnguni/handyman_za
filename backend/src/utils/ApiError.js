@@ -83,4 +83,17 @@ export class ApiError extends Error {
      * @param {string} message - Error message
      * @returns {ApiError}
      */
+    static conflict(message = 'Conflict') {
+        return new ApiError(message, 409);
+    }
+
+    /**
+     * Create a Validation error (422)
+     * @param {string} message - Error message 
+     * @param {Array} errors - Validation error details
+     * @returns {ApiError}
+     */
+    static validation(message = 'Validation Failed', errors = []) {
+        return new ApiError(message, 422, true, errors);
+    }
 }
