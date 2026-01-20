@@ -124,5 +124,11 @@ export class ApiError extends Error {
         };
     }
 
-    
+    /**
+     * Convert to string representation
+     * @returns {string} String representation of the error
+     */
+    toString() {
+        return `[${this.name}] ${this.statusCode} ${this.status}: ${this.message}`;
+    }
 }
