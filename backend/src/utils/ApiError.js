@@ -105,4 +105,24 @@ export class ApiError extends Error {
     static internal(message = 'Internal Server Error') {
         return new ApiError(message, 500, false);       // Not operational
     }
+
+    /**
+     * Convert the error to a plain object 
+     * (useful for logging or sending to client in development)
+     * @returns {Object} Plain object representation
+     */
+    toJSON() {
+        return {
+            name: this.name,
+            message: this.message,
+            statusCode: this.statusCode,
+            status: this.status,
+            timestamp: this.timestamp,
+            isOperational: this.isOperational,
+            ...(this.errors && { errors: this.errors }),
+            ...(process.env.NODE_ENV === 'development' && { stack: this.stack }),
+        };
+    }
+
+    
 }
