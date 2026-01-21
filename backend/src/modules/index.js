@@ -108,3 +108,15 @@ handymenRouter.post('/profile', (req, res) => placeholderResponse(res, 'Create/u
 handymenRouter.get('/profile/me', (req, res) => placeholderResponse(res, 'Get my handyman profile'));
 handymenRouter.patch('/:handymanId/verify', (req, res) => placeholderResponse(res, 'Verify handyman (admin only)'));
 router.use('/handymen', handymenRouter);
+
+// Jobs Module (Core)
+const jobsRouter = express.Router();
+jobsRouter.get('/', (req, res) => placeholderResponse(res, 'List jobs with filters'));
+jobsRouter.post('/', (req, res) => placeholderResponse(res, 'Create new job'));
+jobsRouter.get('/my', (req, res) => placeholderResponse(res, 'Get my jobs (customer/handyman)'));
+jobsRouter.get('/:jobId', (req, res) => placeholderResponse(res, 'Get job details'));
+jobsRouter.post('/:jobId/accept', (req, res) => placeholderResponse(res, 'Accept a job (handyman)'));
+jobsRouter.post('/:jobId/reject', (req, res) => placeholderResponse(res, 'Reject a job (handyman)'));
+jobsRouter.patch('/:jobId/status', (req, res) => placeholderResponse(res, 'Update job status'));
+jobsRouter.post('/:jobId/broadcast', (req, res) => placeholderResponse(res, 'Broadcast jot to handymen (system)'));
+router.use('/jobs', jobsRouter);
