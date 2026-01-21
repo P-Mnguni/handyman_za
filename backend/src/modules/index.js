@@ -121,7 +121,7 @@ jobsRouter.patch('/:jobId/status', (req, res) => placeholderResponse(res, 'Updat
 jobsRouter.post('/:jobId/broadcast', (req, res) => placeholderResponse(res, 'Broadcast jot to handymen (system)'));
 router.use('/jobs', jobsRouter);
 
-// Service Module
+// Services Module
 const servicesRouter = express.Router();
 servicesRouter.get('/', (req, res) => placeholderResponse(res, 'List all services'));
 servicesRouter.get('/:serviceId', (req, res) => placeholderResponse(res, 'Get service details'));
@@ -136,3 +136,11 @@ paymentsRouter.get('/:paymentId', (req, res) => placeholderResponse(res, 'Get pa
 paymentsRouter.post('/:jobId/release', (req, res) => placeholderResponse(res, 'Release payment to handyman (system'));
 paymentsRouter.post('/webhook/:provider', (req, res) => placeholderResponse(res, 'Payment webhook handler'));
 router.use('/payments', paymentsRouter);
+
+// Reviews Module
+const reviewsRouter = express.Router();
+reviewsRouter.get('/', (req, res) => placeholderResponse(res, 'List review with filters'));
+reviewsRouter.post('/', (req, res) => placeholderResponse(res, 'Create a review'));
+reviewsRouter.get('/handyman/:handymanId', (req, res) => placeholderResponse(res, 'Get reviews for a handyman'));
+reviewsRouter.get('/:reviewId', (req, res) => placeholderResponse(res, 'Get review details'));
+router.use('/reviews', reviewsRouter);
