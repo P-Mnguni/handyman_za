@@ -128,3 +128,11 @@ servicesRouter.get('/:serviceId', (req, res) => placeholderResponse(res, 'Get se
 servicesRouter.post('/', (req, res) => placeholderResponse(res, 'Create service (admin only)'));
 servicesRouter.put('/:serviceId', (req, res) => placeholderResponse(res, 'Update service (admin only)'));
 router.use('/services', servicesRouter);
+
+// Payments Module
+const paymentsRouter = express.Router();
+paymentsRouter.post('/initiate', (req, res) => placeholderResponse(res, 'Initiate payment for a job'));
+paymentsRouter.get('/:paymentId', (req, res) => placeholderResponse(res, 'Get payment status'));
+paymentsRouter.post('/:jobId/release', (req, res) => placeholderResponse(res, 'Release payment to handyman (system'));
+paymentsRouter.post('/webhook/:provider', (req, res) => placeholderResponse(res, 'Payment webhook handler'));
+router.use('/payments', paymentsRouter);
