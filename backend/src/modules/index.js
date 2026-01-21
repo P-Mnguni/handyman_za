@@ -90,3 +90,11 @@ authRouter.post('/logout', (req, res) => placeholderResponse(res, 'User logout e
 authRouter.post('/refresh-token', (req, res) => placeholderResponse(res, 'Token refresh endpoint'));
 authRouter.post('/verify-email', (req, res) => placeholderResponse(res, 'Email verification endpoint'));
 router.use('/auth', authRouter);
+
+// Users Module
+const usersRouter = express.Router();
+usersRouter.get('/me', (req, res) => placeholderResponse(res, 'Get current user profile'));
+usersRouter.put('/me', (req, res) => placeholderResponse(res, 'Update user profile'));
+usersRouter.get('/:userId', (req, res) => placeholderResponse(res, 'Get user by ID'));
+usersRouter.patch('/:userId/suspend', (req, res) => placeholderResponse(res, 'Suspend user (admin only)'));
+router.use('/users', usersRouter);
