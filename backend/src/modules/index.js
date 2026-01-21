@@ -76,3 +76,17 @@ router.get('/', (req, res) => {
         },
     });
 });
+
+// ============================
+// 2. MODULE ROUTE PLACEHOLDERS
+// ============================
+
+// Authentication Module
+const authRouter = express.Router();
+authRouter.get('/', (req, res) => placeholderResponse(res, 'Authentication endpoints coming soon'));
+authRouter.post('/register', (req, res) => placeholderResponse(res, 'User registration endpoint'));
+authRouter.post('/login', (req, res) => placeholderResponse(res, 'User login endpoint'));
+authRouter.post('/logout', (req, res) => placeholderResponse(res, 'User logout endpoint'));
+authRouter.post('/refresh-token', (req, res) => placeholderResponse(res, 'Token refresh endpoint'));
+authRouter.post('/verify-email', (req, res) => placeholderResponse(res, 'Email verification endpoint'));
+router.use('/auth', authRouter);
