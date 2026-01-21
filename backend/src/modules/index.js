@@ -120,3 +120,11 @@ jobsRouter.post('/:jobId/reject', (req, res) => placeholderResponse(res, 'Reject
 jobsRouter.patch('/:jobId/status', (req, res) => placeholderResponse(res, 'Update job status'));
 jobsRouter.post('/:jobId/broadcast', (req, res) => placeholderResponse(res, 'Broadcast jot to handymen (system)'));
 router.use('/jobs', jobsRouter);
+
+// Service Module
+const servicesRouter = express.Router();
+servicesRouter.get('/', (req, res) => placeholderResponse(res, 'List all services'));
+servicesRouter.get('/:serviceId', (req, res) => placeholderResponse(res, 'Get service details'));
+servicesRouter.post('/', (req, res) => placeholderResponse(res, 'Create service (admin only)'));
+servicesRouter.put('/:serviceId', (req, res) => placeholderResponse(res, 'Update service (admin only)'));
+router.use('/services', servicesRouter);
