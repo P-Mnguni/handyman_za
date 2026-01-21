@@ -98,3 +98,13 @@ usersRouter.put('/me', (req, res) => placeholderResponse(res, 'Update user profi
 usersRouter.get('/:userId', (req, res) => placeholderResponse(res, 'Get user by ID'));
 usersRouter.patch('/:userId/suspend', (req, res) => placeholderResponse(res, 'Suspend user (admin only)'));
 router.use('/users', usersRouter);
+
+// Handymen Module
+const handymenRouter = express.Router();
+handymenRouter.get('/', (req, res) => placeholderResponse(res, 'List handymen with filters'));
+handymenRouter.get('/nearby', (req, res) => placeholderResponse(res, 'Find nearby handymen'));
+handymenRouter.get('/:handymanId', (req, res) => placeholderResponse(res, 'Get handyman profile'));
+handymenRouter.post('/profile', (req, res) => placeholderResponse(res, 'Create/update handyman profile'));
+handymenRouter.get('/profile/me', (req, res) => placeholderResponse(res, 'Get my handyman profile'));
+handymenRouter.patch('/:handymanId/verify', (req, res) => placeholderResponse(res, 'Verify handyman (admin only)'));
+router.use('/handymen', handymenRouter);
