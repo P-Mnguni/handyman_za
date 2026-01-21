@@ -6,6 +6,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
+import apiRouter from './modules/index.js';
 import { success } from 'zod';
 //import { version } from 'react';
 
@@ -135,8 +136,15 @@ export function createApp() {
         });
     });
 
+    // =============
+    // 7. API ROUTES
+    // =============
+
+    // Mount API routes under /api/v1
+    app.use('/api/v1', apiRouter);
+
     // ===========================
-    // 7. Request Logging (Custom)
+    // 8. Request Logging (Custom)
     // ===========================
 
     // Custom request logger for development
@@ -155,7 +163,7 @@ export function createApp() {
     }
 
     // =======================
-    // 8. Error Handling Setup
+    // 9. Error Handling Setup
     // =======================
 
     // 404 handler for undefined routes
