@@ -2,6 +2,7 @@ import express from 'express';
 import { env } from '../config/env.js';
 import { success } from 'zod';
 import { no } from 'zod/v4/locales';
+import { useImperativeHandle } from 'react';
 
 /**
  * Route Aggregator - Central hub for all API modules
@@ -162,3 +163,25 @@ adminRouter.get('/handymen/pending', (req, res) => placeholderResponse(res, 'Pen
 adminRouter.get('/transactions', (req, res) => placeholderResponse(res, 'Payment transactions'));
 adminRouter.get('/analytics', (req, res) => placeholderResponse(res, 'Platform analytics'));
 router.use('/admin', adminRouter);
+
+// ================================
+// 3. HELPER FUNCTIONS 
+// ================================
+
+/**
+ * Returns a placeholder response for routes that are not yet implemented
+ * @param {Response} res - Express response object
+ * @param {string} message - Custom message describing the endpoint
+ */
+function placeholderResponse(res, message) {
+    res.status(200).json({
+        success: true,
+        message: `🛠️ ${message}`,
+        implemented: false,
+        endpoint: res.req.originalUrl,
+        method: res.req.method,
+        timestamp: new Date().toISOString(),
+        note: 'This endpoint is a placeholder. Implementation is in progress.',
+        documentation: `See API documentation for ${res.req.baseUrl.replace('/api/v1/', '')} module`,
+    });
+}
