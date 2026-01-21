@@ -1,6 +1,7 @@
 import express from 'express';
 import { env } from '../config/env.js';
 import { success } from 'zod';
+import { no } from 'zod/v4/locales';
 
 /**
  * Route Aggregator - Central hub for all API modules
@@ -144,3 +145,10 @@ reviewsRouter.post('/', (req, res) => placeholderResponse(res, 'Create a review'
 reviewsRouter.get('/handyman/:handymanId', (req, res) => placeholderResponse(res, 'Get reviews for a handyman'));
 reviewsRouter.get('/:reviewId', (req, res) => placeholderResponse(res, 'Get review details'));
 router.use('/reviews', reviewsRouter);
+
+// Notifications Module
+const notificationsRouter = express.Router();
+notificationsRouter.get('/', (req, res) => placeholderResponse(res, 'Get user notifications'));
+notificationsRouter.patch('/:notificationId/read', (req, res) => placeholderResponse(res, 'Mark notification as read'));
+notificationsRouter.patch('/read-all', (req, res) => placeholderResponse(res, 'Mark all notifications as read'));
+router.use('/notifications', notificationsRouter);
