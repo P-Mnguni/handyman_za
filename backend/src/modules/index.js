@@ -152,3 +152,13 @@ notificationsRouter.get('/', (req, res) => placeholderResponse(res, 'Get user no
 notificationsRouter.patch('/:notificationId/read', (req, res) => placeholderResponse(res, 'Mark notification as read'));
 notificationsRouter.patch('/read-all', (req, res) => placeholderResponse(res, 'Mark all notifications as read'));
 router.use('/notifications', notificationsRouter);
+
+// Admin Module
+const adminRouter = express.Router();
+adminRouter.get('/dashboard', (req, res) => placeholderResponse(res, 'Admin dashboard statistics'));
+adminRouter.get('/jobs', (req, res) => placeholderResponse(res, 'Admin job management'));
+adminRouter.get('/users', (req, res) => placeholderResponse(res, 'Admin user management'));
+adminRouter.get('/handymen/pending', (req, res) => placeholderResponse(res, 'Pending handyman verifications'));
+adminRouter.get('/transactions', (req, res) => placeholderResponse(res, 'Payment transactions'));
+adminRouter.get('/analytics', (req, res) => placeholderResponse(res, 'Platform analytics'));
+router.use('/admin', adminRouter);
