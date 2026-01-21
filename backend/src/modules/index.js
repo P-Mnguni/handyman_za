@@ -185,3 +185,59 @@ function placeholderResponse(res, message) {
         documentation: `See API documentation for ${res.req.baseUrl.replace('/api/v1/', '')} module`,
     });
 }
+
+/**
+ * Log route registration for development
+ */
+if (env.isDevelopment) {
+    const routes = [
+        {
+            path: '/auth',
+            methods: ['GET', 'POST'],
+        },
+        {
+            path: '/users',
+            methods: ['GET', 'PUT', 'PATCH'],
+        },
+        {
+            path: '/handymen',
+            methods: ['GET', 'POST', 'PATCH'],
+        },
+        {
+            path: '/jobs',
+            methods: ['GET', 'POST', 'PATCH', 'POST'],
+        },
+        {
+            path: '/services',
+            methods: ['GET', 'POST', 'PUT'],
+        },
+        {
+            path: '/payments',
+            methods: ['POST', 'GET'],
+        },
+        {
+            path: '/reviews',
+            methods: ['GET', 'POST'],
+        },
+        {
+            path: '/notifications',
+            methods: ['GET', 'PATCH'],
+        },
+        {
+            path: '/admin',
+            methods: ['GET'],
+        },
+    ];
+
+    console.log('\n📡 Registered API Routes:');
+    routes.forEach(route => {
+        console.log(`   ${route.path.padEnd(15)} [${route.methods.join(', ')}]`);
+    });
+    console.log('');
+}
+
+// ========================
+// 4. EXPORT
+// ========================
+
+export default router;
