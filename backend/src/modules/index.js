@@ -2,7 +2,7 @@ import express from 'express';
 import { env } from '../config/env.js';
 import { success } from 'zod';
 import { no } from 'zod/v4/locales';
-import { useImperativeHandle } from 'react';
+//import { useImperativeHandle } from 'react';
 
 /**
  * Route Aggregator - Central hub for all API modules
@@ -95,6 +95,7 @@ router.use('/auth', authRouter);
 
 // Users Module
 const usersRouter = express.Router();
+usersRouter.get('/', (req, res) => placeholderResponse(res, 'List users'));
 usersRouter.get('/me', (req, res) => placeholderResponse(res, 'Get current user profile'));
 usersRouter.put('/me', (req, res) => placeholderResponse(res, 'Update user profile'));
 usersRouter.get('/:userId', (req, res) => placeholderResponse(res, 'Get user by ID'));
@@ -133,6 +134,7 @@ router.use('/services', servicesRouter);
 
 // Payments Module
 const paymentsRouter = express.Router();
+paymentsRouter.get('/', (req, res) => placeholderResponse(res, 'Payment endpoints'));
 paymentsRouter.post('/initiate', (req, res) => placeholderResponse(res, 'Initiate payment for a job'));
 paymentsRouter.get('/:paymentId', (req, res) => placeholderResponse(res, 'Get payment status'));
 paymentsRouter.post('/:jobId/release', (req, res) => placeholderResponse(res, 'Release payment to handyman (system'));
@@ -156,6 +158,7 @@ router.use('/notifications', notificationsRouter);
 
 // Admin Module
 const adminRouter = express.Router();
+adminRouter.get('/', (req, res) => placeholderResponse(res, 'Admin dashboard'));
 adminRouter.get('/dashboard', (req, res) => placeholderResponse(res, 'Admin dashboard statistics'));
 adminRouter.get('/jobs', (req, res) => placeholderResponse(res, 'Admin job management'));
 adminRouter.get('/users', (req, res) => placeholderResponse(res, 'Admin user management'));
