@@ -71,3 +71,28 @@ router.post(
         });
     })
 );
+
+/**
+ * @api {post} /auth/logout                     - User Logout
+ * @apiName LogoutUser
+ * @apiGroup Auth
+ * @apiDescription Logout user and invalidate token
+ * 
+ * @apiHeader {String} Authorization            - Bearer token
+ * 
+ * @apiSuccess {Boolean} success                - Request status
+ * @apiSuccess {String} message                 - Success message
+ */
+router.post(
+    '/logout',
+    asyncHandler(async (req, res) => {
+        // Placeholder - will be implemented in controller
+        res.status(200).json({
+            success: true,
+            message: 'User logout endpoint',
+            implemented: false,
+            endpoint: '/auth/logout',
+            method: 'POST',
+        });
+    })
+);
