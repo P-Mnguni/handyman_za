@@ -174,3 +174,29 @@ router.post(
         });
     })
 );
+
+/**
+ * @api {post} /auth/reset-password             - Reset Password
+ * @apiName ResetPassword
+ * @apiGroup Auth
+ * @apiDescription Reset password with token
+ * 
+ * @apiBody {String} token                      - Password reset token
+ * @apiBody {String} newPassword                - New password
+ * 
+ * @apiSuccess {Boolean} success                - Request status
+ * @apiSuccess {String} message                 - Success message
+ */
+router.post(
+    '/reset-password',
+    asyncHandler(async (req, res) => {
+        // Placeholder - will be implemented in controller
+        res.status(200).json({
+            success: true,
+            message: 'Password reset endpoint',
+            implemented: false,
+            endpoint: '/auth/reset-password',
+            method: 'POST',
+        });
+    })
+);
