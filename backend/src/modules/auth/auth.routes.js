@@ -96,3 +96,31 @@ router.post(
         });
     })
 );
+
+/**
+ * @api {post} /auth/refresh-token              - Refresh Access Token
+ * @apiName RefreshToken
+ * @apiGroup Auth
+ * @apiDescription Get new access token using refresh token
+ * 
+ * @apiBody {String} refreshToken               - Valid refresh token
+ * 
+ * @apiSuccess {Boolean} success                - Request status
+ * @apiSuccess {String} message                 - Success message
+ * @apiSuccess {Object} data                    - New tokens
+ * @apiSuccess {String} data.accessToken        - New JWT access token
+ * @apiSuccess {String} data.refreshToken       - New JWT refresh token
+ */
+router.post(
+    '/refresh-token',
+    asyncHandler(async (req, res) => {
+        // Placeholder - will be implemented in controller
+        res.status(200).json({
+            success: true,
+            message: 'Token refresh endpoint',
+            implemented: false,
+            endpoint: '/auth/refresh-token',
+            method: 'POST',
+        });
+    })
+);
