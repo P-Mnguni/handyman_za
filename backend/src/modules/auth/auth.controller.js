@@ -55,3 +55,46 @@ export const register = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * @desc    Authenticate user and get tokens
+ * @route   POST /api/v1/auth/login
+ * @access  Public
+ */
+export const login = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            throw ApiError.badRequest('Please provide email and password');
+        }
+
+        // Call service (placeholder for now)
+        // const user = await authService.loginUser({ email, password });
+
+        // Placeholder response
+        const user = {
+            id: 'placeholder-id',
+            fullName: 'John Doe',
+            email,
+            role: 'CUSTOMER',
+            isEmailVerified: true,
+        };
+
+        const tokens = {
+            accessToken: 'placeholder-jwt-token',
+            refreshToken: 'placeholder-refresh-token',
+        };
+
+        res.status(200).json({
+            success: true,
+            message: 'Login successful',
+            data: {
+                user,
+                tokens,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
