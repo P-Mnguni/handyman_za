@@ -124,3 +124,28 @@ router.post(
         });
     })
 );
+
+/**
+ * @api {post} /auth/verify-email               - Verify Email Address
+ * @apiName VerifyEmail
+ * @apiGroup Auth
+ * @apiDescription Verify user's email address with token
+ * 
+ * @apiBody {String}                            - Email verification token
+ * 
+ * @apiSuccess {Boolean} success                - Request status
+ * @apiSuccess {String} message                 - Success message
+ */
+router.post(
+    '/verify-email',
+    asyncHandler(async (req, res) => {
+        // Placeholder - will be implemented in controller
+        res.status(200).json({
+            success: true,
+            message: 'Email verification endpoint',
+            implemented: false,
+            endpoint: '/auth/verify-email',
+            method: 'POST',
+        });
+    })
+);
