@@ -149,3 +149,28 @@ router.post(
         });
     })
 );
+
+/**
+ * @api {post} /auth/forgot-password            - Forgot Password
+ * @apiName ForgotPassword
+ * @apiGroup Auth
+ * @apiDescription Request password reset email
+ * 
+ * @apiBody {String} email                      - User's email address
+ * 
+ * @apiSuccess {Boolean} success                - Request status
+ * @apiSuccess {String} message                 - Success message
+ */
+router.post(
+    '/forgot-password',
+    asyncHandler(async (req, res) => {
+        // Placeholder- will be implemented in controller
+        res.status(200).json({
+            success: true,
+            message: 'Forgot password endpoint',
+            implemented: false,
+            endpoint: '/auth/forgot-password',
+            method: 'POST',
+        });
+    })
+);
