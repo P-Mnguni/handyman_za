@@ -200,3 +200,32 @@ router.post(
         });
     })
 );
+
+/**
+ * @api {get} /auth/me                          - Get Current User
+ * @apiName GetCurrentUser
+ * @apiGroup Auth
+ * @apiDescription Get authenticated user's profile
+ * 
+ * @apiHeader {String} Authorization            - Bearer token
+ * 
+ * @apiSuccess {Boolean} success                - Request status
+ * @apiSuccess {String} message                 - Success message
+ * @apiSuccess {Object} data                    - User profile
+ */
+router.get(
+    '/me',
+    asyncHandler(async (req, res) => {
+        // Placeholder - will be implemented in controller
+        res.status(200).json({
+            success: true,
+            message: 'Get current user endpoint',
+            implemented: false,
+            endpoint: '/auth/me',
+            method: 'GET',
+        });
+    })
+);
+
+// Export the router
+export default router;
