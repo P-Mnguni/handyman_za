@@ -98,3 +98,30 @@ export const login = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * @desc    Logout user / invalidate token
+ * @route   POST /api/v1/auth/logout
+ * @access  Private (requires authentication)
+ */
+export const logout = async (req, res, next) => {
+    try {
+        // Get token from request (will be in middleware)
+        const token = req.headers.authorization?.replace('Bearer ', '');
+
+        if (!token) {
+            throw ApiError.badRequest('No token provided');
+        }
+
+        // Call service to invalidate token (placeholder)
+        // await authService.logoutUser(token);
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
