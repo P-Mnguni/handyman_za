@@ -1,3 +1,4 @@
+import { use } from 'react';
 import { ApiError } from '../../utils/ApiError.js';
 
 // Service import (will be implemented later)
@@ -190,7 +191,7 @@ export const verifyEmail = async (req, res, next) => {
  */
 export const forgotPassword = async (req, res, next) => {
     try {
-        const { email } = res.body;
+        const { email } = req.body;
 
         if (!email) {
             throw ApiError.badRequest('Email is required');
@@ -232,6 +233,45 @@ export const resetPassword = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: 'Password reset successfully. You can now log in with your new password.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Get current authenticated user's profile
+ * @route   GET /api/v1/auth/me
+ * @access  Private (requires authentication)
+ */
+export const getCurrentUser = async (req, res, next) => {
+    try {
+        // User will be attached to request by auth middleware (later)
+        const user = req.user || {
+            id: 'placeholder-id',
+            fullName: 'John Doe',
+            email: 'john@example.com',
+            role: 'CUSTOMER',
+            isEmailVerified: true,
+            phone: '+27123456789',
+            createdAt: new Date().toISOString(),
+        };
+
+        // If handyman, include profile data
+        if (user.role === 'HANDYMAN') {
+            user.handymanProfile = {
+                bio: 'Experienced handyman with 5 years in plumbing and electrical work.',
+                skills: ['Plumbing', 'Electrical', 'Carpentry'],
+                rating: 4.8,
+                totalJobsCompleted: 124,
+            };
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                user,
+            },
         });
     } catch (error) {
         next(error);
