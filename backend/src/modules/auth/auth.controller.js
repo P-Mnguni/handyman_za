@@ -125,3 +125,35 @@ export const logout = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Refresh access token using refresh token
+ * @route   POST /api/v1/auth/refresh-token
+ * @access  Public (but requires valid refresh token)
+ */
+export const refreshToken = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            throw ApiError.badRequest('Refresh token is required');
+        }
+
+        // Call service (placeholder)
+        // const tokens = await authService.refreshAccessToken(refreshToken);
+
+        const tokens = {
+            accessToken: 'new-placeholder-jwt-token',
+            refreshToken: 'new-placeholder-refresh-token',      // Optional: rotate refresh token
+        };
+
+        res.status(200).json({
+            success: true,
+            message: 'Token refreshed successfully',
+            data: { 
+                tokens, 
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
