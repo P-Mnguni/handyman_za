@@ -208,3 +208,32 @@ export const forgotPassword = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * @desc    Reset password with token
+ * @route   POST /api/v1/auth/reset-password
+ * @access  Public
+ */
+export const resetPassword = async (req, res, next) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            throw ApiError.badRequest('Token and new password are required');
+        }
+
+        if (newPassword.length < 6) {
+            throw ApiError.badRequest('Password must be at least 6 characters long');
+        }
+
+        // Call service (placeholder)
+        // await authService.resetPassword(token, newPassword);
+
+        res.status(200).json({
+            success: true,
+            message: 'Password reset successfully. You can now log in with your new password.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
