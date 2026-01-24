@@ -1,5 +1,6 @@
 import express from 'express';
 import { asyncHandler } from '../../middlewares/error.middleware.js';
+import * as authController from './auth.controller.js';
 import { success } from 'zod';
 
 // Controller imports (will be created later)
@@ -27,19 +28,7 @@ const router = express.Router();
  * @apiSuccess {String} data.accessToken        - JWT access Token
  * @apiSuccess {String} data.refreshToken       - JWT refresh Token
  */
-router.post(
-    '/register',
-    asyncHandler(async (req, res) => {
-        // Placeholder - will be implemented in controller
-        res.status(201).json({
-            success: true,
-            message: 'User registration endpoint',
-            implemented: false,
-            endpoint: '/auth/register',
-            method: 'POST',
-        });
-    })
-);
+router.post('/register', asyncHandler(authController.register));
 
 /**
  * @api {post} /auth/login                      - User Login
@@ -58,19 +47,7 @@ router.post(
  * @apiSuccess {String} data.accessToken        - JWT access token
  * @apiSuccess {String} data.refreshToken       - JWT refresh token
  */
-router.post(
-    '/login',
-    asyncHandler(async (req, res) => {
-        // Placeholder - will be implemented in controller
-        res.status(200).json({
-            success: true,
-            message: 'User login endpoint',
-            implemented: false,
-            endpoint: '/auth/login',
-            method: 'POST',
-        });
-    })
-);
+router.post('/login', asyncHandler(authController.login));
 
 /**
  * @api {post} /auth/logout                     - User Logout
@@ -83,19 +60,7 @@ router.post(
  * @apiSuccess {Boolean} success                - Request status
  * @apiSuccess {String} message                 - Success message
  */
-router.post(
-    '/logout',
-    asyncHandler(async (req, res) => {
-        // Placeholder - will be implemented in controller
-        res.status(200).json({
-            success: true,
-            message: 'User logout endpoint',
-            implemented: false,
-            endpoint: '/auth/logout',
-            method: 'POST',
-        });
-    })
-);
+router.post('/logout', asyncHandler(authController.logout));
 
 /**
  * @api {post} /auth/refresh-token              - Refresh Access Token
@@ -111,19 +76,7 @@ router.post(
  * @apiSuccess {String} data.accessToken        - New JWT access token
  * @apiSuccess {String} data.refreshToken       - New JWT refresh token
  */
-router.post(
-    '/refresh-token',
-    asyncHandler(async (req, res) => {
-        // Placeholder - will be implemented in controller
-        res.status(200).json({
-            success: true,
-            message: 'Token refresh endpoint',
-            implemented: false,
-            endpoint: '/auth/refresh-token',
-            method: 'POST',
-        });
-    })
-);
+router.post('/refresh-token', asyncHandler(authController.refreshToken));
 
 /**
  * @api {post} /auth/verify-email               - Verify Email Address
@@ -136,19 +89,7 @@ router.post(
  * @apiSuccess {Boolean} success                - Request status
  * @apiSuccess {String} message                 - Success message
  */
-router.post(
-    '/verify-email',
-    asyncHandler(async (req, res) => {
-        // Placeholder - will be implemented in controller
-        res.status(200).json({
-            success: true,
-            message: 'Email verification endpoint',
-            implemented: false,
-            endpoint: '/auth/verify-email',
-            method: 'POST',
-        });
-    })
-);
+router.post('/verify-email', asyncHandler(authController.verifyEmail));
 
 /**
  * @api {post} /auth/forgot-password            - Forgot Password
@@ -161,19 +102,7 @@ router.post(
  * @apiSuccess {Boolean} success                - Request status
  * @apiSuccess {String} message                 - Success message
  */
-router.post(
-    '/forgot-password',
-    asyncHandler(async (req, res) => {
-        // Placeholder- will be implemented in controller
-        res.status(200).json({
-            success: true,
-            message: 'Forgot password endpoint',
-            implemented: false,
-            endpoint: '/auth/forgot-password',
-            method: 'POST',
-        });
-    })
-);
+router.post('/forgot-password', asyncHandler(authController.forgotPassword));
 
 /**
  * @api {post} /auth/reset-password             - Reset Password
@@ -187,19 +116,7 @@ router.post(
  * @apiSuccess {Boolean} success                - Request status
  * @apiSuccess {String} message                 - Success message
  */
-router.post(
-    '/reset-password',
-    asyncHandler(async (req, res) => {
-        // Placeholder - will be implemented in controller
-        res.status(200).json({
-            success: true,
-            message: 'Password reset endpoint',
-            implemented: false,
-            endpoint: '/auth/reset-password',
-            method: 'POST',
-        });
-    })
-);
+router.post('/reset-password', asyncHandler(authController.resetPassword));
 
 /**
  * @api {get} /auth/me                          - Get Current User
@@ -213,19 +130,14 @@ router.post(
  * @apiSuccess {String} message                 - Success message
  * @apiSuccess {Object} data                    - User profile
  */
-router.get(
-    '/me',
-    asyncHandler(async (req, res) => {
-        // Placeholder - will be implemented in controller
-        res.status(200).json({
-            success: true,
-            message: 'Get current user endpoint',
-            implemented: false,
-            endpoint: '/auth/me',
-            method: 'GET',
-        });
-    })
-);
+router.get('/me', asyncHandler(authController.getCurrentUser));
+
+/**
+ * @api {put} /auth/me                          - Update Profile
+ * @apiName UpdateProfile
+ * @apiGroup Auth
+ */
+router.put('/me', asyncHandler(authController.updateProfile));
 
 // Export the router
 export default router;
