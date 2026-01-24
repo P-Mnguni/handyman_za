@@ -277,3 +277,55 @@ export const getCurrentUser = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * @desc    Update current user's profile
+ * @route   PUT /api/v1/auth/me
+ * @access  Private (requires authentication)
+ */
+export const updateProfile = async (req, res, next) => {
+    try {
+        const updates = req.body;
+        const userId = req.user?.id || ' placeholder-id';
+
+        // Remove restricted fields
+        delete updates.email;
+        delete updates.role;
+        delete updates.password;
+
+        // Call service (placeholder)
+        // const updatedUser = await authService.updateUserProfile(userId, updates);
+
+        const updatedUser = {
+            id: userId,
+            fullName: updates.fullName || 'John Doe',
+            email: 'john@example.com',
+            phone: updates.phone || '+27123456789',
+            role: 'CUSTOMER',
+            updatedAt: new Date().toISOString(),
+        };
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: {
+                user: updatedUser,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Export all controllers
+export default {
+    register,
+    login,
+    logout,
+    refreshToken,
+    verifyEmail,
+    forgotPassword,
+    resetPassword,
+    getCurrentUser,
+    updateProfile,
+};
