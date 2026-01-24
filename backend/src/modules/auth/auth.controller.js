@@ -157,3 +157,28 @@ export const refreshToken = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * @desc    Verify user's email address
+ * @route   POST /api/v1/auth/verify-email
+ * @access  Public
+ */
+export const verifyEmail = async (req, res, next) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            throw ApiError.badRequest('Verification token is required');
+        }
+
+        // Call service (placeholder)
+        // await authService.verifyEmail(token);
+
+        res.status(200).json({
+            success: true,
+            message: 'Email verified successfully. You can now log in',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
