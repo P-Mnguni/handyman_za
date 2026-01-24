@@ -182,3 +182,29 @@ export const verifyEmail = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * @desc    Request password reset email
+ * @route   POST /api/v1/auth/forgot-password
+ * @access  Public
+ */
+export const forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = res.body;
+
+        if (!email) {
+            throw ApiError.badRequest('Email is required');
+        }
+
+        // Call service (placeholder)
+        // await authService.sendPasswordResetEmail(email);
+
+        // Security: Always return some message regardless of email existence
+        res.status(200).json({
+            success: true,
+            message: 'If an account exists with this email, you will receive a password reset link.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
