@@ -124,5 +124,48 @@ class AuthService {
         };
     }
 
-    
+    /**
+     * Authenticate user login
+     */
+    async login(credentials) {
+        const { email, password } = credentials;
+
+        if (!email || !password) {
+            throw ApiError.badRequest('Email and password are registered');
+        }
+
+        // Find user
+        const user = mockUsers.find(u => u.email === email.toLowerCase());
+        if (!user) {
+            throw ApiError.unauthorized('Invalid credentials');
+        }
+
+        // Check status
+        if (user.status !== 'ACTIVE') {
+            throw ApiError.forbidden('Account is not active');
+        }
+
+        // Verify password
+        const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+        if (!isValidPassword) {
+            throw ApiError.unauthorized('Invalid credentials');
+        }
+
+        // Update last login
+        user.lastLoginAt = new Date();
+
+        // Generate tokens
+        const tokens = this.generateTokens(user);
+
+        // Store refresh tokens (in real app, this would be in database)
+        mockRefreshTokens.add(tokens.refreshToken);
+
+        // Remove password from response
+        const { passwordHash: _, ...userWithoutPassword } = user;
+
+        return {
+            user: userWithoutPassword,
+            tokens
+        };
+    }
 }
