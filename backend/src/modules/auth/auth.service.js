@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import ApiError from '../../utils/ApiError';
-import { email } from 'zod';
+import { email, success } from 'zod';
 
 // Mock database (temporary - will be replaced with real model later)
 const mockUsers = [];
@@ -167,5 +167,16 @@ class AuthService {
             user: userWithoutPassword,
             tokens
         };
+    }
+
+    /**
+     * Logout user by invalidating refresh token
+     */
+    async logout(token) {
+        // Remove refresh token from valid set
+        mockRefreshTokens.delete(token);
+
+        // In real implementation, we would also blacklist the access token
+        return { success: true };
     }
 }
