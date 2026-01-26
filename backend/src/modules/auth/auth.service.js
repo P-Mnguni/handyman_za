@@ -251,4 +251,20 @@ class AuthService {
             expiresIn: env.jwtExpiresIn,
         };
     }
+
+    /**
+     * Verify JWT token (for middleware use later)
+     */
+    verifyToken(token) {
+        try {
+            return jwt.verify(token, env.jwtSecret);
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw ApiError.unauthorized('Token expired');
+            }
+            throw ApiError.unauthorized('Invalid token');
+        }
+    }
 }
+
+export default new AuthService();
