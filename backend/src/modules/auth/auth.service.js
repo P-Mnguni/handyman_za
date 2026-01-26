@@ -222,5 +222,33 @@ class AuthService {
         }
     }
 
-    
+    /**
+     * Generate JWT tokens for a user
+     */
+    generateTokens(user) {
+        const accessToken = jwt.sign(
+            {
+                userId: user._id,
+                email: user.email,
+                role: user.role
+            },
+            env.jwtSecret,
+            { expiresIn: env.jwtExpiresIn },
+        );
+
+        const refreshToken = jwt.sign(
+            {
+                userId: user._id,
+                type: 'refresh'
+            },
+            env.jwtRefreshSecret,
+            { expiresIn: env.jwtRefreshExpiresIn },
+        );
+
+        return {
+            accessToken,
+            refreshToken,
+            expiresIn: env.jwtExpiresIn,
+        };
+    }
 }
