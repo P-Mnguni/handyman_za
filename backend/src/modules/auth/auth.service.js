@@ -179,4 +179,48 @@ class AuthService {
         // In real implementation, we would also blacklist the access token
         return { success: true };
     }
+
+    /**
+     * Refresh access token using refresh token
+     */
+    async refreshToken(refreshToken) {
+        if (!refreshToken) {
+            throw ApiError.badRequest('Refresh token is required');
+        }
+
+        // Check if refresh token is valid
+        if (!mockRefreshTokens.has(refreshToken)) {
+            throw ApiError.unauthorized('Invalid refresh token');
+        }
+
+        try {
+            // Verify refresh token
+            const decoded = jwt.verify(refreshToken, env.jwtRefreshSecret);
+
+            // Find user
+            const user = mockUsers.find(u => u._id === decoded.userId);
+            if (!user || user.status !== 'ACTIVE') {
+                throw ApiError.unauthorized('User not found or inactive');
+            }
+
+            // Generate new tokens
+            const tokens = this.generateTokens(user);
+
+            // Replace old refresh token with new one
+            mockRefreshTokens.delete(refreshToken);
+            mockRefreshTokens.add(tokens.refreshToken);
+
+            return tokens;
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw ApiError.unauthorized('Refresh token expired');
+            }
+            if (error.name === 'JsonWebTokenError') {
+                throw ApiError.unauthorized('Invalid refresh token');
+            }
+            throw error;
+        }
+    }
+
+    
 }
