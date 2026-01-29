@@ -392,6 +392,52 @@ class AuthService {
     /**
      * Reset password with token
      */
+    async resetPassword(resetToken, newPassword) {
+        if (!resetToken || !newPassword) {
+            throw ApiError.badRequest('Reset token and new password are required');
+        }
+
+        if (newPassword.length < 6) {
+            throw ApiError.badRequest('Password must be at least 6 characters');
+        }
+
+        try {
+            // Verify the reset token
+            const decoded = jwt.verify(resetToken, env.jwtSecret);
+
+            if (decoded.type !== 'password_reset') {
+                throw ApiError.badRequest('Invalid token type');
+            }
+
+            // Find user
+            const userIndex = mockUsers.findIndex(u => u._id === decoded.userId);
+            if (userIndex === -1) {
+                throw ApiError.notFound('User not found');
+            }
+
+            // Hash new password
+            const passwordHash = await bcrypt.hash(newPassword, 10);
+
+            // Update user password
+            mockUsers[userIndex].passwordHash = passwordHash;
+            mockUsers[userIndex].updatedAt = new Date();
+
+            // Invalidate all refresh tokens for this user (security measure)
+            // In real implementation, we would query the database
+
+            return {
+                message: 'Password reset successfully. You can now login with your new password.',
+            };
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw ApiError.badRequest('Password reset token has expired');
+            }
+            if (error.name === 'JsonWebTokenError') {
+                throw ApiError.badRequest('Invalid password reset token');
+            }
+            throw error;
+        }
+    }
 
     /**
      * Generate JWT tokens for a user
