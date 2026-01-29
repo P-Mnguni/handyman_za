@@ -4,9 +4,6 @@ import { ApiError } from '../../utils/ApiError.js';
 import authService from './auth.service.js';
 import { da } from 'zod/v4/locales';
 
-// Service import (will be implemented later)
-// import * as authService from './auth.service.js';
-
 /**
  * @desc    Register a new user (customer or handyman)
  * @route   POST /api/v1/auth/register
