@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import ApiError from '../../utils/ApiError';
 import { email, success } from 'zod';
+import { useId } from 'react';
 
 // Mock database (temporary - will be replaced with real model later)
 const mockUsers = [];
@@ -221,6 +222,176 @@ class AuthService {
             throw error;
         }
     }
+
+    /**
+     * Get current user profile
+     */
+    async getCurrentUser(userId) {
+        if (!userId) {
+            throw ApiError.unauthorized('User not authenticated');
+        }
+
+        // Find user
+        const userIndex = mockUsers.findIndex(u => u._id === userId);
+        if (userIndex === -1) {
+            throw ApiError.notFound('User not found');
+        }
+
+        // Check status
+        if (mockUsers[userIndex].status !== 'ACTIVE') {
+            throw ApiError.forbidden('Account is not active');
+        }
+
+        // Return user with password
+        const { passwordHash, ...userWithoutPassword } = mockUsers[userIndex];
+
+        // If user is a handyman, add profile data
+        if (userWithoutPassword.role === 'HANDYMAN') {
+            // In real implementation, we would fetch from HandymanProfile model
+            userWithoutPassword.handymanProfile = {
+                // Placeholder handyman profile data
+                verificationStatus: 'PENDING',
+                rating: 0
+            };
+        }
+
+        return userWithoutPassword;
+    }
+
+    /**
+     * Update current user profile
+     */
+    async updateProfile(userId, updateData) {
+        if (!userId) {
+            throw ApiError.unauthorized('User not authenticated');
+        }
+
+        // Find user
+        const userIndex = mockUsers.findIndex(u => u._id === userId);
+        if (userIndex === -1) {
+            throw ApiError.notFound('User not found');
+        }
+
+        // Check status
+        if (mockUsers[userIndex].status !== 'ACTIVE') {
+            throw ApiError.forbidden('Account is not active');
+        }
+
+        // Fields that cannot be updated via this endpoint
+        const restrictedFields = ['_id', 'email', 'passwordHash', 'role', 'status', 'createdAt'];
+        for (const field of restrictedFields) {
+            if (updateData[field] !== undefined) {
+                throw ApiError.badRequest(`Cannot update ${field} via this endpoint`);
+            }
+        }
+
+        // Update allowed fields
+        const allowedUpdates = ['fullName', 'phone'];
+        let updatedFields = [];
+
+        for (const field of allowedUpdates) {
+            if (updateData[field] !== undefined) {
+                mockUsers[userIndex][field] = updateData[field];
+                updatedFields.push(field);
+            }
+        }
+
+        // Update timestamp
+        mockUsers[userIndex].updatedAt = new Date();
+
+        // Return updated user without password
+        const { passwordHash, ...updatedUser } = mockUsers[userIndex];
+
+        return {
+            user: updatedUser,
+            message: `Profile updated successfully. Updated fields: ${updatedFields.join(', ')}`
+        };
+    }
+
+    /**
+     * Verify email address
+     */
+    async verifyEmail(verificationToken) {
+        if (verificationToken) {
+            throw ApiError.badRequest('Verification token is required');
+        }
+
+        try {
+            // Decode the verification token
+            const decoded = jwt.verify(verificationToken, env.jwtSecret);
+
+            // Find user
+            const userIndex = mockUsers.findIndex(u => u._id === decoded.userId);
+            if (userIndex === -1) {
+                throw ApiError.notFound('User not found');
+            }
+
+            // Check if already verified
+            if (mockUsers[userIndex].isEmailVerified) {
+                throw ApiError.conflict('Email is already verified');
+            }
+
+            // Update user
+            mockUsers[userIndex].isEmailVerified = true;
+            mockUsers[userIndex].updatedAt = new Date();
+
+            const { passwordHash, ...userWithoutPassword } = mockUsers[userIndex];
+
+            return {
+                user: userWithoutPassword,
+                message: 'Email verified successfully',
+            };
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw ApiError.badRequest('Verification token has expired');
+            }
+            if (error.name === 'JsonWebTokenError') {
+                throw ApiError.badRequest('Invalid verification token');
+            }
+        }
+    }
+
+    /**
+     * Request password reset email
+     */
+    async forgotPassword(email) {
+        if (!email) {
+            throw ApiError.badRequest('Email is required');
+        }
+
+        // Find user
+        const user = mockUsers.find(u => u.email === email.toLowerCase());
+        if (!user) {
+            // For security, don'n reveal if user exists or not
+            return {
+                message: 'If an account exists with this email, a password reset link has been sent'
+            };
+        }
+
+        // Generate a password reset token (valid for 1 hour)
+        const resetToken = jwt.sign(
+            {
+                useId: user._id,
+                type: 'password_reset',
+                email: user.email,
+            },
+            env.jwtSecret,
+            { expiresIn: '1h' },
+        );
+
+        // In production, this would send an email
+        console.log(`Password reset link: ${env.frontendUrl}/reset-password?token=${resetToken}`);
+
+        return {
+            message: 'If an account exists with this email, a password reset link has been sent',
+            // In development, we return the token for testing
+            ...(env.nodeEnv === 'development' && { resetToken }),
+        };
+    }
+
+    /**
+     * Reset password with token
+     */
 
     /**
      * Generate JWT tokens for a user
