@@ -1,5 +1,8 @@
 //import { use } from 'react';
+import { success } from 'zod';
 import { ApiError } from '../../utils/ApiError.js';
+import authService from './auth.service.js';
+import { da } from 'zod/v4/locales';
 
 // Service import (will be implemented later)
 // import * as authService from './auth.service.js';
@@ -9,48 +12,42 @@ import { ApiError } from '../../utils/ApiError.js';
  * @route   POST /api/v1/auth/register
  * @access  Public
  */
-export const register = async (req, res, next) => {
+export const registerClient = async (req, res, next) => {
     try {
-        const { fullName, email, password, phone, role } = req.body;
+        const userData = req.body;
 
         // Input validation (basic - detailed validation will be implemented)
-        if (!fullName || !email || !password || !role) {
-            throw ApiError.badRequest('Missing required fields: fullName, email, password, role');
+        if (!userData.fullName || !userData.email || !userData.password) {
+            throw ApiError.badRequest('Missing required fields: fullName, email, password');
         }
-
-        // Validate role
-        const validRoles = ['CUSTOMER', 'HANDYMAN'];
-        if (!validRoles.includes(role.toUpperCase())) {
-            throw ApiError.badRequest(`Invalid role. Must be one of: ${validRoles.join(', ')}`);
-        }
-
-        // Call service (placeholder for now)
-        // const user = await authService.registerUser({ fullName, email, password, phone, role });
-
-        // Placeholder response until service is implemented
-        const user = {
-            id: 'placeholder-id',
-            fullName,
-            email,
-            phone: phone || null,
-            role: role.toUpperCase(),
-            isEmailVerified: false,
-            createdAt: new Date().toISOString(),
-        };
-
-        // Generate tokens (placeholder)
-        const tokens = {
-            accessToken: 'placeholder-jwt-token',
-            refreshToken: 'placeholder-refresh-token',
-        };
+       
+        const result = await authService.registerClient(userData);
 
         res.status(201).json({
             success: true,
-            message: 'User registered successfully. Please check your email to verify your account.',
-            data: {
-                user,
-                tokens,
-            },
+            message: result.message,
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const registerHandyman = async (req, res, next) => {
+    try {
+        const handymanData = req.body;
+
+        // Basic validation
+        if (!handymanData.fullName || !handymanData.email || !handymanData.password || !handymanData.skills) {
+            throw new ApiError.badRequest('Missing required fields: fullName, email, password, skills');
+        }
+
+        const result = await authService.registerHandyman(handymanData);
+
+        res.status(201).json({
+            success: true,
+            message: result.message,
+            data: result,
         });
     } catch (error) {
         next(error);
@@ -70,30 +67,12 @@ export const login = async (req, res, next) => {
             throw ApiError.badRequest('Please provide email and password');
         }
 
-        // Call service (placeholder for now)
-        // const user = await authService.loginUser({ email, password });
-
-        // Placeholder response
-        const user = {
-            id: 'placeholder-id',
-            fullName: 'John Doe',
-            email,
-            role: 'CUSTOMER',
-            isEmailVerified: true,
-        };
-
-        const tokens = {
-            accessToken: 'placeholder-jwt-token',
-            refreshToken: 'placeholder-refresh-token',
-        };
+        const result = await authService.login({ email, password });
 
         res.status(200).json({
             success: true,
             message: 'Login successful',
-            data: {
-                user,
-                tokens,
-            },
+            data: result,
         });
     } catch (error) {
         next(error);
@@ -114,8 +93,7 @@ export const logout = async (req, res, next) => {
             throw ApiError.badRequest('No token provided');
         }
 
-        // Call service to invalidate token (placeholder)
-        // await authService.logoutUser(token);
+        await authService.logout(token);
 
         res.status(200).json({
             success: true,
@@ -139,20 +117,12 @@ export const refreshToken = async (req, res, next) => {
             throw ApiError.badRequest('Refresh token is required');
         }
 
-        // Call service (placeholder)
-        // const tokens = await authService.refreshAccessToken(refreshToken);
-
-        const tokens = {
-            accessToken: 'new-placeholder-jwt-token',
-            refreshToken: 'new-placeholder-refresh-token',      // Optional: rotate refresh token
-        };
+        const result = await authService.refreshToken(refreshToken);
 
         res.status(200).json({
             success: true,
             message: 'Token refreshed successfully',
-            data: { 
-                tokens, 
-            },
+            data: result,
         });
     } catch (error) {
         next(error);
@@ -172,12 +142,12 @@ export const verifyEmail = async (req, res, next) => {
             throw ApiError.badRequest('Verification token is required');
         }
 
-        // Call service (placeholder)
-        // await authService.verifyEmail(token);
+        const result = await authService.verifyEmail(token);
 
         res.status(200).json({
             success: true,
-            message: 'Email verified successfully. You can now log in',
+            message: result.message,
+            data: result,
         });
     } catch (error) {
         next(error);
@@ -197,13 +167,15 @@ export const forgotPassword = async (req, res, next) => {
             throw ApiError.badRequest('Email is required');
         }
 
-        // Call service (placeholder)
-        // await authService.sendPasswordResetEmail(email);
+        const result =  await authService.forgotPassword(email);
 
         // Security: Always return some message regardless of email existence
         res.status(200).json({
             success: true,
-            message: 'If an account exists with this email, you will receive a password reset link.',
+            message: result.message,
+            ...ApiError(env.nodeEnv === 'development' && {
+                data: { resetToken: result.resetToken }
+            })
         });
     } catch (error) {
         next(error);
@@ -223,16 +195,11 @@ export const resetPassword = async (req, res, next) => {
             throw ApiError.badRequest('Token and new password are required');
         }
 
-        if (newPassword.length < 6) {
-            throw ApiError.badRequest('Password must be at least 6 characters long');
-        }
-
-        // Call service (placeholder)
-        // await authService.resetPassword(token, newPassword);
-
+        const result = await authService.resetPassword(token, newPassword);
+        
         res.status(200).json({
             success: true,
-            message: 'Password reset successfully. You can now log in with your new password.',
+            message: result.message,
         });
     } catch (error) {
         next(error);
@@ -247,31 +214,18 @@ export const resetPassword = async (req, res, next) => {
 export const getCurrentUser = async (req, res, next) => {
     try {
         // User will be attached to request by auth middleware (later)
-        const user = req.user || {
-            id: 'placeholder-id',
-            fullName: 'John Doe',
-            email: 'john@example.com',
-            role: 'CUSTOMER',
-            isEmailVerified: true,
-            phone: '+27123456789',
-            createdAt: new Date().toISOString(),
-        };
+        const userId = req.user?._id || req.user?.userId;
 
-        // If handyman, include profile data
-        if (user.role === 'HANDYMAN') {
-            user.handymanProfile = {
-                bio: 'Experienced handyman with 5 years in plumbing and electrical work.',
-                skills: ['Plumbing', 'Electrical', 'Carpentry'],
-                rating: 4.8,
-                totalJobsCompleted: 124,
-            };
+        if (!userId) {
+            throw ApiError.unauthorized('Not authenticated');
         }
+
+        const user = await authService.getCurrentUser(userId);
 
         res.status(200).json({
             success: true,
-            data: {
-                user,
-            },
+            message: 'User profile retrieved successfully',
+            data: user,
         });
     } catch (error) {
         next(error);
@@ -285,32 +239,26 @@ export const getCurrentUser = async (req, res, next) => {
  */
 export const updateProfile = async (req, res, next) => {
     try {
-        const updates = req.body;
-        const userId = req.user?.id || ' placeholder-id';
+        // User will be attached to request by auth middleware (later)
+        const userId = req.user?.id || req.user?.userId;
 
-        // Remove restricted fields
-        delete updates.email;
-        delete updates.role;
-        delete updates.password;
+        if (!userId) {
+            throw ApiError.unauthorized('Not authenticated');
+        }
 
-        // Call service (placeholder)
-        // const updatedUser = await authService.updateUserProfile(userId, updates);
+        const updateData = req.body;
 
-        const updatedUser = {
-            id: userId,
-            fullName: updates.fullName || 'John Doe',
-            email: 'john@example.com',
-            phone: updates.phone || '+27123456789',
-            role: 'CUSTOMER',
-            updatedAt: new Date().toISOString(),
-        };
+        // Validate that there's data to update
+        if (!updateData || Object.keys(updateData).length === 0) {
+            throw ApiError.badRequest('No data provided to update');
+        }
+
+        const result = await authService.updateProfile(userId, updateData);
 
         res.status(200).json({
             success: true,
-            message: 'Profile updated successfully',
-            data: {
-                user: updatedUser,
-            },
+            message: result.message,
+            data: result,
         });
     } catch (error) {
         next(error);
