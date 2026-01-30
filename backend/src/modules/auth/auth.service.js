@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import ApiError from '../../utils/ApiError';
 import { email, success } from 'zod';
-import { useId } from 'react';
+//import { useId } from 'react';
 
 // Mock database (temporary - will be replaced with real model later)
 const mockUsers = [];
