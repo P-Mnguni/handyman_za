@@ -1,7 +1,7 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
-import ApiError from '../../utils/ApiError';
+import { ApiError } from '../../utils/ApiError.js';
 import { email, success } from 'zod';
 //import { useId } from 'react';
 
