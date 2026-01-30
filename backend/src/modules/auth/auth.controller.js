@@ -264,7 +264,8 @@ export const updateProfile = async (req, res, next) => {
 
 // Export all controllers
 export default {
-    register,
+    registerClient,
+    registerHandyman,
     login,
     logout,
     refreshToken,
