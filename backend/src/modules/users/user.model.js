@@ -32,5 +32,33 @@ const userSchema = new mongoose.Schema({
         minlength: [6, 'Password must be at least 6 characters']
     },
 
-    
+    // 👤 Profile
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    isPhoneVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    status: {
+        type: String,
+        enum: ['ACTIVE', 'SUSPENDED', 'DELETED'],
+        default: 'ACTIVE'
+    },
+
+    lastLoginAt: {
+        type: Date
+    },
+
+    refreshTokens: [{
+        token: String,
+        expiresAt: Date,
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
 })
