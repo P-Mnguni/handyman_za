@@ -116,4 +116,15 @@ const userSchema = new mongoose.Schema({
         insurance: String,
         otherDocs: [String]
     }
-})
+}, {
+    // 🕒 Metadata
+    timestamps: true,                           // Adds createdAt and updatedAt automatically
+    toJSON: {
+        virtuals: true,
+        transform: function(doc, ret) {
+            delete ret.passwordHash;
+            delete ret.refreshTokens;
+            return ret;
+        }
+    }
+});
