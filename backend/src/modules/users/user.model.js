@@ -61,4 +61,59 @@ const userSchema = new mongoose.Schema({
             default: Date.now
         }
     }],
+
+    // 🛠️ Handyman-specific fields (only when role = HANDYMAN)
+    handymanProfile: {
+        bio: {
+            type: String,
+            maxlength: [500, 'Bio cannot exceed 500 characters']
+        },
+        skills: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Service'
+        }],
+        yearsOfExperience: {
+            type: Number,
+            min: 0,
+            max: 60
+        },
+        verificationStatus: {
+            type: String,
+            enum: ['PENDING', 'APPROVED', 'REJECTED'],
+            default: 'PENDING'
+        },
+        rating: {
+            type: Number,
+            min: 0,
+            max: 5,
+            default: 0
+        },
+        totalJobsCompleted: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        availability: {
+            days: [{
+                type: String,
+                enum: ['MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT', 'SUN']
+            }],
+            timeSlots: [String]                 // e.g., ["08:00-12:00", "13:00-17:00"]
+        },
+        location: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number],                     // [longitude, latitude]
+            required: false
+        }
+    },
+    documents: {
+        idCopy: String,
+        certificate: String,
+        insurance: String,
+        otherDocs: [String]
+    }
 })
