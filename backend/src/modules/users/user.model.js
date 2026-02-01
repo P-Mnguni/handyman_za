@@ -156,3 +156,18 @@ userSchema.virtual('isAdmin').get(function() {
     return this.role === 'ADMIN';
 });
 
+// 🔐 Password hashing middleware
+userSchema.pre('save', async function(next) {
+    // Only hash the password if it has been modified (or is new)
+    if (!this.isModified('passwordHash')) return next();
+
+    try {
+        // Generate a salt
+        const salt = await bcrypt.genSalt(10);
+        // Hash the password along with the new salt
+        this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
