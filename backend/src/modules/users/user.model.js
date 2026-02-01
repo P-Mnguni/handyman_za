@@ -138,3 +138,21 @@ userSchema.index({ status: 1 });
 userSchema.index({ 'handymanProfile.verificationStatus': 1 });
 // Geo-spatial index for location-based queries (handyman location search)
 userSchema.index({ 'handymanProfile.location': '2dsphere'});
+
+// 🔧 Virtuals (computed properties)
+userSchema.virtual('isActive').get(function() {
+    return this.status === 'ACTIVE';
+});
+
+userSchema.virtual('isHandyman').get(function() {
+    return this.role === 'HANDYMAN';
+});
+
+userSchema.virtual('isCustomer').get(function() {
+    return this.role === 'CUSTOMER';
+});
+
+userSchema.virtual('isAdmin').get(function() {
+    return this.role === 'ADMIN';
+});
+
