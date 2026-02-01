@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import { startTransition } from 'react';
 
 const userSchema = new mongoose.Schema({
     // 🆔 Identity
@@ -128,3 +129,12 @@ const userSchema = new mongoose.Schema({
         }
     }
 });
+
+// 📊 Indexes for better query performance
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ phone: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ status: 1 });
+userSchema.index({ 'handymanProfile.verificationStatus': 1 });
+// Geo-spatial index for location-based queries (handyman location search)
+userSchema.index({ 'handymanProfile.location': '2dsphere'});
