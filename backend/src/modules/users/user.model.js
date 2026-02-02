@@ -214,3 +214,15 @@ userSchema.statics.findHandymen = function(query = {}) {
 userSchema.statics.findActive = function(query = {}) {
     return this.find({ ...query, status: 'ACTIVE' });
 };
+
+// 📋 Static method to get users by verification status (for handymen)
+userSchema.statics.findByVerificationStatus = function(status) {
+    return this.find({
+        role: 'HANDYMAN',
+        'handymanProfile.verificationStatus': status,
+    });
+};
+
+const User = mongoose.model('User', userSchema);
+
+export default User;
