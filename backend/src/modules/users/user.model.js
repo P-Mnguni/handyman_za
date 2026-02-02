@@ -171,3 +171,26 @@ userSchema.pre('save', async function(next) {
         next(error);
     }
 });
+
+// 🔐 Method to compare password
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.passwordHash);
+};
+
+// 🔐 Method to add refresh token
+userSchema.methods.addRefreshToken = function(token, expiresAt) {
+    this.refreshTokens.push({ token, expiresAt });
+    return this.save();
+};
+
+// 🔐 Method to remove refresh token
+userSchema.methods.removeRefreshToken = function(token) {
+    this.refreshTokens = this.refreshTokens.filter(t => t.token !== token);
+    return this.save();
+};
+
+// 🔐 Method to remove all refresh tokens (for logout all devices)
+userSchema.methods.removeAllRefreshTokens = function() {
+    this.refreshTokens = [];
+    return this.save();
+};
