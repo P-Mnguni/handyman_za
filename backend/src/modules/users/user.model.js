@@ -194,3 +194,23 @@ userSchema.methods.removeAllRefreshTokens = function() {
     this.refreshTokens = [];
     return this.save();
 };
+
+// 🔐 Static method to find by email
+userSchema.statics.findByEmail = function(email) {
+    return this.findOne({ email: email.toLowerCase() });
+};
+
+// 📋 Static method to get customers
+userSchema.statics.findCustomers = function(query = {}) {
+    return this.find({ ...query, role: 'CUSTOMER' });
+};
+
+// 📋 Static method to get handyman
+userSchema.statics.findHandymen = function(query = {}) {
+    return this.find({ ...query, role: 'HANDYMAN' });
+};
+
+// 📋 Static method to get active users
+userSchema.statics.findActive = function(query = {}) {
+    return this.find({ ...query, status: 'ACTIVE' });
+};
