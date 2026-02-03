@@ -29,7 +29,7 @@ class AuthService {
                 throw ApiError.conflict('User with this email already exists');
             }
 
-            // Create new user
+            // Create new customer user
             const user = await User.create({
                 fullName: userData.fullName,
                 email: userData.email.toLowerCase(),
@@ -75,69 +75,73 @@ class AuthService {
      * Register a new handyman
      */
     async registerHandyman(handymanData) {
-        // Validation
-        if (!handymanData.email || !handymanData.password || !handymanData.fullName || !handymanData.skills) {
-            throw ApiError.badRequest('Email, password, full name, and skills are required');
+        try {
+            // Validation
+            if (!handymanData.email || !handymanData.password || !handymanData.fullName || !handymanData.skills) {
+                throw ApiError.badRequest('Email, password, full name, and skills are required');
+            }
+
+            // Check if user exists
+            const existingUser = await User.findOne({
+                email: handymanData.email.toLowerCase()
+            });
+            
+            if (existingUser) {
+                throw ApiError.conflict('User with this email already exists');
+            }
+
+            // Create handyman user
+            const user = await User.create({
+                fullName: handymanData.fullName,
+                email: handymanData.email.toLowerCase(),
+                phone: handymanData.phone || null,
+                passwordHash: handymanData.password,
+                role: 'HANDYMAN',
+                isEmailVerified: false,
+                isPhoneVerified: false,
+                status: 'ACTIVE',
+                handymanProfile: {
+                    bio: handymanData.bio || '',
+                    skills: Array.isArray(handymanData.skills) ? handymanData.skills : [handymanData.skills],
+                    yearsOfExperience: 'PENDING',
+                    rating: 0,
+                    totalJobsCompleted: 0,
+                    availability: handymanData.availability || {
+                        days: ['MON', 'TUE', 'WED', 'THUR', 'FRI'],
+                        timeSlots: ['08:00-12:00', '13:00-17:00']
+                    },
+                    location: handymanData.location || {
+                        type: 'Point',
+                        coordinates: [28.0473, -26.2041]        // Default: Johannesburg
+                    },
+                    documents: handymanData.documents || {}
+                }
+            });
+
+            const userResponse = user.toJSON();
+        
+            return {
+                user: userResponse,
+                handymanProfile: userResponse.handymanProfile,
+                message: 'Handyman registered successfully. Please wait for verification.',
+            };
+        } catch (error) {
+            if (error.name === 'ValidationError') {
+                const errors = Object.values(error.errors).map(err => err.message);
+                throw ApiError.badRequest('Validation failed', errors);
+            }
+
+            if (error.code === 11000) {
+                throw ApiError.conflict('User with this email already exists');
+            }
+
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
+            console.error('Handyman registration error:', error);
+            throw ApiError.internal('Registration failed. Please try again.');
         }
-
-        // Check if user exists
-        const existingUser = mockUsers.find(user => user.email === handymanData.email.toLowerCase());
-        if (existingUser) {
-            throw ApiError.conflict('User with this email already exists');
-        }
-
-        // Hash password
-        const passwordHash = await bcrypt.hash(handymanData.password, 10);
-
-        // Create user object
-        const user = {
-            _id: `user_${Date.name()}`,
-            fullName: handymanData.fullName,
-            email: handymanData.email.toLowerCase(),
-            phone: handymanData.phone || null,
-            passwordHash,
-            role: 'HANDYMAN',
-            isEmailVerified: false,
-            isPhoneVerified: false,
-            status: 'ACTIVE',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            lastLoginAt: null,
-        };
-
-        // Save to mock DB (temporary)
-        mockUsers.push(user);
-
-        // Create handyman profile (in real implementation, this would be a separate model)
-        const handymanProfile = {
-            userId: user._id,
-            bio: handymanData.bio || '',
-            skills: Array.isArray(handymanData.skills) ? handymanData.skills : [handymanData.skills],
-            yearsOfExperience: handymanData.yearsOfExperience || 0,
-            verificationStatus: 'PENDING',
-            rating: 0,
-            totalJobsCompleted: 0,
-            availability: handymanData.availability || {
-                days: ['MON', 'TUE', 'WED', 'THUR', 'FRI'],
-                timeSlots: ['08:00-12:00', '13:00-17:00'],
-            },
-            location: handymanData.location || {
-                type: 'Point',
-                coordinates: [28.0473, -26.2041]            // Default Johannesburg
-            },
-            documents: handymanData.documents || {},
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
-
-        // Remove password from response
-        const { passwordHash: _, ...userWithoutPassword } = user;
-
-        return {
-            user: userWithoutPassword,
-            handymanProfile,
-            message: 'Handyman registered successfully. Please wait for verification.',
-        };
     }
 
     /**
