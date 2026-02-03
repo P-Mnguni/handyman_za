@@ -235,41 +235,50 @@ class AuthService {
      * Refresh access token using refresh token
      */
     async refreshToken(refreshToken) {
-        if (!refreshToken) {
-            throw ApiError.badRequest('Refresh token is required');
-        }
-
-        // Check if refresh token is valid
-        if (!mockRefreshTokens.has(refreshToken)) {
-            throw ApiError.unauthorized('Invalid refresh token');
-        }
-
         try {
-            // Verify refresh token
-            const decoded = jwt.verify(refreshToken, env.jwtRefreshSecret);
+            if (!refreshToken) {
+                throw ApiError.badRequest('Refresh token is required');
+            }
 
-            // Find user
-            const user = mockUsers.find(u => u._id === decoded.userId);
-            if (!user || user.status !== 'ACTIVE') {
-                throw ApiError.unauthorized('User not found or inactive');
+            const user = await User.findOne({
+                'refreshTokens.token': refreshToken,
+                'refreshTokens.expiresAt': { $gt: new Date() }          // Token not expired
+            });
+            
+            if (!user) {
+                throw ApiError.unauthorized('Invalid or expired refresh token');
+            }
+
+            // Check if user is active
+            if (user.status !== 'ACTIVE') {
+                throw ApiError.forbidden('Account is not active');
             }
 
             // Generate new tokens
             const tokens = this.generateTokens(user);
 
-            // Replace old refresh token with new one
-            mockRefreshTokens.delete(refreshToken);
-            mockRefreshTokens.add(tokens.refreshToken);
+            // Update refresh token in database
+            const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 100);
+
+            // Remove old token and add new one
+            await user.removeRefreshToken(refreshToken);
+            await user.addRefreshToken(tokens.refreshToken, refreshTokenExpiresAt);
 
             return tokens;
         } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
             if (error.name === 'TokenExpiredError') {
-                throw ApiError.unauthorized('Refresh token expired');
+                throw ApiError.unauthorized('Token expired');
             }
             if (error.name === 'JsonWebTokenError') {
-                throw ApiError.unauthorized('Invalid refresh token');
+                throw ApiError.unauthorized('Invalid token');
             }
-            throw error;
+            
+            console.error('Refresh token error:', error);
+            throw ApiError.internal('Token refresh failed. Please try again.');
         }
     }
 
