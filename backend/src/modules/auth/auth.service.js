@@ -204,11 +204,31 @@ class AuthService {
      * Logout user by invalidating refresh token
      */
     async logout(token) {
-        // Remove refresh token from valid set
-        mockRefreshTokens.delete(token);
+        try {
+            if (!token) {
+                throw ApiError.badRequest('Token is required');
+            }
 
-        // In real implementation, we would also blacklist the access token
-        return { success: true };
+            // Find user with refresh token
+            const user = await User.findOne({
+                'refreshTokens.token': token
+            });
+
+            if (user) {
+                // Remove the specific refresh token
+                await user.removeRefreshToken(token);
+            }
+
+            // In real implementation, we would also blacklist the access token
+            return { success: true };
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
+            console.error('Logout error:', error);
+            throw ApiError.internal('Logout failed. Please try again.');
+        }
     }
 
     /**
