@@ -148,45 +148,56 @@ class AuthService {
      * Authenticate user login
      */
     async login(credentials) {
-        const { email, password } = credentials;
+        try {
+            const { email, password } = credentials;
 
-        if (!email || !password) {
-            throw ApiError.badRequest('Email and password are registered');
+            if (!email || !password) {
+                throw ApiError.badRequest('Email and password are registered');
+            }
+
+            // Find user
+            const user = await User.findByEmail(email.toLowerCase());
+            
+            if (!user) {
+                throw ApiError.unauthorized('Invalid credentials');
+            }
+
+            // Check status
+            if (user.status !== 'ACTIVE') {
+                throw ApiError.forbidden('Account is not active');
+            }
+
+            // Verify password
+            const isValidPassword = await user.comparePassword(password);
+            if (!isValidPassword) {
+                throw ApiError.unauthorized('Invalid credentials');
+            }
+
+            // Update last login
+            user.lastLoginAt = new Date();
+            await user.save();
+
+            // Generate tokens
+            const tokens = this.generateTokens(user);
+
+            // Store refresh tokens (in real app, this would be in database)
+            const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 100);    // 7 days
+            await user.addRefreshToken(tokens.refreshToken, refreshTokenExpiresAt);
+
+            const userResponse = user.toJSON();
+
+            return {
+                user: userResponse,
+                tokens
+            };
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
+            console.error('Login error:', error);
+            throw ApiError.internal('Login failed. Please try again.');
         }
-
-        // Find user
-        const user = mockUsers.find(u => u.email === email.toLowerCase());
-        if (!user) {
-            throw ApiError.unauthorized('Invalid credentials');
-        }
-
-        // Check status
-        if (user.status !== 'ACTIVE') {
-            throw ApiError.forbidden('Account is not active');
-        }
-
-        // Verify password
-        const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-        if (!isValidPassword) {
-            throw ApiError.unauthorized('Invalid credentials');
-        }
-
-        // Update last login
-        user.lastLoginAt = new Date();
-
-        // Generate tokens
-        const tokens = this.generateTokens(user);
-
-        // Store refresh tokens (in real app, this would be in database)
-        mockRefreshTokens.add(tokens.refreshToken);
-
-        // Remove password from response
-        const { passwordHash: _, ...userWithoutPassword } = user;
-
-        return {
-            user: userWithoutPassword,
-            tokens
-        };
     }
 
     /**
