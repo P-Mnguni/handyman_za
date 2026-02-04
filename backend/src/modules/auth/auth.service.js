@@ -521,50 +521,72 @@ class AuthService {
      * Update current user profile
      */
     async updateProfile(userId, updateData) {
-        if (!userId) {
-            throw ApiError.unauthorized('User not authenticated');
-        }
-
-        // Find user
-        const userIndex = mockUsers.findIndex(u => u._id === userId);
-        if (userIndex === -1) {
-            throw ApiError.notFound('User not found');
-        }
-
-        // Check status
-        if (mockUsers[userIndex].status !== 'ACTIVE') {
-            throw ApiError.forbidden('Account is not active');
-        }
-
-        // Fields that cannot be updated via this endpoint
-        const restrictedFields = ['_id', 'email', 'passwordHash', 'role', 'status', 'createdAt'];
-        for (const field of restrictedFields) {
-            if (updateData[field] !== undefined) {
-                throw ApiError.badRequest(`Cannot update ${field} via this endpoint`);
+        try {
+            if (!userId) {
+                throw ApiError.unauthorized('User not authenticated');
             }
-        }
 
-        // Update allowed fields
-        const allowedUpdates = ['fullName', 'phone'];
-        let updatedFields = [];
-
-        for (const field of allowedUpdates) {
-            if (updateData[field] !== undefined) {
-                mockUsers[userIndex][field] = updateData[field];
-                updatedFields.push(field);
+            // Find user
+            const user = await User.findById(userId);
+            if (!user) {
+                throw ApiError.notFound('User not found');
             }
+
+            // Check status
+            if (user.status !== 'ACTIVE') {
+                throw ApiError.forbidden('Account is not active');
+            }
+
+            // Fields that cannot be updated via this endpoint
+            const restrictedFields = ['_id', 'email', 'passwordHash', 'role', 'status', 'createdAt', 'updatedAt'];
+            for (const field of restrictedFields) {
+                if (updateData[field] !== undefined) {
+                    throw ApiError.badRequest(`Cannot update ${field} via this endpoint`);
+                }
+            }
+
+            // Update allowed fields
+            const allowedUpdates = ['fullName', 'phone'];
+            let updatedFields = [];
+
+            for (const field of allowedUpdates) {
+                if (updateData[field] !== undefined) {
+                    user[field] = updateData[field];
+                    updatedFields.push(field);
+                }
+            }
+
+            // If user is a handyman, allow updating handyman profile fields
+            if (user.role === 'HANDYMAN' && updateData.handymanProfile) {
+                const handymanAllowedUpdates = ['bio', 'skills', 'yearsOfExperience', 'availability'];
+                for (const field of handymanAllowedUpdates) {
+                    if (updateData.handymanProfile[field] !== undefined) {
+                        user.handymanProfile[field] = updateData.handymanProfile[field];
+                        updatedFields.push(`handymanProfile.${field}`);
+                    }
+                }
+            }
+
+            await user.save();
+            const userResponse = user.toJSON();
+
+            return {
+                user: userResponse,
+                message: `Profile updated successfully. Updated fields: ${updatedFields.join(', ')}`
+            };
+        } catch (error) {
+            if (error.name === 'ValidationError') {
+                const errors = Object.values(error.errors).map(err => err.message);
+                throw ApiError.badRequest('Validation failed', errors);
+            }
+
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
+            console.error('Update profile error:', error);
+            throw ApiError.internal('Profile update failed. Please try again.');
         }
-
-        // Update timestamp
-        mockUsers[userIndex].updatedAt = new Date();
-
-        // Return updated user without password
-        const { passwordHash, ...updatedUser } = mockUsers[userIndex];
-
-        return {
-            user: updatedUser,
-            message: `Profile updated successfully. Updated fields: ${updatedFields.join(', ')}`
-        };
     }
 }
 
