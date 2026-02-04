@@ -376,6 +376,62 @@ class AuthService {
     }
 
     /**
+     * Request password reset email
+     */
+    async forgotPassword(email) {
+        try {
+            if (!email) {
+                throw ApiError.badRequest('Email is required');
+            }
+
+            // Find user
+            const user = await User.findByEmail(email.toLowerCase());
+            
+            // For security, always return success even if user doesn't exist
+            if (!user) {
+                return {
+                    message: 'If an account exists with this email, a password reset link has been sent'
+                };
+            }
+
+            // Check if user is active
+            if (user.status !== 'ACTIVE') {
+                return {
+                    message: 'If an account exists with this email, a password reset link has been sent'
+                };
+            }
+
+            // Generate a password reset token (valid for 1 hour)
+            const resetToken = jwt.sign(
+                {
+                    useId: user._id,
+                    type: 'password_reset',
+                    email: user.email,
+                },
+                env.jwtSecret,
+                { expiresIn: '1h' },
+            );
+
+            // In production, this would send an email
+            // For now, log it (in dev/test we'll return it)
+            console.log(`Password reset link: ${env.frontendUrl}/reset-password?token=${resetToken}`);
+
+            return {
+                message: 'If an account exists with this email, a password reset link has been sent',
+                // In development, we return the token for testing
+                ...(env.nodeEnv === 'development' && { resetToken }),
+            };
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
+            console.error('Forgot password error:', error);
+            throw ApiError.internal('Password reset request failed. Please try again.');
+        }
+    }
+
+    /**
      * Get current user profile
      */
     async getCurrentUser(userId) {
@@ -460,45 +516,6 @@ class AuthService {
         };
     }
 
-    
-
-    /**
-     * Request password reset email
-     */
-    async forgotPassword(email) {
-        if (!email) {
-            throw ApiError.badRequest('Email is required');
-        }
-
-        // Find user
-        const user = mockUsers.find(u => u.email === email.toLowerCase());
-        if (!user) {
-            // For security, don'n reveal if user exists or not
-            return {
-                message: 'If an account exists with this email, a password reset link has been sent'
-            };
-        }
-
-        // Generate a password reset token (valid for 1 hour)
-        const resetToken = jwt.sign(
-            {
-                useId: user._id,
-                type: 'password_reset',
-                email: user.email,
-            },
-            env.jwtSecret,
-            { expiresIn: '1h' },
-        );
-
-        // In production, this would send an email
-        console.log(`Password reset link: ${env.frontendUrl}/reset-password?token=${resetToken}`);
-
-        return {
-            message: 'If an account exists with this email, a password reset link has been sent',
-            // In development, we return the token for testing
-            ...(env.nodeEnv === 'development' && { resetToken }),
-        };
-    }
 
     /**
      * Reset password with token
