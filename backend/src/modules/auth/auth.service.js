@@ -432,38 +432,89 @@ class AuthService {
     }
 
     /**
+     * Reset password with token
+     */
+    async resetPassword(resetToken, newPassword) {
+        try {
+            if (!resetToken || !newPassword) {
+                throw ApiError.badRequest('Reset token and new password are required');
+            }
+
+            if (newPassword.length < 6) {
+                throw ApiError.badRequest('Password must be at least 6 characters');
+            }
+
+            // Verify the reset token
+            const decoded = jwt.verify(resetToken, env.jwtSecret);
+
+            if (decoded.type !== 'password_reset') {
+                throw ApiError.badRequest('Invalid token type');
+            }
+
+            // Find user
+            const user = await User.findById(decoded.userId);
+            if (!user) {
+                throw ApiError.notFound('User not found');
+            }
+
+            // Update user password (pre-save middleware will hash it)
+            user.passwordHash = newPassword;
+
+            // Invalidate all refresh tokens for this user (security measure)
+            await user.removeRefreshToken();
+
+            await user.save();
+
+            return {
+                message: 'Password reset successfully. You can now login with your new password.',
+            };
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw ApiError.badRequest('Password reset token has expired');
+            }
+            if (error.name === 'JsonWebTokenError') {
+                throw ApiError.badRequest('Invalid password reset token');
+            }
+
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
+            console.error('Reset password error:', error);
+            throw ApiError.internal('Password reset failed. Please try again.');
+        }
+    }
+
+    /**
      * Get current user profile
      */
     async getCurrentUser(userId) {
-        if (!userId) {
-            throw ApiError.unauthorized('User not authenticated');
+        try {
+            if (!userId) {
+                throw ApiError.unauthorized('User not authenticated');
+            }
+
+            // Find user
+            const user = await User.findById(userId);
+            if (!user) {
+                throw ApiError.notFound('User not found');
+            }
+
+            // Check status
+            if (user.status !== 'ACTIVE') {
+                throw ApiError.forbidden('Account is not active');
+            }
+
+            // Return user with password
+            return user.toJSON()
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
+            console.error('Get current user error:', error);
+            throw ApiError.internal('Failed to retrieve user profile. Please try again.');
         }
-
-        // Find user
-        const userIndex = mockUsers.findIndex(u => u._id === userId);
-        if (userIndex === -1) {
-            throw ApiError.notFound('User not found');
-        }
-
-        // Check status
-        if (mockUsers[userIndex].status !== 'ACTIVE') {
-            throw ApiError.forbidden('Account is not active');
-        }
-
-        // Return user with password
-        const { passwordHash, ...userWithoutPassword } = mockUsers[userIndex];
-
-        // If user is a handyman, add profile data
-        if (userWithoutPassword.role === 'HANDYMAN') {
-            // In real implementation, we would fetch from HandymanProfile model
-            userWithoutPassword.handymanProfile = {
-                // Placeholder handyman profile data
-                verificationStatus: 'PENDING',
-                rating: 0
-            };
-        }
-
-        return userWithoutPassword;
     }
 
     /**
@@ -514,57 +565,6 @@ class AuthService {
             user: updatedUser,
             message: `Profile updated successfully. Updated fields: ${updatedFields.join(', ')}`
         };
-    }
-
-
-    /**
-     * Reset password with token
-     */
-    async resetPassword(resetToken, newPassword) {
-        if (!resetToken || !newPassword) {
-            throw ApiError.badRequest('Reset token and new password are required');
-        }
-
-        if (newPassword.length < 6) {
-            throw ApiError.badRequest('Password must be at least 6 characters');
-        }
-
-        try {
-            // Verify the reset token
-            const decoded = jwt.verify(resetToken, env.jwtSecret);
-
-            if (decoded.type !== 'password_reset') {
-                throw ApiError.badRequest('Invalid token type');
-            }
-
-            // Find user
-            const userIndex = mockUsers.findIndex(u => u._id === decoded.userId);
-            if (userIndex === -1) {
-                throw ApiError.notFound('User not found');
-            }
-
-            // Hash new password
-            const passwordHash = await bcrypt.hash(newPassword, 10);
-
-            // Update user password
-            mockUsers[userIndex].passwordHash = passwordHash;
-            mockUsers[userIndex].updatedAt = new Date();
-
-            // Invalidate all refresh tokens for this user (security measure)
-            // In real implementation, we would query the database
-
-            return {
-                message: 'Password reset successfully. You can now login with your new password.',
-            };
-        } catch (error) {
-            if (error.name === 'TokenExpiredError') {
-                throw ApiError.badRequest('Password reset token has expired');
-            }
-            if (error.name === 'JsonWebTokenError') {
-                throw ApiError.badRequest('Invalid password reset token');
-            }
-            throw error;
-        }
     }
 }
 
