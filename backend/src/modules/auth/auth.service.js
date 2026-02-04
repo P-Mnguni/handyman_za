@@ -283,6 +283,99 @@ class AuthService {
     }
 
     /**
+     * Generate JWT tokens for a user
+     */
+    generateTokens(user) {
+        const accessToken = jwt.sign(
+            {
+                userId: user._id,
+                email: user.email,
+                role: user.role
+            },
+            env.jwtSecret,
+            { expiresIn: env.jwtExpiresIn },
+        );
+
+        const refreshToken = jwt.sign(
+            {
+                userId: user._id,
+                type: 'refresh'
+            },
+            env.jwtRefreshSecret,
+            { expiresIn: env.jwtRefreshExpiresIn },
+        );
+
+        return {
+            accessToken,
+            refreshToken,
+            expiresIn: env.jwtExpiresIn,
+        };
+    }
+
+    /**
+     * Verify JWT token (for middleware use later)
+     */
+    verifyToken(token) {
+        try {
+            return jwt.verify(token, env.jwtSecret);
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw ApiError.unauthorized('Token expired');
+            }
+            throw ApiError.unauthorized('Invalid token');
+        }
+    }
+
+    /**
+     * Verify email address
+     */
+    async verifyEmail(verificationToken) {
+        try {
+            if (!verificationToken) {
+                throw ApiError.badRequest('Verification token is required');
+            }
+
+            // Decode the verification token
+            const decoded = jwt.verify(verificationToken, env.jwtSecret);
+
+            // Find user
+            const user = await User.findById(decoded.userId);
+            if (!user) {
+                throw ApiError.notFound('User not found');
+            }
+
+            // Check if already verified
+            if (user.isEmailVerified) {
+                throw ApiError.conflict('Email is already verified');
+            }
+
+            // Update user
+            user.isEmailVerified = true;
+            await user.save();
+
+            const userResponse = user.toJSON();
+
+            return {
+                user: userResponse,
+                message: 'Email verified successfully',
+            };
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw ApiError.badRequest('Verification token has expired');
+            }
+            if (error.name === 'JsonWebTokenError') {
+                throw ApiError.badRequest('Invalid verification token');
+            }
+
+            if (error instanceof ApiError) {
+                throw error;
+            }
+
+            throw error;
+        }
+    }
+
+    /**
      * Get current user profile
      */
     async getCurrentUser(userId) {
@@ -367,48 +460,7 @@ class AuthService {
         };
     }
 
-    /**
-     * Verify email address
-     */
-    async verifyEmail(verificationToken) {
-        if (verificationToken) {
-            throw ApiError.badRequest('Verification token is required');
-        }
-
-        try {
-            // Decode the verification token
-            const decoded = jwt.verify(verificationToken, env.jwtSecret);
-
-            // Find user
-            const userIndex = mockUsers.findIndex(u => u._id === decoded.userId);
-            if (userIndex === -1) {
-                throw ApiError.notFound('User not found');
-            }
-
-            // Check if already verified
-            if (mockUsers[userIndex].isEmailVerified) {
-                throw ApiError.conflict('Email is already verified');
-            }
-
-            // Update user
-            mockUsers[userIndex].isEmailVerified = true;
-            mockUsers[userIndex].updatedAt = new Date();
-
-            const { passwordHash, ...userWithoutPassword } = mockUsers[userIndex];
-
-            return {
-                user: userWithoutPassword,
-                message: 'Email verified successfully',
-            };
-        } catch (error) {
-            if (error.name === 'TokenExpiredError') {
-                throw ApiError.badRequest('Verification token has expired');
-            }
-            if (error.name === 'JsonWebTokenError') {
-                throw ApiError.badRequest('Invalid verification token');
-            }
-        }
-    }
+    
 
     /**
      * Request password reset email
@@ -495,50 +547,6 @@ class AuthService {
                 throw ApiError.badRequest('Invalid password reset token');
             }
             throw error;
-        }
-    }
-
-    /**
-     * Generate JWT tokens for a user
-     */
-    generateTokens(user) {
-        const accessToken = jwt.sign(
-            {
-                userId: user._id,
-                email: user.email,
-                role: user.role
-            },
-            env.jwtSecret,
-            { expiresIn: env.jwtExpiresIn },
-        );
-
-        const refreshToken = jwt.sign(
-            {
-                userId: user._id,
-                type: 'refresh'
-            },
-            env.jwtRefreshSecret,
-            { expiresIn: env.jwtRefreshExpiresIn },
-        );
-
-        return {
-            accessToken,
-            refreshToken,
-            expiresIn: env.jwtExpiresIn,
-        };
-    }
-
-    /**
-     * Verify JWT token (for middleware use later)
-     */
-    verifyToken(token) {
-        try {
-            return jwt.verify(token, env.jwtSecret);
-        } catch (error) {
-            if (error.name === 'TokenExpiredError') {
-                throw ApiError.unauthorized('Token expired');
-            }
-            throw ApiError.unauthorized('Invalid token');
         }
     }
 }
