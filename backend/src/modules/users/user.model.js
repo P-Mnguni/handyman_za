@@ -110,7 +110,6 @@ const userSchema = new mongoose.Schema({
             coordinates: {
                 type: [Number],                 // [longitude, latitude]
                 required: false,
-                default: undefined              // Important: don't default to empty array
             }
         },
     },
