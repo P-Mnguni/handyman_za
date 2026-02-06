@@ -103,7 +103,8 @@ class AuthService {
                 handymanProfile: {
                     bio: handymanData.bio || '',
                     skills: Array.isArray(handymanData.skills) ? handymanData.skills : [handymanData.skills],
-                    yearsOfExperience: 'PENDING',
+                    yearsOfExperience: handymanData.yearsOfExperience || 0,
+                    verificationStatus: 'PENDING',
                     rating: 0,
                     totalJobsCompleted: 0,
                     availability: handymanData.availability || {
