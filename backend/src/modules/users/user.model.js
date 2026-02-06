@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 // import { startTransition } from 'react';
 
 const userSchema = new mongoose.Schema({
@@ -102,21 +102,24 @@ const userSchema = new mongoose.Schema({
             timeSlots: [String]                 // e.g., ["08:00-12:00", "13:00-17:00"]
         },
         location: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point'
+            type: {
+                type: String,
+                enum: ['Point'],
+                default: 'Point'
+            },
+            coordinates: {
+                type: [Number],                 // [longitude, latitude]
+                required: false,
+                default: undefined              // Important: don't default to empty array
+            }
         },
-        coordinates: {
-            type: [Number],                     // [longitude, latitude]
-            required: false
-        }
     },
     documents: {
         idCopy: String,
         certificate: String,
         insurance: String,
         otherDocs: [String]
-    }
+    },                              // Add this to prevent nested _id
 }, {
     // 🕒 Metadata
     timestamps: true,                           // Adds createdAt and updatedAt automatically
@@ -128,16 +131,18 @@ const userSchema = new mongoose.Schema({
             return ret;
         }
     }
-});
+},
+{ _id: false }
+);
 
 // 📊 Indexes for better query performance
-userSchema.index({ email: 1 }, { unique: true });
+//userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ phone: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ status: 1 });
 userSchema.index({ 'handymanProfile.verificationStatus': 1 });
 // Geo-spatial index for location-based queries (handyman location search)
-userSchema.index({ 'handymanProfile.location': '2dsphere'});
+userSchema.index({ 'handymanProfile.location.coordinates': 1});
 
 // 🔧 Virtuals (computed properties)
 userSchema.virtual('isActive').get(function() {
@@ -157,18 +162,19 @@ userSchema.virtual('isAdmin').get(function() {
 });
 
 // 🔐 Password hashing middleware
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function() {
     // Only hash the password if it has been modified (or is new)
-    if (!this.isModified('passwordHash')) return next();
+    if (!this.isModified('passwordHash')) return;
 
     try {
         // Generate a salt
         const salt = await bcrypt.genSalt(10);
+        
         // Hash the password along with the new salt
         this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
-        return next();
+    
     } catch (error) {
-        return next(error);
+        throw error;
     }
 });
 
