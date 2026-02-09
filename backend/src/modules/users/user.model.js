@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema({
         match: [/^(\+27|0)[6-8][0-9]{8}$/, 'Please enter a valid South African phone number']
     },
 
+    role: {
+        type: String,
+        enum: ['CUSTOMER', 'HANDYMAN', 'ADMIN'],
+        default: 'CUSTOMER'
+    },
+
     passwordHash: {
         type: String,
         required: [true, 'Password is required'],
@@ -105,7 +111,6 @@ const userSchema = new mongoose.Schema({
             type: {
                 type: String,
                 enum: ['Point'],
-                default: 'Point'
             },
             coordinates: {
                 type: [Number],                 // [longitude, latitude]
