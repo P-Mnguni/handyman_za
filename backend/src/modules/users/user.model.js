@@ -71,52 +71,63 @@ const userSchema = new mongoose.Schema({
 
     // 🛠️ Handyman-specific fields (only when role = HANDYMAN)
     handymanProfile: {
-        bio: {
-            type: String,
-            maxlength: [500, 'Bio cannot exceed 500 characters']
-        },
-        skills: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Service'
-        }],
-        yearsOfExperience: {
-            type: Number,
-            min: 0,
-            max: 60
-        },
-        verificationStatus: {
-            type: String,
-            enum: ['PENDING', 'APPROVED', 'REJECTED'],
-            default: 'PENDING'
-        },
-        rating: {
-            type: Number,
-            min: 0,
-            max: 5,
-            default: 0
-        },
-        totalJobsCompleted: {
-            type: Number,
-            default: 0,
-            min: 0
-        },
-        availability: {
-            days: [{
-                type: String,
-                enum: ['MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT', 'SUN']
+        type: {
+            skills: [{
+                type: String,                   // NOT ObjectID, unless you have a separate Skills model
+                enum: ['PLUMBER', 'ELECTRICIAN', 'CARPENTER', 'PAINTER', 'GARDENER', 'OTHER'],
+                trim: true
             }],
-            timeSlots: [String]                 // e.g., ["08:00-12:00", "13:00-17:00"]
-        },
-        location: {
-            type: {
-                type: String,
-                enum: ['Point'],
+            experienceYears: {
+                type: Number,
+                min: 0,
+                default: 0
             },
-            coordinates: {
-                type: [Number],                 // [longitude, latitude]
-                required: false,
+            hourlyRate: {
+                type: Number,
+                min: 0
+            },
+            description: String,
+            // FIXED: location should only exist when explicitly set
+            location: {
+                type: {
+                    type: String,
+                    enum: ['Point'],
+                    default: 'Point'
+                },
+                coordinates: {
+                    type: [Number],
+                    default: undefined,
+                    validate: {
+                        validator: function(coords) {
+                            // Only validate if coordinates exist
+                            if (!coords) return true;       // Allow undefined/null
+                            return Array.isArray(coords) && 
+                            coords.length === 2 && 
+                            typeof coords[0] === 'number' && 
+                            typeof coords[1] === 'number';
+                        },
+                        message: 'Coordinates must be an array of two numbers [longitude, latitude]'
+                    }
+                }
+            },
+            serviceAreas: [String],
+            isVerified: {
+                type: Boolean,
+                default: false
+            },
+            rating: {
+                type: Number,
+                default: 0,
+                min: 0,
+                max: 5
+            },
+            reviewCount: {
+                type: Number,
+                default: 0
             }
         },
+        // CRITICAL: This should be undefined, not an empty object
+        default: undefined
     },
     documents: {
         idCopy: String,
@@ -166,19 +177,33 @@ userSchema.virtual('isAdmin').get(function() {
 });
 
 // 🔐 Password hashing middleware
-userSchema.pre('save', async function() {
-    // Only hash the password if it has been modified (or is new)
-    if (!this.isModified('passwordHash')) return;
+userSchema.pre('save', function() {
+    // Only HANDYMEN should have handymanProfile
+    if (this.role !== 'HANDYMAN') {
+        this.handymanProfile = undefined;
+        return;
+    }
 
-    try {
-        // Generate a salt
-        const salt = await bcrypt.genSalt(10);
-        
-        // Hash the password along with the new salt
-        this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
-    
-    } catch (error) {
-        throw error;
+    // For handymen: ensure location is either valid or removed
+    if (this.handymanProfile && this.handymanProfile.location) {
+        const loc = this.handymanProfile.location;
+
+        // If location exists but has empty/invalid coordinates, remove it
+        if (!loc.coordinates || 
+            !Array.isArray(loc.coordinates) || 
+            loc.coordinates.length !== 2 || 
+            typeof loc.coordinates[0] !== 'number' || 
+            typeof loc.coordinates[1] !== 'number') {
+                // Remove the location field entirely
+                delete this.handymanProfile.location;
+        } else if (loc.coordinates.length === 2 && 
+            typeof loc.coordinates[0] === 'number' && 
+            typeof loc.coordinates[1] === 'number') {
+                // Ensure the type is set
+                if (!loc.type) {
+                    this.handymanProfile.location.type = 'Point';
+                }
+        }
     }
 });
 
