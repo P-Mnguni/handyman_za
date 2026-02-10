@@ -155,7 +155,7 @@ userSchema.index({ role: 1 });
 userSchema.index({ status: 1 });
 userSchema.index({ 'handymanProfile.verificationStatus': 1 });
 // Geo-spatial index for location-based queries (handyman location search)
-// userSchema.index({ 'handymanProfile.location.coordinates': 1});
+userSchema.index({ 'handymanProfile.location.coordinates': 1});
 
 // 🔧 Virtuals (computed properties)
 userSchema.virtual('isActive').get(function() {
