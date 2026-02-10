@@ -92,11 +92,9 @@ const userSchema = new mongoose.Schema({
                 type: {
                     type: String,
                     enum: ['Point'],
-                    default: 'Point'
                 },
                 coordinates: {
                     type: [Number],
-                    default: undefined,
                     validate: {
                         validator: function(coords) {
                             // Only validate if coordinates exist
@@ -108,7 +106,7 @@ const userSchema = new mongoose.Schema({
                         },
                         message: 'Coordinates must be an array of two numbers [longitude, latitude]'
                     }
-                }
+                },
             },
             serviceAreas: [String],
             isVerified: {
