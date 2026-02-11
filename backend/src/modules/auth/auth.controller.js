@@ -3,6 +3,7 @@ import { success } from 'zod';
 import { ApiError } from '../../utils/ApiError.js';
 import authService from './auth.service.js';
 import { da } from 'zod/v4/locales';
+import { token } from 'morgan';
 
 /**
  * @desc    Register a new user (customer or handyman)
@@ -22,8 +23,9 @@ export const registerClient = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: result.message,
-            data: result
+            message: result.message || 'Customer registered successfully. Please verify email.',
+            user: result.user,
+            token: result.token
         });
     } catch (error) {
         next(error);
@@ -35,8 +37,17 @@ export const registerHandyman = async (req, res, next) => {
         const handymanData = req.body;
 
         // Basic validation
-        if (!handymanData.fullName || !handymanData.email || !handymanData.password || !handymanData.skills) {
-            throw new ApiError.badRequest('Missing required fields: fullName, email, password, skills');
+        if (!handymanData.fullName || !handymanData.email || !handymanData.password) {
+            throw ApiError.badRequest('Missing required fields: fullName, email, password');
+        }
+
+        // Handyman-specific validation
+        if (!handymanData.handymanProfile) {
+            throw ApiError.badRequest('Handyman profile is required');
+        }
+
+        if (!handymanData.handymanProfile.skills || handymanData.handymanProfile.skills.length === 0) {
+            throw ApiError.badRequest('At least one skill is required');
         }
 
         const result = await authService.registerHandyman(handymanData);
@@ -44,7 +55,8 @@ export const registerHandyman = async (req, res, next) => {
         res.status(201).json({
             success: true,
             message: result.message,
-            data: result,
+            user: result.user,
+            token: result.token
         });
     } catch (error) {
         next(error);

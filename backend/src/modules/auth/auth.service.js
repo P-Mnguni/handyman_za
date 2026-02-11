@@ -77,8 +77,8 @@ class AuthService {
     async registerHandyman(handymanData) {
         try {
             // Validation
-            if (!handymanData.email || !handymanData.password || !handymanData.fullName || !handymanData.skills) {
-                throw ApiError.badRequest('Email, password, full name, and skills are required');
+            if (!handymanData.email || !handymanData.password || !handymanData.fullName) {
+                throw ApiError.badRequest('Email, password, and full name are required');
             }
 
             // Check if user exists
