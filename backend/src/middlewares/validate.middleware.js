@@ -41,3 +41,10 @@ const validate = (schema, property = 'body') => {
         return next();
     };
 };
+
+/**
+ * Validate request body
+ * @param {Object} schema - Joi schema for body validation
+ */
+export const validateBody = (schema) => validate(schema, 'body');
+
