@@ -48,3 +48,8 @@ const validate = (schema, property = 'body') => {
  */
 export const validateBody = (schema) => validate(schema, 'body');
 
+/**
+ * Validate request query parameters
+ * @param {Object} schema - Joi schema
+ */
+export const validateQuery = (schema) => validate(schema, 'query');
