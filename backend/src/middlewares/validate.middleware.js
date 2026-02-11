@@ -50,6 +50,14 @@ export const validateBody = (schema) => validate(schema, 'body');
 
 /**
  * Validate request query parameters
- * @param {Object} schema - Joi schema
+ * @param {Object} schema - Joi schema for query validation
  */
 export const validateQuery = (schema) => validate(schema, 'query');
+
+/**
+ * Validate request params
+ * @param {Object} schema - Joi schema for params validation
+ */
+export const validateParams = (schema) => validate(schema, 'params');
+
+export default validate;
