@@ -110,3 +110,12 @@ export const loginSchema = Joi.object({
     email: userBaseSchema.email,
     password: userBaseSchema.password
 });
+
+// Email verification schema
+export const verifyEmailSchema = Joi.object({
+    token: Joi.string()
+                .required()
+                .messages({
+                    'any.required': 'Verification token is required'
+                })
+});
