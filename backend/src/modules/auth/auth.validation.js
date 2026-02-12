@@ -104,3 +104,9 @@ export const registerHandymanSchema = Joi.object({
                         .optional()
     }).optional()
 });
+
+// Login schema
+export const loginSchema = Joi.object({
+    email: userBaseSchema.email,
+    password: userBaseSchema.password
+});
