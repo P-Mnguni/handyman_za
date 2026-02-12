@@ -151,3 +151,22 @@ export const refreshTokenSchema = Joi.object({
                             'any.required': 'Refresh token is required'
                         })
 });
+
+// Update profile schema
+export const updateProfileSchema = Joi.object({
+    fullName: userBaseSchema.fullName.optional(),
+    phone: userBaseSchema.phone.optional(),
+
+    // Handyman profile updates
+    handymanProfile: Joi.object({
+        bio: Joi.string().max(500).optional(),
+        skills: Joi.array().items(Joi.string()).min(1).optional(),
+        yearsOfExperience: Joi.number().integer().min(0).max(60).optional(),
+        availability: Joi.object({
+            days: Joi.array().items(Joi.string().valid('MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT', 'SUN')),
+            timeSlots: Joi.array().items(Joi.string())
+        }).optional()
+    }).optional()
+}).min(1).messages({
+    'object.min': 'At least one field to update is required'
+});
