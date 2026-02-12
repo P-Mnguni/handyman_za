@@ -142,3 +142,12 @@ export const resetPasswordSchema = Joi.object({
                     'any.required': 'New Password is required'
                 })
 });
+
+// Refresh token schema
+export const refreshTokenSchema = Joi.object({
+    refreshToken: Joi.string()
+                        .required()
+                        .messages({
+                            'any.required': 'Refresh token is required'
+                        })
+});
