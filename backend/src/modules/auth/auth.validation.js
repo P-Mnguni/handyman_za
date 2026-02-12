@@ -202,3 +202,29 @@ export const paginationQuerySchema = Joi.object({
             .default('asc')
             .optional()
 });
+
+export const nearbyHandymanQuerySchema = Joi.object({
+    serviceId: Joi.string()
+                    .pattern(/^[0-9a-fA-F]{24}$/)
+                    .optional(),
+    lat: Joi.number()
+            .min(-90)
+            .max(90)
+            .required()
+            .messages({
+                'any.required': 'Latitude is required for nearby search'
+            }),
+    lng: Joi.number()
+            .min(-180)
+            .max(180)
+            .required()
+            .messages({
+                'any.required': 'Longitude is required for nearby search'
+            }),
+    radius: Joi.number()
+                .integer()
+                .min(1)
+                .max(100)
+                .default(10)
+                .optional()
+}).and('lat', 'lng');
