@@ -181,3 +181,24 @@ export const idParamSchema = Joi.object({
                 'any.required': 'ID is required'
             })
 });
+
+// Query schemas
+export const paginationQuerySchema = Joi.object({
+    page: Joi.number()
+            .integer()
+            .min(1)
+            .default(1)
+            .optional(),
+    limit: Joi.number()
+            .integer()
+            .min(1)
+            .max(100)
+            .default(10)
+            .optional(),
+    sort: Joi.string()
+            .optional(),
+    order: Joi.string()
+            .valid('asc', 'desc')
+            .default('asc')
+            .optional()
+});
