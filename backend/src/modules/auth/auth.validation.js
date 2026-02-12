@@ -125,4 +125,20 @@ export const forgotPasswordSchema = Joi.object({
     email: userBaseSchema.email
 });
 
-//
+// Reset password schema
+export const resetPasswordSchema = Joi.object({
+    token: Joi.string()
+                .required()
+                .messages({
+                    'any.required': 'Reset token is required'
+                }),
+    newPassword: Joi.string()
+                .min(6)
+                .max(50)
+                .required()
+                .messages({
+                    'string.min': 'Password must be at least 6 characters',
+                    'string.max': 'Password cannot exceed 50 characters',
+                    'any.required': 'New Password is required'
+                })
+});
