@@ -170,3 +170,14 @@ export const updateProfileSchema = Joi.object({
 }).min(1).messages({
     'object.min': 'At least one field to update is required'
 });
+
+// ID params schema (reusable for routes with :id)
+export const idParamSchema = Joi.object({
+    id: Joi.string()
+            .pattern(/^[0-9a-fA-F]{24}$/)
+            .required()
+            .message({
+                'string.pattern.base': 'Invalid ID format',
+                'any.required': 'ID is required'
+            })
+});
