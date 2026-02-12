@@ -43,3 +43,64 @@ const userBaseSchema = {
                     'string.pattern.base': 'Please enter a valid South African phone number'
                 })
 };
+
+// Register schemas
+export const registerClientSchema = Joi.object({
+    fullName: userBaseSchema.fullName,
+    email: userBaseSchema.email,
+    password: userBaseSchema.password,
+    phone: userBaseSchema.phone
+});
+
+export const registerHandymanSchema = Joi.object({
+    fullName: userBaseSchema.fullName,
+    email: userBaseSchema.email,
+    password: userBaseSchema.password,
+    phone: userBaseSchema.phone,
+
+    // Handyman specific fields
+    skills: Joi.array()
+                .items(Joi.string())
+                .min(1)
+                .required()
+                .messages({
+                    'array.min': 'At least one skill is required',
+                    'any.required': 'Skills are required'
+                }),
+
+    bio: Joi.string()
+                .max(500)
+                .optional()
+                .allow('', null)
+                .messages({
+                    'string.max': 'Bio cannot exceed 500 characters'
+                }),
+
+    yearsOfExperience: Joi.number()
+                .integer()
+                .min(0)
+                .max(60)
+                .optional()
+                .messages({
+                    'number.base': 'Years of experience must be a number',
+                    'number.min': 'Years of experience cannot be negative',
+                    'number.max': 'Years of experience cannot exceed 60'
+                }),
+
+    availability: Joi.object({
+        days: Joi.array()
+                .items(Joi.string().valid('MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT', 'SUN'))
+                .optional(),
+        timeSlots: Joi.array()
+                .items(Joi.string().pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]-([0-1][0-9]|2[0-3]):[0-5][0-9]$/))
+                .optional()
+    }).optional(),
+
+    location: Joi.object({
+        type: Joi.string().valid('Point').default('Point'),
+        coordinates: Joi.array()
+                        .items(Joi.number())
+                        .length(2)
+                        .optional()
+    }).optional()
+});
