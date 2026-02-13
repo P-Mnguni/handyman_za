@@ -232,7 +232,7 @@ export const idParamSchema = Joi.object({
     id: Joi.string()
             .pattern(/^[0-9a-fA-F]{24}$/)
             .required()
-            .message({
+            .messages({
                 'string.pattern.base': 'Invalid ID format',
                 'any.required': 'ID is required'
             })
