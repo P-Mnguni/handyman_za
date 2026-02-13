@@ -5,19 +5,15 @@ import { ApiError } from '../../utils/ApiError.js';
 import User from '../users/user.model.js';
 import { email, success } from 'zod';
 //import { useId } from 'react';
-
-// Remove the mock database since we'll use real MongoDB
-// const mockUsers = [];
-// const mockRefreshTokens = new Set();
 class AuthService {
     /**
-     * Register a new client (customer)
+     * Register a new client (customer or handyman)
      */
-    async registerClient(userData) {
+    async register(userData) {
         try {    
             // Validation
-            if (!userData.email || !userData.password || !userData.fullName) {
-                throw ApiError.badRequest('Email, password, and full name are required');
+            if (!userData.email || !userData.password || !userData.fullName || !userData.role) {
+                throw ApiError.badRequest('Email, password, full name, and role are required');
             }
 
             // Check if user exists
@@ -29,25 +25,59 @@ class AuthService {
                 throw ApiError.conflict('User with this email already exists');
             }
 
-            // Create new customer user
-            const user = await User.create({
+            // Base user data
+            const baseUserData = {
                 fullName: userData.fullName,
                 email: userData.email.toLowerCase(),
-                phone: userData.phone || null,
-                passwordHash: userData.password,        // hashed by pre-save middleware
-                role: 'CUSTOMER',
+                phone: userData.phoneNumber,
+                passwordHash: userData.password,
+                role: userData.role === 'client' ? 'CUSTOMER' : 'HANDYMAN', // Map client->CUSTOMER, handyman->HANDYMAN
                 isEmailVerified: false,
                 isPhoneVerified: false,
                 status: 'ACTIVE'
-            });
+            };
+
+            // handyman-specific data
+            if (userData.role === 'HANDYMAN') {
+                baseUserData.handymanProfile = {
+                    bio: userData.bio || '',
+                    skills: userData.skills || [],
+                    yearsOfExperience: userData.yearsOfExperience || 0,
+                    verificationStatus: 'PENDING',
+                    rating: 0,
+                    totalJobsCompleted: 0,
+                    availability: userData.availability || {
+                        days: ['MON', 'TUE', 'WED', 'THUR', 'FRI'],
+                        timeSlots: ['08:00-12:00', '13:00-17:00']
+                    },
+                    location: userData.location || {
+                        type: 'Point',
+                        coordinates: [28.0473, -26.2041]                // Default: Johannesburg
+                    },
+                    documents: {}
+                };
+            }
+
+            // Create user
+            const user = await User.create(baseUserData);
 
             // The toJSON() method automatically remove passwordHash
             const userResponse = user.toJSON();
-        
-            return {
+
+            // Prepare response based on role 
+            const response = {
                 user: userResponse,
-                message: 'Client registered successfully. Please verify email.'
+                message: userData.role === 'client' 
+                                        ? 'Client registered successfully. Please verify your email.'
+                                        : 'Handyman registered successfully. Please wait for verification.'
             };
+
+            // Add handyman profile to response if applicable
+            if (userData.role === 'handyman') {
+                response.handymanProfile = userResponse.handymanProfile;
+            }
+        
+            return response;
         } catch (error) {
             // Handle Mongoose validation errors
             if (error.name === 'ValidationError') {
@@ -68,80 +98,6 @@ class AuthService {
             // Convert other errors to internal server error
             console.error('Registration error:', error);
             throw ApiError.internal('Registration failed. Please try again');
-        }
-    }
-
-    /**
-     * Register a new handyman
-     */
-    async registerHandyman(handymanData) {
-        try {
-            // Validation
-            if (!handymanData.email || !handymanData.password || !handymanData.fullName) {
-                throw ApiError.badRequest('Email, password, and full name are required');
-            }
-
-            // Check if user exists
-            const existingUser = await User.findOne({
-                email: handymanData.email.toLowerCase()
-            });
-            
-            if (existingUser) {
-                throw ApiError.conflict('User with this email already exists');
-            }
-
-            // Create handyman user
-            const user = await User.create({
-                fullName: handymanData.fullName,
-                email: handymanData.email.toLowerCase(),
-                phone: handymanData.phone || null,
-                passwordHash: handymanData.password,
-                role: 'HANDYMAN',
-                isEmailVerified: false,
-                isPhoneVerified: false,
-                status: 'ACTIVE',
-                handymanProfile: {
-                    bio: handymanData.bio || '',
-                    skills: Array.isArray(handymanData.skills) ? handymanData.skills : [handymanData.skills],
-                    yearsOfExperience: handymanData.yearsOfExperience || 0,
-                    verificationStatus: 'PENDING',
-                    rating: 0,
-                    totalJobsCompleted: 0,
-                    availability: handymanData.availability || {
-                        days: ['MON', 'TUE', 'WED', 'THUR', 'FRI'],
-                        timeSlots: ['08:00-12:00', '13:00-17:00']
-                    },
-                    location: handymanData.location || {
-                        type: 'Point',
-                        coordinates: [28.0473, -26.2041]        // Default: Johannesburg
-                    },
-                    documents: handymanData.documents || {}
-                }
-            });
-
-            const userResponse = user.toJSON();
-        
-            return {
-                user: userResponse,
-                handymanProfile: userResponse.handymanProfile,
-                message: 'Handyman registered successfully. Please wait for verification.',
-            };
-        } catch (error) {
-            if (error.name === 'ValidationError') {
-                const errors = Object.values(error.errors).map(err => err.message);
-                throw ApiError.badRequest('Validation failed', errors);
-            }
-
-            if (error.code === 11000) {
-                throw ApiError.conflict('User with this email already exists');
-            }
-
-            if (error instanceof ApiError) {
-                throw error;
-            }
-
-            console.error('Handyman registration error:', error);
-            throw ApiError.internal('Registration failed. Please try again.');
         }
     }
 
