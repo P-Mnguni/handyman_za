@@ -5,8 +5,7 @@ import { success } from 'zod';
 import { authMiddleware } from './auth.middleware.js';
 import { validateBody, validateQuery, validateParams } from '../../middlewares/validate.middleware.js';
 import {
-    registerClientSchema,
-    registerHandymanSchema,
+    registerSchema,
     loginSchema,
     verifyEmailSchema,
     forgotPasswordSchema,
@@ -23,15 +22,9 @@ const router = express.Router();
 // Public routes
 
 router.post(
-    '/register/client', 
-    validateBody(registerClientSchema),
-    authController.registerClient
-);
-
-router.post(
-    '/register/handyman', 
-    validateBody(registerHandymanSchema),    
-    authController.registerHandyman
+    '/register', 
+    validateBody(registerSchema),
+    authController.register
 );
 
 router.post(
@@ -81,6 +74,7 @@ router.get(
 router.put(
     '/me', 
     authMiddleware, 
+    validateBody(updateProfileSchema),
     authController.updateProfile
 );
 
