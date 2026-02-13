@@ -1,117 +1,171 @@
 import Joi from 'joi';
 
-// Password validation pattern
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{6,}$/;
+// Validation pattern
 const phonePattern = /^(\+27|0)[6-8][0-9]{8}$/;
+const timeSlotPattern = /^([0-1][0-9]|2[0-3]):[0-5][0-9]-([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
 
 // Base user schema fields (reusable)
-const userBaseSchema = {
-    fullName: Joi.string()
-                .min(2)
-                .max(100)
-                .required()
-                .messages({
-                    'string.min': 'Full name must be at least 2 characters',
-                    'string.max': 'Full name cannot exceed 100 characters',
-                    'any.required': 'Full name is required'
-                }),
+const nameSchema = Joi.string()
+                        .min(2)
+                        .max(50)
+                        .required()
+                        .messages({
+                            'string.min': 'First name must be at least 2 characters',
+                            'string.max': 'First name cannot exceed 50 characters',
+                            'any.required': 'First name is required'
+                        });
 
-    email: Joi.string()
-                .email()
-                .lowercase()
-                .required()
-                .messages({
-                    'string.email': 'Please enter a valid email address',
-                    'any.required': 'Email is required'
-                }),
+const lastNameSchema = Joi.string()
+                        .min(2)
+                        .max(50)
+                        .required()
+                        .messages({
+                            'string.min': 'Last name must be at least 2 characters',
+                            'string.max': 'Last name cannot exceed 50 characters',
+                            'any.required': 'Last name is required'
+                        });
 
-    password: Joi.string()
-                .min(5)
-                .max(50)
-                .required()
-                .messages({
-                    'string.min': 'Password must be at least 6 characters',
-                    'string.max': 'Password cannot exceed 50 characters',
-                    'any.required': 'Password is required'
-                }),
+const emailSchema = Joi.string()
+                        .email()
+                        .lowercase()
+                        .required()
+                        .messages({
+                            'string.email': 'Please enter a valid email address',
+                            'any.required': 'Email is required'
+                        });
 
-    phone: Joi.string()
-                .pattern(phonePattern)
-                .optional()
-                .allow('', null)
-                .messages({
-                    'string.pattern.base': 'Please enter a valid South African phone number'
-                })
-};
+const passwordSchema = Joi.string()
+                        .min(6)
+                        .max(50)
+                        .required()
+                        .messages({
+                            'string.min': 'Password must be at least 6 characters',
+                            'string.max': 'Password cannot exceed 50 characters',
+                            'any.required': 'Password is required'
+                        });
 
-// Register schemas
-export const registerClientSchema = Joi.object({
-    fullName: userBaseSchema.fullName,
-    email: userBaseSchema.email,
-    password: userBaseSchema.password,
-    phone: userBaseSchema.phone
+const phoneNumberSchema = Joi.string()
+                        .pattern(phonePattern)
+                        .optional()
+                        .messages({
+                            'string.pattern.base': 'Please enter a valid South African phone number',
+                            'any.required': 'Phone number is required'
+                        });
+
+const roleSchema = Joi.string()
+                        .valid('client', 'handyman')
+                        .required()
+                        .messages({
+                            'any.only': 'Role must ne either client or handyman',
+                            'any.required': 'Role is required'
+                        });
+
+const handymanSkillsSchema = Joi.array()
+                        .items(Joi.string())
+                        .min(1)
+                        .messages({
+                            'array.min': 'At least one skills is required'
+                        });
+
+const handymanBioSchema = Joi.string()
+                        .max(500)
+                        .messages({
+                            'string.max': 'Bio cannot exceed 500 characters'
+                        });
+
+const handymanYearsExperienceSchema = Joi.number()
+                        .integer()
+                        .min(0)
+                        .max(60)
+                        .messages({
+                            'number.base': 'Years of experience must be a number',
+                            'number.min': 'Years of experience cannot be negative',
+                            'number.max': 'Years of experience cannot exceed 60'
+                        });
+
+const handymanAvailabilitySchema = Joi.object({
+    days: Joi.array()
+            .items(Joi.string().valid('MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT', 'SUN'))
+            .min(1)
+            .messages({
+                'array.min': 'At least one day must be selected'
+            }),
+    timeSlots: Joi.array()
+            .items(Joi.string().pattern(timeSlotPattern))
+            .min(1)
+            .messages({
+                'array.min': 'At least one time slot must be provided',
+                'string.pattern.base': 'Time slots must be in format HH:MM-HH:MM (e.g., 08:00-12:00)'
+            })
 });
 
-export const registerHandymanSchema = Joi.object({
-    fullName: userBaseSchema.fullName,
-    email: userBaseSchema.email,
-    password: userBaseSchema.password,
-    phone: userBaseSchema.phone,
+const handymanLocationSchema = Joi.object({
+    type: Joi.string()
+            .valid('Point')
+            .default('Point'),
+    coordinates: Joi.array()
+            .items(Joi.number())
+            .length(2)
+            .messages({
+                'array.length': 'Coordinates must have exactly 2 values [longitude, latitude]'
+            })
+});
+
+/**
+ * Register schemas
+ * Validates: firstName, lastName, email, password, phoneNumber, role
+ * Handyman-specific: skills, bio, yearsOfExperience, availability, location (all optional)
+ */
+export const registerSchema = Joi.object({
+    firstName: nameSchema,
+    lastName: lastNameSchema,
+    email: emailSchema,
+    password: passwordSchema,
+    phoneNumber: phoneNumberSchema,
+    role: roleSchema,
 
     // Handyman specific fields
-    skills: Joi.array()
-                .items(Joi.string())
-                .min(1)
-                .required()
-                .messages({
-                    'array.min': 'At least one skill is required',
-                    'any.required': 'Skills are required'
-                }),
-
-    bio: Joi.string()
-                .max(500)
-                .optional()
-                .allow('', null)
-                .messages({
-                    'string.max': 'Bio cannot exceed 500 characters'
-                }),
-
-    yearsOfExperience: Joi.number()
-                .integer()
-                .min(0)
-                .max(60)
-                .optional()
-                .messages({
-                    'number.base': 'Years of experience must be a number',
-                    'number.min': 'Years of experience cannot be negative',
-                    'number.max': 'Years of experience cannot exceed 60'
-                }),
-
-    availability: Joi.object({
-        days: Joi.array()
-                .items(Joi.string().valid('MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT', 'SUN'))
-                .optional(),
-        timeSlots: Joi.array()
-                .items(Joi.string().pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]-([0-1][0-9]|2[0-3]):[0-5][0-9]$/))
-                .optional()
-    }).optional(),
-
-    location: Joi.object({
-        type: Joi.string().valid('Point').default('Point'),
-        coordinates: Joi.array()
-                        .items(Joi.number())
-                        .length(2)
-                        .optional()
-    }).optional()
+    ...(['skills', 'bio', 'yearsOfExperience', 'availability', 'location'].reduce((acc, field) => {
+        acc[field] = Joi.when('role', {
+            is: 'handyman',
+            then: getHandymanFieldSchema(field),
+            otherwise: Joi.forbidden().messages({
+                'any.unknown': `${field} is only allowed for handymen`
+            })
+        });
+        return acc;
+    }, {}))
 });
 
-// Login schema
+// Helper function to get schema for each handyman field
+function getHandymanFieldSchema(field) {
+    switch(field) {
+        case 'skills':
+            return handymanSkillsSchema.optional();
+        case 'bio':
+            return handymanBioSchema.optional();
+        case 'yearsOfExperience':
+            return handymanYearsExperienceSchema.optional();
+        case 'availability':
+            return handymanAvailabilitySchema.optional();
+        case 'location':
+            return handymanLocationSchema.optional();
+        default:
+            return Joi.any().optional();
+    }
+}
+
+/**
+ * Login schema
+ */
 export const loginSchema = Joi.object({
-    email: userBaseSchema.email,
-    password: userBaseSchema.password
+    email: emailSchema,
+    password: passwordSchema
 });
 
-// Email verification schema
+/**
+ * Email verification schema
+ */
 export const verifyEmailSchema = Joi.object({
     token: Joi.string()
                 .required()
@@ -120,30 +174,28 @@ export const verifyEmailSchema = Joi.object({
                 })
 });
 
-// Forgot password schema
+/**
+ * Forgot password schema
+ */
 export const forgotPasswordSchema = Joi.object({
-    email: userBaseSchema.email
+    email: emailSchema
 });
 
-// Reset password schema
+/**
+ * Reset password schema
+ */
 export const resetPasswordSchema = Joi.object({
     token: Joi.string()
                 .required()
                 .messages({
                     'any.required': 'Reset token is required'
                 }),
-    newPassword: Joi.string()
-                .min(6)
-                .max(50)
-                .required()
-                .messages({
-                    'string.min': 'Password must be at least 6 characters',
-                    'string.max': 'Password cannot exceed 50 characters',
-                    'any.required': 'New Password is required'
-                })
+    newPassword: passwordSchema
 });
 
-// Refresh token schema
+/**
+ * Refresh token schema
+ */
 export const refreshTokenSchema = Joi.object({
     refreshToken: Joi.string()
                         .required()
@@ -152,26 +204,30 @@ export const refreshTokenSchema = Joi.object({
                         })
 });
 
-// Update profile schema
+/**
+ * Update profile schema
+ * All fields optional, but at least one required
+ */
 export const updateProfileSchema = Joi.object({
-    fullName: userBaseSchema.fullName.optional(),
-    phone: userBaseSchema.phone.optional(),
+    // Basic fields (any role)
+    firstName: nameSchema.optional(),
+    lastName: lastNameSchema.optional(),
+    phoneNumber: phoneNumberSchema.optional(),
 
     // Handyman profile updates
-    handymanProfile: Joi.object({
-        bio: Joi.string().max(500).optional(),
-        skills: Joi.array().items(Joi.string()).min(1).optional(),
-        yearsOfExperience: Joi.number().integer().min(0).max(60).optional(),
-        availability: Joi.object({
-            days: Joi.array().items(Joi.string().valid('MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT', 'SUN')),
-            timeSlots: Joi.array().items(Joi.string())
-        }).optional()
-    }).optional()
-}).min(1).messages({
-    'object.min': 'At least one field to update is required'
+    skills: handymanSkillsSchema.optional(),
+    bio: handymanBioSchema.optional(),
+    yearsOfExperience: handymanYearsExperienceSchema.optional(),
+    availability: handymanAvailabilitySchema.optional()
+})
+.min(1)
+.messages({
+    'object-min': 'At least one field to update is required'
 });
 
-// ID params schema (reusable for routes with :id)
+/**
+ * ID params schema 
+ */
 export const idParamSchema = Joi.object({
     id: Joi.string()
             .pattern(/^[0-9a-fA-F]{24}$/)
@@ -182,7 +238,9 @@ export const idParamSchema = Joi.object({
             })
 });
 
-// Query schemas
+/**
+ * Pagination Query Schemas
+ */
 export const paginationQuerySchema = Joi.object({
     page: Joi.number()
             .integer()
@@ -203,10 +261,10 @@ export const paginationQuerySchema = Joi.object({
             .optional()
 });
 
+/**
+ * Nearby Handyman Query Schema
+ */
 export const nearbyHandymanQuerySchema = Joi.object({
-    serviceId: Joi.string()
-                    .pattern(/^[0-9a-fA-F]{24}$/)
-                    .optional(),
     lat: Joi.number()
             .min(-90)
             .max(90)
@@ -222,9 +280,26 @@ export const nearbyHandymanQuerySchema = Joi.object({
                 'any.required': 'Longitude is required for nearby search'
             }),
     radius: Joi.number()
-                .integer()
-                .min(1)
-                .max(100)
-                .default(10)
-                .optional()
+            .integer()
+            .min(1)
+            .max(100)
+            .default(10)
+            .optional(),
+    serviceId: Joi.string()
+            .pattern(/^[0-9a-fA-F]{24}$/)
+            .optional()
 }).and('lat', 'lng');
+
+// Export all schemas
+export default {
+    registerSchema,
+    loginSchema,
+    refreshTokenSchema,
+    verifyEmailSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema,
+    updateProfileSchema,
+    idParamSchema,
+    paginationQuerySchema,
+    nearbyHandymanQuerySchema
+};
