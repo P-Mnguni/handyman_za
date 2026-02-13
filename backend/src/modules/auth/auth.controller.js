@@ -10,53 +10,25 @@ import { token } from 'morgan';
  * @route   POST /api/v1/auth/register
  * @access  Public
  */
-export const registerClient = async (req, res, next) => {
+export const register = async (req, res, next) => {
     try {
         const userData = req.body;
 
-        // Input validation (basic - detailed validation will be implemented)
-        if (!userData.fullName || !userData.email || !userData.password) {
-            throw ApiError.badRequest('Missing required fields: fullName, email, password');
-        }
-       
-        const result = await authService.registerClient(userData);
+        // Combine firstName and lastName for storage in User model
+        const fullName = `${userData.firstName} ${userData.lastName}`.trim();
+
+        // Prepare data for service
+        const registrationData = {
+            ...userData,
+            fullName
+        };
+
+        const result = await authService.register(registrationData);
 
         res.status(201).json({
             success: true,
             message: result.message || 'Customer registered successfully. Please verify email.',
-            user: result.user,
-            token: result.token
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const registerHandyman = async (req, res, next) => {
-    try {
-        const handymanData = req.body;
-
-        // Basic validation
-        if (!handymanData.fullName || !handymanData.email || !handymanData.password) {
-            throw ApiError.badRequest('Missing required fields: fullName, email, password');
-        }
-
-        // Handyman-specific validation
-        if (!handymanData.handymanProfile) {
-            throw ApiError.badRequest('Handyman profile is required');
-        }
-
-        if (!handymanData.handymanProfile.skills || handymanData.handymanProfile.skills.length === 0) {
-            throw ApiError.badRequest('At least one skill is required');
-        }
-
-        const result = await authService.registerHandyman(handymanData);
-
-        res.status(201).json({
-            success: true,
-            message: result.message,
-            user: result.user,
-            token: result.token
+            data: result
         });
     } catch (error) {
         next(error);
@@ -258,8 +230,10 @@ export const updateProfile = async (req, res, next) => {
         const updateData = req.body;
 
         // Validate that there's data to update
-        if (!updateData || Object.keys(updateData).length === 0) {
-            throw ApiError.badRequest('No data provided to update');
+        if (updateData.firstName || updateData.lastName) {
+            const user = await authService.getCurrentUser(userId);
+            updateData.fullName = `${updateData.firstName || user.firstName} 
+                                    ${updateData.lastName || user.lastName}`.trim();
         }
 
         const result = await authService.updateProfile(userId, updateData);
@@ -276,8 +250,7 @@ export const updateProfile = async (req, res, next) => {
 
 // Export all controllers
 export default {
-    registerClient,
-    registerHandyman,
+    register,
     login,
     logout,
     refreshToken,
