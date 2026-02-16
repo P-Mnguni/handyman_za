@@ -2,9 +2,13 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import { ApiError } from '../../utils/ApiError.js';
-import User from '../users/user.model.js';
+import { User } from '../users/user.model.js';
 import { email, success } from 'zod';
 //import { useId } from 'react';
+
+// Salt rounds for bcrypt
+const SALT_ROUNDS = 10;
+
 class AuthService {
     /**
      * Register a new client (customer or handyman)
@@ -25,12 +29,15 @@ class AuthService {
                 throw ApiError.conflict('User with this email already exists');
             }
 
+            // Hash the password
+            const hashedPassword = await bcrypt.hash(userData.password, SALT_ROUNDS);
+
             // Base user data
             const baseUserData = {
                 fullName: userData.fullName,
                 email: userData.email.toLowerCase(),
                 phone: userData.phoneNumber,
-                passwordHash: userData.password,
+                passwordHash: hashedPassword,
                 role: userData.role === 'client' ? 'CUSTOMER' : 'HANDYMAN', // Map client->CUSTOMER, handyman->HANDYMAN
                 isEmailVerified: false,
                 isPhoneVerified: false,
@@ -57,6 +64,9 @@ class AuthService {
                     documents: {}
                 };
             }
+
+            // Convert to object and remove password before returning
+            delete userObject.password;
 
             // Create user
             const user = await User.create(baseUserData);
@@ -109,11 +119,11 @@ class AuthService {
             const { email, password } = credentials;
 
             if (!email || !password) {
-                throw ApiError.badRequest('Email and password are registered');
+                throw ApiError.badRequest('Email and password are required');
             }
 
             // Find user
-            const user = await User.findByEmail(email.toLowerCase());
+            const user = await User.findByEmail(email).select("+passwordHash");
             
             if (!user) {
                 throw ApiError.unauthorized('Invalid credentials');
