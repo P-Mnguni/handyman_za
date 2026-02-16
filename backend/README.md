@@ -82,15 +82,15 @@ handyman_za-backend/
 ```
 | Method |        Endpoint         |          Description            | Auth Required |
 |--------|-------------------------|---------------------------------|---------------|
-|  POST  |    `/auth/register`     | Register user (client/handyman) | No  |
-|  POST  |      `/auth/login`      |    Login with email/password    | No  |
-|  POST  |  `/auth/refresh-token`  |       Refresh access token      | No  |
-|  POST  |     `/auth/logout/`     |          Logout user            | Yes |
-|  POST  |  `/auth/verify-email`   |       Verify email address      | No  |
+|  POST  | `/auth/register`        | Register user (client/handyman) | No  |
+|  POST  | `/auth/login`           |    Login with email/password    | No  |
+|  POST  | `/auth/refresh-token`   |       Refresh access token      | No  |
+|  POST  | `/auth/logout/`         |          Logout user            | Yes |
+|  POST  | `/auth/verify-email`    |       Verify email address      | No  |
 |  POST  | `/auth/forgot-password` |      Request password reset     | No  |
 |  POST  | `/auth/reset-password`  |    Reset password with token    | No  |
-|  GET   |        `/auth/me`       |     Get current user profile    | Yes |
-|  GET   |        `/auth/me`       |       Update user profile       | Yes |
+|  GET   | `/auth/me`              |     Get current user profile    | Yes |
+|  GET   | `/auth/me`              |       Update user profile       | Yes |
 ```
 
 ## Example Requests
