@@ -91,10 +91,10 @@ export const env = {
     mongoUri: parsedEnv.MONGO_URI,
 
     // Authentication
-    jwtAccessSecret: parsedEnv.JWT_ACCESS_SECRET,
-    jwtAccessExpires: parsedEnv.JWT_ACCESS_EXPIRES,
+    jwtSecret: parsedEnv.JWT_ACCESS_SECRET,
+    jwtExpiresIn: parsedEnv.JWT_ACCESS_EXPIRES,
     jwtRefreshSecret: parsedEnv.JWT_REFRESH_SECRET,
-    jwtRefreshExpires: parsedEnv.JWT_REFRESH_EXPIRES,
+    jwtRefreshExpiresIn: parsedEnv.JWT_REFRESH_EXPIRES,
     bcryptRounds: parsedEnv.BCRYPT_ROUNDS,
 
     // Frontend
