@@ -22,3 +22,23 @@ export const generateAccessToken = (user) => {
         { expiresIn: env.jwtExpiresIn }
     );
 };
+
+/**
+ * Generate refresh token (long-lived)
+ * @param {Object} user - User object
+ * @returns {string} JWT refresh token
+ */
+export const generateRefreshToken = (user) => {
+    // Refresh token carries minimal payload
+    const payload = {
+        userId: user._id,
+        tokenType: 'refresh'
+        // Role not included - role changes require re-login
+    };
+
+    return jwt.sign(
+        payload,
+        env.jwtRefreshSecret,
+        { expiresIn: env.jwtRefreshExpiresIn }
+    );
+};
