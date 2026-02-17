@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import { z } from 'zod';            // for runtime validation
 
@@ -22,6 +23,7 @@ const envSchema = z.object({
     JWT_EXPIRES_IN: z.string().default('15m'),
     JWT_REFRESH_SECRET: z.string().min(32, "JWT_REFRESH_SECRET is required"),
     JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+    BCRYPT_ROUNDS: z.string().transform(Number).default("12"),
 
     // Frontend URLs for CORS
     FRONTEND_URL: z.string().default('http://localhost:3000'),
@@ -72,6 +74,7 @@ if (result.success) {
             JWT_REFRESH_EXPIRES_IN: '7d',
             FRONTEND_URL: 'http://localhost:3000',
             ADMIN_URL: 'http://localhost:3001',
+            BCRYPT_ROUNDS: process.env.BCRYPT_ROUNDS
         };
     }
 }
@@ -92,6 +95,7 @@ export const env = {
     jwtExpiresIn: parsedEnv.JWT_EXPIRES_IN,
     jwtRefreshSecret: parsedEnv.JWT_REFRESH_SECRET,
     jwtRefreshExpiresIn: parsedEnv.JWT_REFRESH_EXPIRES_IN,
+    bcryptRounds: parsedEnv.BCRYPT_ROUNDS,
 
     // Frontend
     frontendUrl: parsedEnv.FRONTEND_URL,
