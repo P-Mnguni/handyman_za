@@ -1,31 +1,45 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import ApiError from '../../utils/ApiError.js';
+import { email } from 'zod';
 
 
 /**
  * Authentication middleware
  * Extracts and verifies JWT token from Authorization header
  */
-const authMiddleware = async (req, res, next) => {
+export const authenticate = (req, res, next) => {
     try {
         // Get token from header
         const authHeader = req.headers.authorization;
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        if (!authHeader) {
             throw ApiError.unauthorized('No token provided');
         }
 
-        const token = authHeader.split(' ')[1];
-
-        if (!token) {
-            throw ApiError.unauthorized('No token provided');
+        // Check bearer format
+        const parts = authHeader.split(' ');
+        if (parts.length !== 2 || parts[0] !== "Bearer") {
+            throw ApiError.unauthorized('Invalid token format. Use: Bearer [token]');
         }
+
+        const token = parts[1];
 
         // Verify token
-        const decoded = jwt.verify(token, env.jwtSecret);
+        let decoded;
+        try {
+            decoded = jwt.verify(token, env.jwtSecret);
+        } catch (error) {
+            if (error.name === "TokenExpiredError") {
+                throw ApiError.unauthorized('Access token expired');
+            }
+            if (error.name === "JsonWebTokenError") {
+                throw ApiError.unauthorized('Invalid access token');
+            }
+            throw ApiError.unauthorized('Authentication failed');
+        }
 
-        // Attach user to request object
+        // Attach user to request
         req.user = {
             userId: decoded.userId,
             email: decoded.email,
@@ -34,32 +48,21 @@ const authMiddleware = async (req, res, next) => {
 
         next();
     } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            next(ApiError.unauthorized('Token expired'));
-        } else if (error.name === 'JsonWebTokenError') {
-            next(ApiError.unauthorized('Invalid token'));
-        } else {
-            next(error);
-        }
+        // Pass to global error handler
+        next(error);
     }
 };
 
 /**
- * Role-based authorization middleware
+ * Extract token without verifying
  */
-const authorize = (...roles) => {
-    return (req, res, next) => {
-        if (!req.user) {
-            return next(ApiError.unauthorized('Not authenticated'));
-        }
+export const extractToken = (req) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return null;
 
-        if (!roles.includes(req.user.role)) {
-            return next(ApiError.forbidden('Insufficient permissions'));
-        }
+    const parts = authHeader.split(" ");
+    if (parts.length !== 2 || parts[0] !== "Bearer") return null;
 
-        next();
-    };
+    return parts[1];
 };
 
-
-export { authMiddleware, authorize };

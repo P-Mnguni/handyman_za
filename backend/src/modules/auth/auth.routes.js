@@ -2,7 +2,7 @@ import express from 'express';
 import { asyncHandler } from '../../middlewares/error.middleware.js';
 import * as authController from './auth.controller.js';
 import { success } from 'zod';
-import { authMiddleware } from './auth.middleware.js';
+import { authenticate } from './auth.middleware.js';
 import { validateBody, validateQuery, validateParams } from '../../middlewares/validate.middleware.js';
 import {
     registerSchema,
@@ -61,19 +61,19 @@ router.post(
 
 router.post(
     '/logout', 
-    authMiddleware, 
+    authenticate, 
     authController.logout
 );
 
 router.get(
     '/me', 
-    authMiddleware, 
+    authenticate, 
     authController.getCurrentUser
 );
 
 router.put(
     '/me', 
-    authMiddleware, 
+    authenticate, 
     validateBody(updateProfileSchema),
     authController.updateProfile
 );
