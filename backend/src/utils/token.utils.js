@@ -97,3 +97,23 @@ export const verifyRefreshToken = (token) => {
     }
 };
 
+/**
+ * Extract token from Authorization header
+ * @param {string} authHeader - The Authorization header value
+ * @returns {string} The extracted token
+ * @throws {unauthorized} - Throws unauthorized if header missing or invalid
+ */
+export const extractTokenFromHeader = (authHeader) => {
+    if (!authHeader) {
+        throw ApiError.unauthorized('No authorization token provided');
+    }
+
+    const parts = authHeader.split(' ');
+
+    if (parts.length !== 2 || parts[0] !== 'Bearer') {
+        throw ApiError.unauthorized('Invalid token format. Use: Bearer [token]');
+    }
+
+    return parts[1];
+};
+
