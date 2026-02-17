@@ -12,6 +12,7 @@ import { token } from 'morgan';
  */
 export const register = async (req, res, next) => {
     try {
+        const deviceInfo = req.headers["user-agent"] || "unknown";
         const userData = req.body;
 
         // Combine firstName and lastName for storage in User model
@@ -20,6 +21,7 @@ export const register = async (req, res, next) => {
         // Prepare data for service
         const registrationData = {
             ...userData,
+            deviceInfo,
             fullName
         };
 
@@ -48,7 +50,9 @@ export const login = async (req, res, next) => {
             throw ApiError.badRequest('Please provide email and password');
         }
 
-        const result = await authService.login({ email, password });
+        const deviceInfo = req.headers["user-agent"] || "unknown";
+
+        const result = await authService.login({ email, password, deviceInfo });
 
         res.status(200).json({
             success: true,
@@ -86,6 +90,27 @@ export const logout = async (req, res, next) => {
 };
 
 /**
+ * @desc    Logout from all devices
+ * @route   POST /api/v1/auth/logout
+ * @access  Private (requires authentication)
+ */
+export const logoutAll = async (req, res, next) => {
+    try {
+        // Get userId from authenticated user
+        const { userId } = req.user;
+
+        await authService.logoutAllDevices(userId);
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out from all devices successfully'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * @desc    Refresh access token using refresh token
  * @route   POST /api/v1/auth/refresh-token
  * @access  Public (but requires valid refresh token)
@@ -98,7 +123,8 @@ export const refreshToken = async (req, res, next) => {
             throw ApiError.badRequest('Refresh token is required');
         }
 
-        const result = await authService.refreshToken(refreshToken);
+        const deviceInfo = req.headers["user-agent"] || "unknown";
+        const result = await authService.refreshToken(refreshToken, deviceInfo);
 
         res.status(200).json({
             success: true,
