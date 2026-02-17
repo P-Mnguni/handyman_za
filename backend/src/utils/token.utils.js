@@ -60,6 +60,7 @@ export const generateTokens = (user) => {
  * Verify access token
  * @param {string} token - JWT token to verify
  * @returns {Object} Decoded token payload
+ * @throws {unauthorized} - Throws unauthorized error if token invalid
  */
 export const verifyAccessToken = (token) => {
     try {
@@ -75,3 +76,24 @@ export const verifyAccessToken = (token) => {
         throw ApiError.unauthorized('Authentication failed. Please login again.');
     }
 };
+
+/**
+ * Verify refresh token
+ * @param {string} token - JWT token to verify
+ * @returns {Object} Decoded token payload
+ * @throws {unauthorized} - Throws unauthorized error if token invalid
+ */
+export const verifyRefreshToken = (token) => {
+    try {
+        return jwt.verify(token, env.jwtRefreshSecret);
+    } catch {
+        if (error.name === 'TokenExpiredError') {
+            throw ApiError.unauthorized('Refresh token expired. Please login again.');
+        }
+        if (error.name === 'JsonWebTokenError') {
+            throw ApiError.unauthorized('Invalid refresh token. Please login again.');
+        }
+        throw ApiError.unauthorized('Authentication failed. Please login again.');
+    }
+};
+
