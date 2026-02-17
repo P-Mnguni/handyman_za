@@ -61,13 +61,27 @@ const userSchema = new mongoose.Schema({
     },
 
     refreshTokens: [{
-        token: String,
-        expiresAt: Date,
+        token: {
+            type: String,
+            required: true
+        },
+        deviceInfo: { 
+            type: String 
+        },
+        expiresAt: {
+            type: Date,
+            required: true,
+        },
         createdAt: {
             type: Date,
             default: Date.now
         }
     }],
+
+    maxRefreshTokens: {
+        type: Number,
+        default: 5
+    },
 
     // 🛠️ Handyman-specific fields (only when role = HANDYMAN)
     handymanProfile: {
