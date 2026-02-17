@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
+import ApiError from "./ApiError";
 import { email } from "zod";
 
 /**
@@ -53,4 +54,24 @@ export const generateTokens = (user) => {
         accessToken: generateAccessToken(user),
         refreshToken: generateRefreshToken(user)
     };
+};
+
+/**
+ * Verify access token
+ * @param {string} token - JWT token to verify
+ * @returns {Object} Decoded token payload
+ */
+export const verifyAccessToken = (token) => {
+    try {
+        return jwt.verify(token, env.jwtSecret);
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            throw ApiError.unauthorized('Access token expired.  Please refresh your session.');
+        }
+        if (error.name === 'JsonWebTokenError') {
+            throw ApiError.unauthorized('Invalid access token. Please login again.');
+        }
+        // Catch any other unexpected errors
+        throw ApiError.unauthorized('Authentication failed. Please login again.');
+    }
 };
