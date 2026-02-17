@@ -1,15 +1,42 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import { env } from '../../config/env.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { User } from '../users/user.model.js';
 import { email, success } from 'zod';
+import { verifyRefreshToken } from '../../utils/token.utils.js';
 //import { useId } from 'react';
 
 // Salt rounds for bcrypt
 const SALT_ROUNDS = env.bcryptRounds;
 
 class AuthService {
+    /**
+     * Calculate refresh token expiration date
+     */
+    getRefreshTokenExpiry() {
+        const expiresIn = env.jwtRefreshExpiresIn;
+        const value = parseInt(expiresIn);
+        const unit = expiresIn.slice(-1);
+
+        const now = new Date();
+        switch(unit) {
+            case 'd': 
+                now.setDate(now.getDate() + value);
+                break;
+            case 'h':
+                now.setHours(now.getHours() + value);
+                break;
+            case 'm':
+                now.setMinutes(now.getMinutes() + value);
+                break;
+            default:
+                now.setDate(now.getDate() + 7);         // Default 7 days
+        }
+        return now;
+    };
+
     /**
      * Register a new client (customer or handyman)
      */
@@ -30,7 +57,7 @@ class AuthService {
             }
 
             // Hash the password
-            const hashedPassword = await bcrypt.hash(userData.password, SALT_ROUNDS);
+            const hashedPassword = bcrypt.hash(userData.password, SALT_ROUNDS);
 
             // Base user data
             const baseUserData = {
@@ -39,6 +66,7 @@ class AuthService {
                 phone: userData.phoneNumber,
                 passwordHash: hashedPassword,
                 role: userData.role === 'client' ? 'CUSTOMER' : 'HANDYMAN', // Map client->CUSTOMER, handyman->HANDYMAN
+                refreshTokens: [],                                           // Initialize empty refresh tokens array
                 isEmailVerified: false,
                 isPhoneVerified: false,
                 status: 'ACTIVE'
@@ -71,6 +99,18 @@ class AuthService {
             // Create user
             const user = await User.create(baseUserData);
 
+            // Generate tokens for immediate login after registration
+            const tokens = this.generateTokens(user);
+
+            // Save refresh token to database
+            user.refreshTokens.push({
+                token: tokens.refreshTokens,
+                expiresAt: this.getRefreshTokenExpiry(),
+                deviceInfo: userData.deviceInfo || 'unknown'
+            });
+
+            await user.save();
+
             // The toJSON() method automatically remove passwordHash
             const userResponse = user.toJSON();
 
@@ -87,7 +127,10 @@ class AuthService {
                 response.handymanProfile = userResponse.handymanProfile;
             }
         
-            return response;
+            return {
+                response,
+                tokens
+            };
         } catch (error) {
             // Handle Mongoose validation errors
             if (error.name === 'ValidationError') {
@@ -116,14 +159,14 @@ class AuthService {
      */
     async login(credentials) {
         try {
-            const { email, password } = credentials;
+            const { email, password, deviceInfo = 'unknown' } = credentials;
 
             if (!email || !password) {
                 throw ApiError.badRequest('Email and password are required');
             }
 
             // Find user
-            const user = await User.findByEmail(email).select("+passwordHash");
+            const user = await User.findByEmail(email).select("+passwordHash +refreshTokens");
             
             if (!user) {
                 throw ApiError.unauthorized('Invalid credentials');
@@ -147,9 +190,23 @@ class AuthService {
             // Generate tokens
             const tokens = this.generateTokens(user);
 
-            // Store refresh tokens (in real app, this would be in database)
-            const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 100);    // 7 days
-            await user.addRefreshToken(tokens.refreshToken, refreshTokenExpiresAt);
+            // Manage refresh tokens (limit active session)
+            const expiresAt = this.getRefreshTokenExpiry();
+
+            // Add new refresh token
+            user.refreshTokens.push({
+                token: tokens.refreshTokens,
+                expiresAt,
+                deviceInfo
+            });
+
+            // Enforce max active session
+            if (user.refreshTokens.length > (user.maxRefreshTokens || 5)) {
+                // Remove oldest token
+                user.refreshToken = user.refreshTokens.slice(-user.maxRefreshTokens);
+            }
+
+            await user.save();
 
             const userResponse = user.toJSON();
 
@@ -170,20 +227,20 @@ class AuthService {
     /**
      * Logout user by invalidating refresh token
      */
-    async logout(token) {
+    async logout(refreshToken) {
         try {
-            if (!token) {
+            if (!refreshToken) {
                 throw ApiError.badRequest('Token is required');
             }
 
             // Find user with refresh token
-            const user = await User.findOne({
-                'refreshTokens.token': token
-            });
+            const result = await User.updateOne(
+                { 'refreshTokens.token': refreshToken },
+                { $pull: { refreshToken: { token: refreshToken } } }
+            );
 
-            if (user) {
-                // Remove the specific refresh token
-                await user.removeRefreshToken(token);
+            if (result.modifiedCount === 0) {
+                throw ApiError.notFound('Token not found');
             }
 
             // In real implementation, we would also blacklist the access token
@@ -199,21 +256,34 @@ class AuthService {
     }
 
     /**
+     * Logout from all devices
+     */
+    async logoutAllDevices(userId) {
+        await User.updateOne(
+            { _id: userId },
+            { $set: { refreshTokens: [] } }
+        );
+    } 
+
+    /**
      * Refresh access token using refresh token
      */
-    async refreshToken(refreshToken) {
+    async refreshToken(refreshToken, deviceInfo = 'unknown') {
         try {
             if (!refreshToken) {
                 throw ApiError.badRequest('Refresh token is required');
             }
 
+            // Verify the refresh token
+            const decoded = verifyRefreshToken(refreshToken);
+
             const user = await User.findOne({
+                _id: decoded.userId,
                 'refreshTokens.token': refreshToken,
-                'refreshTokens.expiresAt': { $gt: new Date() }          // Token not expired
-            });
+            }).select("+refreshTokens");
             
             if (!user) {
-                throw ApiError.unauthorized('Invalid or expired refresh token');
+                throw ApiError.unauthorized('Invalid refresh token');
             }
 
             // Check if user is active
@@ -221,17 +291,34 @@ class AuthService {
                 throw ApiError.forbidden('Account is not active');
             }
 
+            // Find specific token in user's array
+            const tokenDoc = user.refreshTokens.find(t => t.token === refreshToken);
+
+            // Check if token expired
+            if (tokenDoc.expiresAt < new Date()) {
+                // Remove expired token
+                user.refreshTokens = user.refreshTokens.filter(t => t.token !== refreshToken);
+                await user.save();
+                throw new ApiError.unauthorized('Refresh token expired');
+            }
+
             // Generate new tokens
-            const tokens = this.generateTokens(user);
+            const newTokens = this.generateTokens(user);
 
-            // Update refresh token in database
-            const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 100);
+            // Remove old refresh token and add new one
+            user.refreshTokens = user.refreshTokens.filter(t => t.token !== refreshToken);
+            user.refreshTokens.push({
+                token: newTokens.refreshToken,
+                expiresAt: this.getRefreshTokenExpiry(),
+                deviceInfo
+            });
 
-            // Remove old token and add new one
-            await user.removeRefreshToken(refreshToken);
-            await user.addRefreshToken(tokens.refreshToken, refreshTokenExpiresAt);
+            await user.save();
 
-            return tokens;
+            return {
+                user,
+                tokens: newTokens
+            }
         } catch (error) {
             if (error instanceof ApiError) {
                 throw error;
