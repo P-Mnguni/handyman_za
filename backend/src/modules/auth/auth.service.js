@@ -7,7 +7,7 @@ import { email, success } from 'zod';
 //import { useId } from 'react';
 
 // Salt rounds for bcrypt
-const SALT_ROUNDS = 10;
+const SALT_ROUNDS = env.bcryptRounds;
 
 class AuthService {
     /**
