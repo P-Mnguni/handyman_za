@@ -115,5 +115,4 @@ export const extractTokenFromHeader = (authHeader) => {
     }
 
     return parts[1];
-};
-
+}
