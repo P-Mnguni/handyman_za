@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
-import ApiError from "./ApiError";
+import ApiError from "./ApiError.js";
 import { email } from "zod";
 
 /**

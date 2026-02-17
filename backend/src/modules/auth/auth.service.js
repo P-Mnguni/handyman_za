@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { env } from '../../config/env.js';
 import { ApiError } from '../../utils/ApiError.js';
-import { User } from '../users/user.model.js';
+import User from '../users/user.model.js';
 import { email, success } from 'zod';
 import { verifyRefreshToken } from '../../utils/token.utils.js';
 //import { useId } from 'react';
