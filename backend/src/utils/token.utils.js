@@ -42,3 +42,15 @@ export const generateRefreshToken = (user) => {
         { expiresIn: env.jwtRefreshExpiresIn }
     );
 };
+
+/**
+ * Generate both tokens (convenience function)
+ * @param {Object} user - User object
+ * @returns {Object} Object containing access and refresh tokens
+ */
+export const generateTokens = (user) => {
+    return {
+        accessToken: generateAccessToken(user),
+        refreshToken: generateRefreshToken(user)
+    };
+};
