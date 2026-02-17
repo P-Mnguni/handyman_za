@@ -19,10 +19,10 @@ const envSchema = z.object({
     MONGO_URI: z.string().min(1, "MONGO_URI is required"),
 
     // Authentication
-    JWT_SECRET: z.string().min(32, "JWT_SECRET is required"),
-    JWT_EXPIRES_IN: z.string().default('15m'),
+    JWT_ACCESS_SECRET: z.string().min(32, "JWT_SECRET is required"),
+    JWT_ACCESS_EXPIRES: z.string().default('15m'),
     JWT_REFRESH_SECRET: z.string().min(32, "JWT_REFRESH_SECRET is required"),
-    JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+    JWT_REFRESH_EXPIRES: z.string().default('7d'),
     BCRYPT_ROUNDS: z.string().transform(Number).default("12"),
 
     // Frontend URLs for CORS
@@ -68,10 +68,10 @@ if (result.success) {
             NODE_ENV: 'development',
             PORT: 5000,
             MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/handyman_za',
-            JWT_SECRET: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
-            JWT_EXPIRES_IN: '15m',
+            JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'dev-jwt-secret-change-in-production',
+            JWT_ACCESS_EXPIRES: process.env.JWT_ACCESS_EXPIRES || '15m',
             JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production',
-            JWT_REFRESH_EXPIRES_IN: '7d',
+            JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES || '7d',
             FRONTEND_URL: 'http://localhost:3000',
             ADMIN_URL: 'http://localhost:3001',
             BCRYPT_ROUNDS: process.env.BCRYPT_ROUNDS
@@ -91,10 +91,10 @@ export const env = {
     mongoUri: parsedEnv.MONGO_URI,
 
     // Authentication
-    jwtSecret: parsedEnv.JWT_SECRET,
-    jwtExpiresIn: parsedEnv.JWT_EXPIRES_IN,
+    jwtAccessSecret: parsedEnv.JWT_ACCESS_SECRET,
+    jwtAccessExpires: parsedEnv.JWT_ACCESS_EXPIRES,
     jwtRefreshSecret: parsedEnv.JWT_REFRESH_SECRET,
-    jwtRefreshExpiresIn: parsedEnv.JWT_REFRESH_EXPIRES_IN,
+    jwtRefreshExpires: parsedEnv.JWT_REFRESH_EXPIRES,
     bcryptRounds: parsedEnv.BCRYPT_ROUNDS,
 
     // Frontend
