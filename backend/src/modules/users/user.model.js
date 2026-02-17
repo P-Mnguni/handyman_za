@@ -205,15 +205,6 @@ userSchema.pre('save', function() {
     }
 });
 
-// 🔐 Password deletion using toJSON
-userSchema.set('toJSON', {
-    transform: function(doc, ret, options) {
-        delete ret.passwordHash;                // Removes passwordHash from output
-        delete ret.__v                          // Removes version key
-        return ret;
-    }
-});
-
 // 🔐 Method to compare password
 userSchema.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.passwordHash);
