@@ -12,6 +12,10 @@ import { token } from 'morgan';
  */
 export const register = async (req, res, next) => {
     try {
+        console.log("========== CONTROLLER DEBUG ==========");
+        console.log("Request body:", req.body);
+        console.log("Headers:", req.headers['content-type']);
+
         const deviceInfo = req.headers["user-agent"] || "unknown";
         const userData = req.body;
 
@@ -24,6 +28,8 @@ export const register = async (req, res, next) => {
             deviceInfo,
             fullName
         };
+
+        console.log("Data being sent to service:", registrationData);
 
         const result = await authService.register(registrationData);
 

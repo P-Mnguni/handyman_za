@@ -95,7 +95,7 @@ export const env = {
     jwtExpiresIn: parsedEnv.JWT_ACCESS_EXPIRES,
     jwtRefreshSecret: parsedEnv.JWT_REFRESH_SECRET,
     jwtRefreshExpiresIn: parsedEnv.JWT_REFRESH_EXPIRES,
-    bcryptRounds: parsedEnv.BCRYPT_ROUNDS,
+    bcryptRounds: parseInt(parsedEnv.BCRYPT_ROUNDS || "12", 10),
 
     // Frontend
     frontendUrl: parsedEnv.FRONTEND_URL,
