@@ -43,3 +43,23 @@ export const authorize = (...allowedRoles) => {
         }
     };
 };
+
+/**
+ * Pre-defined role combinations for convenience
+ */
+export const role = {
+    // Allow only clients
+    client: () => authorize("client"),
+
+    // Allow only handymen
+    handyman: () => authorize("handyman"),
+
+    // Allow only admins
+    admin: () => authorize("admin"),
+
+    // Allow both clients and handymen (al non-admin users)
+    user: () => authorize("client", "handyman"),
+
+    // Allow everyone (useful for routes that just need authentication, not specific roles)
+    any: () => authorize("client", "handyman", "admin")
+};
