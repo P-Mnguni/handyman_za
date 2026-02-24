@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema({
     refreshTokens: [{
         token: {
             type: String,
-            required: true
+            required: false
         },
         deviceInfo: { 
             type: String 
