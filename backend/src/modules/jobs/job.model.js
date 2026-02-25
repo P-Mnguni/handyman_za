@@ -186,3 +186,8 @@ jobSchema.index({ serviceCategory: 1, status: 1 });     // Find available jobs b
 jobSchema.virtual('isAvailable').get(function() {
     return this.status === JobStatus.PENDING && !this.handyman;
 });
+
+// 🔍 Virtual for checking if job is active (not completed or cancelled)
+jobSchema.virtual('isActive').get(function() {
+    return [JobStatus.ACCEPTED, JobStatus.IN_PROGRESS].includes(this.status);
+});
