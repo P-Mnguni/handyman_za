@@ -1,6 +1,6 @@
 import express from 'express';
-import { authenticate } from '../auth/auth.middleware';
-import { authorize } from '../../middlewares/role.middleware';
+import { authenticate } from '../auth/auth.middleware.js';
+import { authorize } from '../../middlewares/role.middleware.js';
 import {
     createJob,
     getAllJobs,
