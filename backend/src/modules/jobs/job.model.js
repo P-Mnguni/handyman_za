@@ -181,3 +181,8 @@ jobSchema.index({ client: 1, createdAt: -1 })           // Get client's jobs, ne
 jobSchema.index({ handyman: 1, status: 1 });            // Get handyman's jobs by status
 jobSchema.index({ status: 1, createdAt: -1 });          // Get recent jobs by status
 jobSchema.index({ serviceCategory: 1, status: 1 });     // Find available jobs by category
+
+// 🔍 Virtual for checking if job is available for handymen to accept
+jobSchema.virtual('isAvailable').get(function() {
+    return this.status === JobStatus.PENDING && !this.handyman;
+});
