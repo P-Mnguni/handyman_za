@@ -221,3 +221,26 @@ jobSchema.pre('save', function(next) {
 
     next();
 });
+
+// 📝 Instance method to check if user can modify this job
+jobSchema.methods.canBeModifiedBy = function(userId, userRole) {
+    // Client can modify their own pending jobs
+    if (userRole === 'client' && this.client.toString() === userId.toString()) {
+        return this.status === JobStatus.PENDING;
+    }
+
+    // Handyman can modify jobs they've accepted
+    if (userRole === 'handyman' && this.handyman && this.handyman.toString() === userId.toString()) {
+        return [JobStatus.ACCEPTED, JobStatus.IN_PROGRESS].includes(this.status);
+    }
+
+    // Admins can modify anything (if you have admin role)
+    if (userRole === 'admin') {
+        return true;
+    }
+
+    return false;
+};
+
+// Create and export the model
+export const Job = mongoose.model("Job", jobSchema);
