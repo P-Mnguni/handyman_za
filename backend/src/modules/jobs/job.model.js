@@ -191,3 +191,8 @@ jobSchema.virtual('isAvailable').get(function() {
 jobSchema.virtual('isActive').get(function() {
     return [JobStatus.ACCEPTED, JobStatus.IN_PROGRESS].includes(this.status);
 });
+
+// 🔍 Virtual for checking if job can be reviewed
+jobSchema.virtual('canBeReviewed').get(function() {
+    return this.status === JobStatus.COMPLETED;
+});
