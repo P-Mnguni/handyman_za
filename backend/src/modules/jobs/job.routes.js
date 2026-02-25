@@ -9,7 +9,9 @@ import {
     completeJob,
     cancelJob,
     updateJobStatus,
-    getMyJobs
+    getMyJobs,
+    addReview,
+    uploadJobImages
 } from './job.controller.js';
 
 const router = express.Router();
@@ -138,3 +140,32 @@ router.patch(
     authenticate,
     cancelJob
 );
+
+// ===============================================
+// FUTURE ROUTES (Commented for now)
+// ===============================================
+
+/**
+ * @route   POST /api/v1/jobs/:id/review
+ * @desc    Leave a review for completed job
+ * @access  Private (Client or Handyman who was part of the job)
+ */
+router.post(
+    "/:id/review",
+    authenticate,
+    addReview
+);
+
+/**
+ * @route   POST /api/v1/jobs/:id/upload
+ * @desc    Upload images for a job
+ * @access  Private (Client who created the job)
+ */
+router.post(
+    "/:id/upload-images",
+    authenticate,
+    authorize("client"),
+    uploadJobImages
+);
+
+export default router;
