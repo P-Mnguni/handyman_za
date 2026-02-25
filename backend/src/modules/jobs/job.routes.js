@@ -100,3 +100,41 @@ router.patch(
     authorize("client"),
     updateJobStatus             // implemented for general updates
 );
+
+// ===============================================
+// JOB LIFECYCLE ACTIONS
+// ===============================================
+
+/**
+ * @route   PATCH /api/v1/jobs/:id/accept
+ * @desc    Accept a job (Handyman only)
+ * @access  Private (Handyman)
+ */
+router.patch(
+    "/:id/accept",
+    authenticate,
+    authorize("handyman"),
+    acceptJob
+);
+
+/**
+ * @route   PATCH /api/v1/jobs/:id/complete
+ * @desc    Mark job as completed (Client or Handyman, with service layer checks)
+ * @access  Private
+ */
+router.patch(
+    "/:id/complete",
+    authenticate,
+    completeJob
+);
+
+/**
+ * @route   PATCH /api/v1/jobs/:id/cancel
+ * @desc    Cancel a job (Client can cancel pending jobs, Handyman can cancel accepted jobs)
+ * @access  Private
+ */
+router.patch(
+    "/:id/cancel",
+    authenticate,
+    cancelJob
+);
