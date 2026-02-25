@@ -172,3 +172,12 @@ const jobSchema = new mongoose.Schema({
         }
     }
 });
+
+// 🖼️ Creates geospatial index for location-based queries
+jobSchema.index({ "location.coordinates": "2dsphere" });
+
+// 📊 Compound indexes for common queries
+jobSchema.index({ client: 1, createdAt: -1 })           // Get client's jobs, newest first
+jobSchema.index({ handyman: 1, status: 1 });            // Get handyman's jobs by status
+jobSchema.index({ status: 1, createdAt: -1 });          // Get recent jobs by status
+jobSchema.index({ serviceCategory: 1, status: 1 });     // Find available jobs by category
