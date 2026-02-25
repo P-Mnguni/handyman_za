@@ -73,3 +73,30 @@ router.get(
     authorize("handyman"),
     getAllJobs                  // Same controller but filters applied
 );
+
+// ===============================================
+// SINGLE JOB OPERATIONS
+// ===============================================
+
+/**
+ * @route   GET /api/v1/jobs/:id
+ * @desc    Get job by ID (Access control in service layer)
+ * @access  Private (Client/Handyman/Admin with proper permissions)
+ */
+router.get(
+    "/:id",
+    authenticate,
+    getJobById
+);
+
+/**
+ * @route   PATCH /api/v1/jobs/:id
+ * @desc    Update job (Only client can update their pending jobs)
+ * @access  Private (Client)
+ */
+router.patch(
+    "/:id",
+    authenticate,
+    authorize("client"),
+    updateJobStatus             // implemented for general updates
+);
