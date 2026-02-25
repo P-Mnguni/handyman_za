@@ -45,3 +45,31 @@ router.get(
     authenticate,
     getMyJobs
 );
+
+// ===============================================
+// JOB DISCOVERY ROUTES
+// ===============================================
+
+/**
+ * @route   GET /api/v1/jobs
+ * @desc    Get all jobs (with filters - Handymen see available, Admins see all)
+ * @access  Private (Handyman or Admin)
+ */
+router.get(
+    "/",
+    authenticate,
+    authorize("handyman", "admin"),
+    getAllJobs
+);
+
+/**
+ * @route   GET /api/v1/jobs/available
+ * @desc    Get only available (pending) jobs for handymen
+ * @access  Private (Handymen)
+ */
+router.get(
+    "/available",
+    authenticate,
+    authorize("handyman"),
+    getAllJobs                  // Same controller but filters applied
+);
