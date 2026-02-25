@@ -1,6 +1,7 @@
 import express from 'express';
 import { env } from '../config/env.js';
-import authRouter from './auth/auth.routes.js';
+import authRoutes from './auth/auth.routes.js';
+import jobRoutes from './jobs/job.routes.js';
 import { success } from 'zod';
 import { no } from 'zod/v4/locales';
 //import { useImperativeHandle } from 'react';
@@ -85,7 +86,7 @@ router.get('/', (req, res) => {
 // ============================
 
 // Authentication Module
-router.use('/auth', authRouter);
+router.use('/auth', authRoutes);
 
 // Users Module
 const usersRouter = express.Router();
@@ -107,16 +108,7 @@ handymenRouter.patch('/:handymanId/verify', (req, res) => placeholderResponse(re
 router.use('/handymen', handymenRouter);
 
 // Jobs Module (Core)
-const jobsRouter = express.Router();
-jobsRouter.get('/', (req, res) => placeholderResponse(res, 'List jobs with filters'));
-jobsRouter.post('/', (req, res) => placeholderResponse(res, 'Create new job'));
-jobsRouter.get('/my', (req, res) => placeholderResponse(res, 'Get my jobs (customer/handyman)'));
-jobsRouter.get('/:jobId', (req, res) => placeholderResponse(res, 'Get job details'));
-jobsRouter.post('/:jobId/accept', (req, res) => placeholderResponse(res, 'Accept a job (handyman)'));
-jobsRouter.post('/:jobId/reject', (req, res) => placeholderResponse(res, 'Reject a job (handyman)'));
-jobsRouter.patch('/:jobId/status', (req, res) => placeholderResponse(res, 'Update job status'));
-jobsRouter.post('/:jobId/broadcast', (req, res) => placeholderResponse(res, 'Broadcast jot to handymen (system)'));
-router.use('/jobs', jobsRouter);
+router.use('/jobs', jobRoutes);
 
 // Services Module
 const servicesRouter = express.Router();
