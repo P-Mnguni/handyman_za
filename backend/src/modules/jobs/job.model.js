@@ -1,51 +1,28 @@
 import mongoose from 'mongoose';
-
-// Job status enum - defines all possible states a job can be in
-export const JobStatus = {
-    PENDING: "pending",
-    ACCEPTED: "accepted",
-    IN_PROGRESS: "in_progress",
-    COMPLETED: "completed",
-    CANCELED: "canceled"
-};
-
-// Service categories enum - expand this based on your platform's offerings
-export const ServiceCategory = {
-    PLUMBING: "plumbing",
-    ELECTRICAL: "electrical",
-    CARPENTRY: "carpentry",
-    PAINTING: "painting",
-    CLEANING: "cleaning",
-    MOVING: "moving",
-    GARDENING: "gardening",
-    HVAC: "hvac",
-    APPLIANCE_REPAIR: "appliance_repair",
-    GENERAL_MAINTENANCE: "general_maintenance",
-    OTHER: "other"
-};
+import { JobStatus, ServiceCategory, JobValidationMessage } from "./job.constants.js";
 
 const jobSchema = new mongoose.Schema({
     // 🆔 Basic information
     title: {
         type: String,
-        required: [true, "Job title is required"],
+        required: [true, JobValidationMessage.TITLE_REQUIRED],
         trim: true,
-        minlength: [5, "Title must be at least 5 characters long"],
-        maxlength: [100, "Title cannot exceed 100 characters"]
+        minlength: [5, JobValidationMessage.TITLE_MIN_LENGTH],
+        maxlength: [100, JobValidationMessage.TITLE_MAX_LENGTH]
     },
     description: {
         type: String,
-        required: [true, "Job description is required"],
+        required: [true, JobValidationMessage.DESCRIPTION_REQUIRED],
         trim: true,
-        minlength: [20, "Description must be at least 20 characters long"],
-        maxlength: [2000, "Description cannot exceed 2000 characters"],
+        minlength: [20, JobValidationMessage.DESCRIPTION_MIN_LENGTH],
+        maxlength: [2000, JobValidationMessage.DESCRIPTION_MAX_LENGTH],
     },
     serviceCategory: {
         type: String,
-        required: [true, "Service category is required"],
+        required: [true, JobValidationMessage.CATEGORY_REQUIRED],
         enum: {
             values: Object.values(ServiceCategory),
-            message: "Please select a valid service category"
+            message: JobValidationMessage.CATEGORY_INVALID
         }
     },
     images: [{
@@ -54,7 +31,7 @@ const jobSchema = new mongoose.Schema({
             validator: function(url) {
                 return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(url);   // Basic URL validation
             },
-            message: "Please provide valid image URLs"
+            message: JobValidationMessage.IMAGE_INVALID
         }
     }],
 
@@ -62,17 +39,17 @@ const jobSchema = new mongoose.Schema({
     location: {
         address: {
             type: String,
-            required: [true, "Address is required"],
+            required: [true, JobValidationMessage.ADDRESS_REQUIRED],
             trim: true
         },
         city: {
             type: String,
-            required: [true, "City is required"],
+            required: [true, JobValidationMessage.CITY_REQUIRED],
             trim: true
         },
         province: {
             type: String,
-            required: [true, "Province is required"],
+            required: [true, JobValidationMessage.PROVINCE_REQUIRED],
             trim: true
         },
         coordinates: {
@@ -94,13 +71,13 @@ const jobSchema = new mongoose.Schema({
     // 💰 Pricing
     budget: {
         type: Number,
-        min: [0, "Budget cannot be negative"],
+        min: [0, JobValidationMessage.BUDGET_MIN_PRICE],
         validate: {
             validator: function(value) {
                 // Budget can be null/undefined, but if provided must be > 0
                 return value === null || value === undefined || value > 0;
             },
-            message: "Budget must be greater than 0 if provided"
+            message: JobValidationMessage.BUDGET_POSITIVE
         }
     },
     isNegotiable: {
@@ -112,7 +89,7 @@ const jobSchema = new mongoose.Schema({
     client: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: [true, "Job must have a client"],
+        required: [true, JobValidationMessage.CLIENT_REQUIRED],
         index: true
     },
     handyman: {
@@ -127,7 +104,7 @@ const jobSchema = new mongoose.Schema({
         type: String,
         enum: {
             values: Object.values(JobStatus),
-            message: "Please select a valid job status"
+            message: JobValidationMessage.STATUS_INVALID
         },
         default: JobStatus.PENDING,
         index: true
@@ -155,7 +132,7 @@ const jobSchema = new mongoose.Schema({
     cancellationReason: {
         type: String,
         trim: true,
-        maxlength: [500, "Cancellation reason cannot exceed 500 characters"]
+        maxlength: [500, JobValidationMessage.CANCELLATION_REASON_MAX_LENGTH]
     },
 
     // ⏱️ Scheduling 
