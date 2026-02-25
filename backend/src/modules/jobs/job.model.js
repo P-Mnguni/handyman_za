@@ -196,3 +196,28 @@ jobSchema.virtual('isActive').get(function() {
 jobSchema.virtual('canBeReviewed').get(function() {
     return this.status === JobStatus.COMPLETED;
 });
+
+// 📝 Pre-save middleware to update timestamps based on status change
+jobSchema.pre('save', function(next) {
+    // When status changes to ACCEPTED
+    if (this.isModified('status') && this.status === JobStatus.ACCEPTED && !this.acceptedAt) {
+        this.acceptedAt = new Date();
+    }
+
+    // When status changes to IN_PROGRESS
+    if (this.isModified('status') && this.status === JobStatus.IN_PROGRESS && !this.startedAt) {
+        this.startedAt = new Date();
+    }
+
+    // When status changes to COMPLETED
+    if (this.isModified('status') && this.status === JobStatus.COMPLETED && !this.completedAt) {
+        this.completedAt = new Date();
+    }
+
+    // When status changes to CANCELLED
+    if (this.isModified('status') && this.status === JobStatus.CANCELED && !this.cancelledAt) {
+        this.cancelledAt = new Date();
+    }
+
+    next();
+});
