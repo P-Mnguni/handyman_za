@@ -154,3 +154,29 @@ export const deleteJob = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Accept job (handyman accepts a job)
+ * @route   POST /api/v1/jobs/:jobId/accept
+ * @access  Private - Handyman only
+ */
+export const acceptJob = async (req, res, next) => {
+    try {
+        const { jobId } = req.params;
+        const handymanId = req.user.userId;
+
+        if (!jobId) {
+            throw ApiError.badRequest("Job ID is required");
+        }
+
+        const job = await jobService.acceptJob(jobId, handymanId);
+
+        res.status(200).json({
+            success: true,
+            message: "Job accepted successfully",
+            data: { job }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
