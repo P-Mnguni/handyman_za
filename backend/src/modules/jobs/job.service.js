@@ -123,3 +123,44 @@ export const getJobById = async (jobId, user) => {
 
     return job;
 };
+
+/**
+ * Update job (client only, pending only)
+ * @param {string} jobId - Job ID
+ * @param {Object} updateData - Fields to update
+ * @param {string} userId - User ID making the request
+ * @param {string} userRole - User role
+ * @returns {Promise<Object>} Updated job
+ */
+export const updateJob = async (jobId, updateData, userId, userRole) => {
+    // Find job
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+        throw ApiError.notFound("Job not found");
+    }
+
+    // Permission check: Only client who owns the job can update
+    if (userRole === ' client' && job.client.toString() !== userId) {
+        throw ApiError.forbidden("You can only update your own jobs");
+    }
+
+    // Status check: Only pending jobs can be updated
+    if (job.status !== JobStatus.PENDING) {
+        throw ApiError.badRequest("Only pending jobs can be updated");
+    }
+
+    // Prevent updating certain fields
+    const forbiddenFields = ['client', 'status', 'handyman', '_id'];
+    forbiddenFields.forEach(field => {
+        if (updateData[field]) {
+            delete updateData[field];
+        }
+    });
+
+    // Update job
+    Object.assign(job, updateData);
+    await job.save();
+
+    return job;
+};
