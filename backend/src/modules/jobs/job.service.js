@@ -275,3 +275,37 @@ export const startJob = async (jobId, handymanId) => {
 
     return job;
 }
+
+/**
+ * Complete job (handyman completes work)
+ * @param {string} jobId - Job ID
+ * @param {string} handymanId - Handyman ID
+ * @returns {Promise<Object>} Updated job
+ */
+export const completeJob = async (jobId, handymanId) => {
+    // Find job
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+        throw ApiError.notFound("Job not found");
+    }
+
+    // Check if handyman is assigned to this job
+    if (!job.handyman || job.handyman.toString() !== handymanId) {
+        throw ApiError.forbidden("You are not assigned to this job");
+    }
+
+    // Check if job can be completed
+    const validStatuses = [JobStatus.ACCEPTED, JobStatus.IN_PROGRESS];
+    if (!validStatuses.includes(job.status)) {
+        throw ApiError.badRequest("This job cannot be completed in its current state");
+    }
+
+    // Update status
+    job.status = JobStatus.COMPLETED;
+    job.completedAt = new Date();
+
+    await job.save();
+
+    return job;
+};
