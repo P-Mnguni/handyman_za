@@ -30,3 +30,42 @@ export const createJob = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Get all jobs with optional filters
+ * @route   GET /api/v1/jobs
+ * @access  Private - All authenticated users
+ */
+export const getAllJobs = async (req, res, next) => {
+    try {
+        // Extract query parameters for filtering
+        const filters = {
+            status: req.query.status,
+            category: req.query.category,
+            city: req.query.city,
+            province: req.query.province,
+            clientId: req.query.clientId,
+            handymanId: req.query.handymanId,
+            page: parseInt(req.query.page) || 1,
+            limit: parseInt(req.query.limit) || 20,
+            sortBy: req.query.sortBy || 'createdAt',
+            sortOrder: req.query.sortOrder || 'desc',
+        };
+
+        // Get user role and ID from authenticated user
+        const user = {
+            id: req.user.userId,
+            role: req.user.role,
+        };
+
+        // Call service layer
+        const result = await jobService.getAllJobs(filters, user);
+
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+}
