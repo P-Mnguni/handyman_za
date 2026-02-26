@@ -164,3 +164,42 @@ export const updateJob = async (jobId, updateData, userId, userRole) => {
 
     return job;
 };
+
+/**
+ * Delete/cancel job (client only, pending only)
+ * @param {string} jobId - Job ID
+ * @param {string} userId - User ID making the request
+ * @param {string} userRole - User role
+ * @param {string} cancellationReason - Reason for cancellation
+ * @returns {Promise<Object>} Result
+ */
+export const deleteJob = async (jobId, userId, userRole, cancellationReason) => {
+    // Find job
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+        throw ApiError.notFound("Job not found");
+    }
+
+    // Permission check
+    if (userRole === 'client' && job.client.toString() !== userId) {
+        throw ApiError.forbidden("You can only cancel your own jobs");
+    }
+
+    // Status check: Only pending jobs can be cancelled
+    if (job.status !== JobStatus.PENDING) {
+        throw ApiError.badRequest("Only pending jobs can be cancelled");
+    }
+
+    // Update job status to cancelled
+    job.status = JobStatus.CANCELED;
+    job.cancelledAt = new Date();
+    job.cancelledBy = userId;
+    if (cancellationReason) {
+        job.cancellationReason = cancellationReason;
+    }
+
+    await job.save();
+
+    return { message: "Job cancelled successfully", job };
+};
