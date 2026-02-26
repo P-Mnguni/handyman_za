@@ -180,3 +180,29 @@ export const acceptJob = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Start job (handyman starts work)
+ * @route   POST /api/v1/jobs/:jobId/start
+ * @access  Private - Handyman only (assigned job)
+ */
+export const startJob = async (req, res, next) => {
+    try {
+        const { jobId } = req.params;
+        const handymanId = req.user.userId;
+
+        if (!jobId) {
+            throw ApiError.badRequest("Job ID is required");
+        }
+
+        const job = await jobService.startJob(jobId, handymanId);
+
+        res.status(200).json({
+            success: true,
+            message: "Job started successfully",
+            data: { job }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
