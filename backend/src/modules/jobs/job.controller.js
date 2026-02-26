@@ -99,3 +99,31 @@ export const getJobById = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Update job
+ * @route   PATCH /api/v1/jobs/:jobId
+ * @access  Private - Client only (own pending jobs)
+ */
+export const updateJob = async (req, res, next) => {
+    try {
+        const { jobId } = req.params;
+        const userId = req.user.userId;
+        const userRole = req.user.role;
+        const updateData = req.body;
+
+        if (!jobId) {
+            throw ApiError.badRequest("Job ID is required");
+        }
+
+        const updatedJob = await jobService.updateJob(jobId, updateData, userId, userRole);
+
+        res.status(200).json({
+            success: true,
+            message: "Job updated successfully",
+            data: { job: updatedJob }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
