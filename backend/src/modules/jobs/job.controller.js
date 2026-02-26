@@ -261,3 +261,31 @@ export const getMyJobs = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Get available jobs for handymen (pending jobs with no handyman)
+ * @route   GET /api/v1/jobs/available
+ * @access  Private - Handyman only
+ */
+export const getAvailableJobs = async (req, res, next) => {
+    try {
+        const filters = {
+            category: req.query.category,
+            city: req.query.city,
+            province: req.query.province,
+            page: parseInt(req.query.page) || 1,
+            limit: parseInt(req.query.limit) || 20,
+            sortBy: req.query.sortBy || 'createdAt',
+            sortOrder: req.query.sortOrder || 'desc'
+        };
+
+        const result = await jobService.getAvailableJobs(filters);
+
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
