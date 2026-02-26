@@ -232,3 +232,32 @@ export const completeJob = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Get jobs for current user (either as client or handyman)
+ * @route   GET /api/v1/jobs/my-jobs
+ * @access  Private - All authenticated users
+ */
+export const getMyJobs = async (req, res, next) => {
+    try {
+        const userId = req.user.userId;
+        const userRole = req.user.role;
+
+        const filters = {
+            status: req.query.status,
+            page: parseInt(req.query.page) || 1,
+            limit: parseInt(req.query.limit) || 20,
+            sortBy: req.query.sortBy || 'createdAt',
+            sortOrder: req.query.sortOrder || 'desc'
+        };
+
+        const result = await jobService.getUserJobs(userId, userRole, filters);
+
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
