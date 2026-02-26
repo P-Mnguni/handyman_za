@@ -68,4 +68,34 @@ export const getAllJobs = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
+
+/**
+ * Get job by ID
+ * @route   GET /api/v1/jobs/:jobId
+ * @access  Private - All authenticated users
+ */
+export const getJobById = async (req, res, next) => {
+    try {
+        const { jobId } = req.params;
+
+        if (!jobId) {
+            throw ApiError.badRequest("Job ID is required");
+        }
+
+        // Get user info for permission checks in service
+        const user = {
+            id: req.user.userId,
+            role: req.user.role
+        };
+
+        const job = await jobService.getJobById(jobId, user);
+
+        res.status(200).json({
+            success: true,
+            data: { job }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
