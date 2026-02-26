@@ -289,3 +289,31 @@ export const getAvailableJobs = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Add review to completed job
+ * @route   POST /api/v1/jobs/:jobId/review
+ * @access  Private - Client or Handymen (who completed the job)
+ */
+export const addReview = async (req, res, next) => {
+    try {
+        const { jobId } = req.params;
+        const userId = req.user.userId;
+        const userRole = req.user.role;
+        const reviewData = req.body;
+
+        if (!jobId) {
+            throw ApiError.badRequest("Job ID is required");
+        }
+
+        const result = await jobService.addJobReview(jobId, userId, userRole, reviewData);
+
+        res.status(200).json({
+            success: true,
+            message: "Review added successfully",
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
