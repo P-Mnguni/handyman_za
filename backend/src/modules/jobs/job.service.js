@@ -203,3 +203,42 @@ export const deleteJob = async (jobId, userId, userRole, cancellationReason) => 
 
     return { message: "Job cancelled successfully", job };
 };
+
+/**
+ * Accept job (handyman accepts a pending job)
+ * @param {string} jobId - Job ID
+ * @param {string} handymanId - Handyman ID
+ * @returns {Promise<Object>} Updated job
+ */
+export const acceptJob = async (jobId, handymanId) => {
+    // Find job
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+        throw ApiError.notFound("Job not found");
+    }
+
+    // Verify handyman exists
+    const handyman = await User.findById(handymanId);
+    if (!handyman || handyman.role !== 'handyman') {
+        throw ApiError.forbidden("Only handymen can accept jobs");
+    }
+
+    // Check if job is available for acceptance
+    if (job.status !== JobStatus.PENDING) {
+        throw ApiError.badRequest("This job is not available for acceptance");
+    }
+
+    if (job.handyman) {
+        throw ApiError.badRequest("This job already has a handyman assigned");
+    }
+
+    // Assign handyman and update status
+    job.handyman = handymanId;
+    job.status = JobStatus.ACCEPTED;
+    job.acceptedAt = new Date();
+
+    await job.save();
+
+    return job;
+};
