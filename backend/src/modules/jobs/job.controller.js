@@ -126,4 +126,31 @@ export const updateJob = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
+
+/**
+ * Delete/cancel job
+ * @route   DELETE /api/v1/jobs/:jobId
+ * @access  Private - Client only (own pending jobs)
+ */
+export const deleteJob = async (req, res, next) => {
+    try {
+        const { jobId } = req.params;
+        const userId = req.user.userId;
+        const userRole = req.user.role;
+        const { cancellationReason } = req.body;
+
+        if (!jobId) {
+            throw ApiError.badRequest("Job ID is required");
+        }
+
+        const result = await jobService.deleteJob(jobId, userId, userRole, cancellationReason);
+
+        res.status(200).json({
+            success: true,
+            message: result.message || "Job cancelled successfully"
+        });
+    } catch (error) {
+        next(error);
+    }
+};
