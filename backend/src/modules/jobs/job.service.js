@@ -87,3 +87,39 @@ export const getAllJobs = async (filters, user) => {
         }
     };
 };
+
+/**
+ * Get job by ID with permission check
+ * @param {string} jobId - Job ID
+ * @param {Object} user - User object { id, role }
+ * @returns {Promise<Object>} Job object
+ */
+export const getJobById = async (jobId, user) => {
+    // Find job 
+    const job = await Job.findById(jobId)
+                            .populate('client', 'name email phone')
+                            .populate('handyman', 'name email phone');
+
+    if (!job) {
+        throw ApiError.notFound("Job not found");
+    }
+
+    // Permission check based on role
+    if (user.role === 'client' && job.client._id.toString() !== user.id) {
+        throw ApiError.forbidden("You can only view your own jobs");
+    }
+
+    if (user.role === 'handyman') {
+        // Handymen can view pending jobs OR jobs they're assigned to
+        const isAssigned = job.handyman && job.handyman._id.toString() === user.id;
+        const isPending = job.status === JobStatus.PENDING && !job.handyman;
+
+        if (!isAssigned && !isPending) {
+            throw ApiError.forbidden("You can only view pending jobs or jobs assigned to you");
+        }
+    }
+
+    // Admin has no restrictions
+
+    return job;
+};
