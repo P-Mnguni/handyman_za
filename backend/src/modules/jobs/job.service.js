@@ -399,3 +399,52 @@ export const getAvailableJobs = async (filters) => {
         }
     };
 };
+
+/**
+ * Add review to completed job
+ * @param {string} jobId - Job ID
+ * @param {string} userId - User ID adding review
+ * @param {string} userRole - User role
+ * @param {string} reviewData - Review data
+ * @returns {Promise<Object>} Updated job
+ */
+export const addJobReview = async (jobId, userId, userRole, reviewData) => {
+    // Find job
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+        throw ApiError.notFound("Job not found");
+    }
+
+    // Check if job is completed
+    if (job.status !== JobStatus.COMPLETED) {
+        throw ApiError.badRequest("Review can only be added to completed jobs");
+    }
+
+    // Check if user is authorized to review
+    const isClient = job.client.toString() === userId && userRole === 'client';
+    const isHandyman = job.handyman && job.handyman.toString() === userId && userRole === 'handyman';
+
+    if (!isClient && !isHandyman) {
+        throw ApiError.forbidden("You are not authorized to review this job");
+    }
+
+    // Check if already reviewed
+    if (isClient && job.clientReviewed) {
+        throw ApiError.badRequest("You have already reviewed this job");
+    }
+    if (isHandyman && job.handymanReviewed) {
+        throw ApiError.badRequest("You have already reviewed this job");
+    }
+
+    //Update review status
+    if (isClient) {
+        job.clientReviewed = true;
+    } else if (isHandyman) {
+        job.handymanReviewed = true;
+    }
+
+    await job.save();
+
+    return { message: "Review added successfully", job };
+};
