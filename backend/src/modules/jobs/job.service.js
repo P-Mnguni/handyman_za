@@ -309,3 +309,51 @@ export const completeJob = async (jobId, handymanId) => {
 
     return job;
 };
+
+/**
+ * Get jobs for specific user (client or handyman)
+ * @param {string} userId - User ID
+ * @param {string} userRole - User role
+ * @param {Object} filters - Pagination and status filters
+ * @returns {Promise<Object>} Paginated jobs
+ */
+export const getUserJobs = async (userId, userRole, filters) => {
+    const { status, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = filters;
+
+    // Build query based on role
+    let query = {};
+
+    if (userRole === 'client') {
+        query.client = userId;
+    } else if (userRole === 'handyman') {
+        query.handyman = userId;
+    }
+
+    if (status) {
+        query.status = status;
+    }
+
+    // Pagination
+    const skip = (page - 1) * limit;
+    const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+    const jobs = await Job.find(query)
+                            .populate('client', 'name email phone')
+                            .populate('handyman', 'name email phone')
+                            .sort(sort)
+                            .skip(skip)
+                            .limit(limit)
+                            .lean();
+
+    const total = await Job.countDocuments(query);
+
+    return {
+        jobs,
+        pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+        }
+    };
+};
