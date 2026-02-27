@@ -357,3 +357,45 @@ export const getUserJobs = async (userId, userRole, filters) => {
         }
     };
 };
+
+/**
+ * Get available jobs for handymen 
+ * @param {Object} filters - Category, location, pagination
+ * @returns {Promise<Object>} Paginated available jobs
+ */
+export const getAvailableJobs = async (filters) => {
+    const { category, city, province, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = filters;
+
+    // Build query for available jobs
+    let query = {
+        status: JobStatus.PENDING,
+        handyman: null
+    };
+
+    if (category) query.serviceCategory = category;
+    if (city) query['location.city'] = city;
+    if (province) query['location.province'] = province;
+
+    // Pagination
+    const skip = (page - 1) * limit;
+    const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+    const jobs = await Job.find(query)
+                            .populate('client', 'name email phone')
+                            .sort(sort)
+                            .skip(skip)
+                            .limit(limit)
+                            .lean();
+
+    const total = await Job.countDocuments(query);
+
+    return {
+        jobs,
+        pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+        }
+    };
+};
