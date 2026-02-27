@@ -1,18 +1,7 @@
 import express from 'express';
 import { authenticate } from '../auth/auth.middleware.js';
-import { authorize } from '../../middlewares/role.middleware.js';
-import {
-    createJob,
-    getAllJobs,
-    getJobById,
-    acceptJob,
-    completeJob,
-    cancelJob,
-    updateJobStatus,
-    getMyJobs,
-    addReview,
-    uploadJobImages
-} from './job.controller.js';
+import { authorize, role } from '../../middlewares/role.middleware.js';
+import * as jobController from './job.controller.js';
 
 const router = express.Router();
 
@@ -34,7 +23,7 @@ router.post(
     "/",
     authenticate,
     authorize("client"),
-    createJob
+    jobController.createJob
 );
 
 /**
@@ -45,7 +34,8 @@ router.post(
 router.get(
     "/my-jobs",
     authenticate,
-    getMyJobs
+    role.user(),
+    jobController.getMyJobs
 );
 
 // ===============================================
@@ -54,14 +44,14 @@ router.get(
 
 /**
  * @route   GET /api/v1/jobs
- * @desc    Get all jobs (with filters - Handymen see available, Admins see all)
- * @access  Private (Handyman or Admin)
+ * @desc    Get all jobs (with role checks in service)
+ * @access  Private (Client/Handyman/Admin with proper permissions)
  */
 router.get(
     "/",
     authenticate,
-    authorize("handyman", "admin"),
-    getAllJobs
+    role.user(),
+    jobController.getAllJobs
 );
 
 /**
@@ -73,7 +63,7 @@ router.get(
     "/available",
     authenticate,
     authorize("handyman"),
-    getAllJobs                  // Same controller but filters applied
+    jobController.getAvailableJobs
 );
 
 // ===============================================
@@ -81,26 +71,27 @@ router.get(
 // ===============================================
 
 /**
- * @route   GET /api/v1/jobs/:id
+ * @route   GET /api/v1/jobs/:jobId
  * @desc    Get job by ID (Access control in service layer)
  * @access  Private (Client/Handyman/Admin with proper permissions)
  */
 router.get(
-    "/:id",
+    "/:jobId",
     authenticate,
-    getJobById
+    role.user(),
+    jobController.getJobById
 );
 
 /**
- * @route   PATCH /api/v1/jobs/:id
+ * @route   PATCH /api/v1/jobs/:jobId
  * @desc    Update job (Only client can update their pending jobs)
  * @access  Private (Client)
  */
 router.patch(
-    "/:id",
+    "/:jobId",
     authenticate,
     authorize("client"),
-    updateJobStatus             // implemented for general updates
+    jobController.updateJob             // implemented for general updates
 );
 
 // ===============================================
@@ -108,37 +99,51 @@ router.patch(
 // ===============================================
 
 /**
- * @route   PATCH /api/v1/jobs/:id/accept
+ * @route   POST /api/v1/jobs/:jobId/accept
  * @desc    Accept a job (Handyman only)
  * @access  Private (Handyman)
  */
-router.patch(
-    "/:id/accept",
+router.post(
+    "/:jobId/accept",
     authenticate,
     authorize("handyman"),
-    acceptJob
+    jobController.acceptJob
 );
 
 /**
- * @route   PATCH /api/v1/jobs/:id/complete
- * @desc    Mark job as completed (Client or Handyman, with service layer checks)
- * @access  Private
+ * @route   POST /api/v1/jobs/:jobId/start
+ * @desc    Start a job (Handyman only)
+ * @access  Private (Handyman)
  */
-router.patch(
-    "/:id/complete",
+router.post(
+    "/:jobId/start",
     authenticate,
-    completeJob
+    authorize("handyman"),
+    jobController.startJob
 );
 
 /**
- * @route   PATCH /api/v1/jobs/:id/cancel
- * @desc    Cancel a job (Client can cancel pending jobs, Handyman can cancel accepted jobs)
+ * @route   POST /api/v1/jobs/:jobId/complete
+ * @desc    Mark job as completed (Handyman)
  * @access  Private
  */
-router.patch(
-    "/:id/cancel",
+router.post(
+    "/:jobId/complete",
     authenticate,
-    cancelJob
+    authorize("handyman"),
+    jobController.completeJob
+);
+
+/**
+ * @route   DELETE /api/v1/jobs/:jobId
+ * @desc    Delete a job (Client can delete pending jobs)
+ * @access  Private
+ */
+router.delete(
+    "/:jobId",
+    authenticate,
+    authorize("client"),
+    jobController.deleteJob
 );
 
 // ===============================================
@@ -146,26 +151,15 @@ router.patch(
 // ===============================================
 
 /**
- * @route   POST /api/v1/jobs/:id/review
+ * @route   POST /api/v1/jobs/:jobId/review
  * @desc    Leave a review for completed job
  * @access  Private (Client or Handyman who was part of the job)
  */
 router.post(
-    "/:id/review",
+    "/:jobId/review",
     authenticate,
-    addReview
-);
-
-/**
- * @route   POST /api/v1/jobs/:id/upload
- * @desc    Upload images for a job
- * @access  Private (Client who created the job)
- */
-router.post(
-    "/:id/upload-images",
-    authenticate,
-    authorize("client"),
-    uploadJobImages
+    role.user,
+    jobController.addReview
 );
 
 export default router;
