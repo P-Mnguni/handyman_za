@@ -12,24 +12,17 @@ import { token } from 'morgan';
  */
 export const register = async (req, res, next) => {
     try {
-        console.log("========== CONTROLLER DEBUG ==========");
-        console.log("Request body:", req.body);
-        console.log("Headers:", req.headers['content-type']);
-
         const deviceInfo = req.headers["user-agent"] || "unknown";
-        const userData = req.body;
 
         // Combine firstName and lastName for storage in User model
-        const fullName = `${userData.firstName} ${userData.lastName}`.trim();
+        const fullName = `${req.body?.firstName} ${req.body?.lastName}`.trim();
 
         // Prepare data for service
         const registrationData = {
-            ...userData,
+            ...req.body,
             deviceInfo,
             fullName
         };
-
-        console.log("Data being sent to service:", registrationData);
 
         const result = await authService.register(registrationData);
 
@@ -65,6 +58,7 @@ export const login = async (req, res, next) => {
             message: 'Login successful',
             data: result,
         });
+
     } catch (error) {
         next(error);
     }
