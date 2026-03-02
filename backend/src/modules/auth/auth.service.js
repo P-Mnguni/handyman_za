@@ -41,14 +41,6 @@ class AuthService {
      * Register a new client (customer or handyman)
      */
     async register(userData) {
-        console.log('========== REGISTER DEBUG ==========');
-        console.log('1️⃣ Raw userData received:', userData);
-        console.log('2️⃣ Password exists?', !!userData.password);
-        console.log('3️⃣ Password value:', userData.password);
-        console.log('4️⃣ Password type:', typeof userData.password);
-        console.log('5️⃣ Password length:', userData.password.length);
-        console.log('6️⃣ All keys in userData:', Object.keys(userData));
-
         try {    
             // Validation
             if (!userData.email || !userData.password || !userData.fullName || !userData.role) {
@@ -66,33 +58,15 @@ class AuthService {
 
             // Checks password before bcrypt
             if (!userData.password) {
-                console.log('❌ CRITICAL: password is missing or falsy!');
-                console.log('   password value:', userData.password);
-                console.log('   password type:', typeof userData.password);
                 throw ApiError.badRequest('Password is undefined or null');
             }
 
             if (typeof userData.password !== 'string') {
-                console.log('❌ CRITICAL: password is not a string!');
-                console.log('   It is:', typeof userData.password);
                 throw ApiError.badRequest(`Password must be a string, got ${typeof userData.password}`);
             }
 
             // Hash the password
-            console.log('7️⃣ About to hash password with bcrypt...');
-            console.log('8️⃣ SALT_ROUNDS value:', SALT_ROUNDS);
             const hashedPassword = bcrypt.hashSync(userData.password, SALT_ROUNDS);
-
-            console.log('9️⃣ Password hashed successfully!');
-            console.log("🔟 Hash type:", typeof hashedPassword);
-            console.log("🔟 Hash value:", hashedPassword);
-
-            // Only try substring if it's a string
-            if (typeof hashedPassword === 'string') {
-                console.log('🔟 Hash preview:', hashedPassword.substring(0, 20) + "...");
-            } else {
-                console.log("🔟 WARNING: hashedPassword is NOT a string!");
-            }
 
             // Base user data
             const baseUserData = {
