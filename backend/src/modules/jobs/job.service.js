@@ -2,6 +2,7 @@ import { Job } from './job.model.js';
 import { JobStatus } from './job.constants.js';
 import User  from '../users/user.model.js';
 import ApiError from '../../utils/ApiError.js';
+import mongoose from 'mongoose';
 
 /**
  * Create a new Job
@@ -10,8 +11,9 @@ import ApiError from '../../utils/ApiError.js';
  * @returns {Promise<Object>} Created job
  */
 export const createJob = async (jobData, clientId) => {
-    // Verify client exists
+    // Verify client exists    
     const client = await User.findById(clientId);
+
     if (!client) {
         throw ApiError.notFound("Client not found");
     }

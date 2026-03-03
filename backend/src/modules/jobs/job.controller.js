@@ -9,16 +9,20 @@ import { ApiError } from '../../utils/ApiError.js';
 export const createJob = async (req, res, next) => {
     try {
         // Get client ID from authenticated user
-        const clientId = req.user.userId;
+        const clientId = req.user?.userId;
+        
+        if (!clientId) {
+            throw ApiError.badRequest("User ID not found in request. Authentication middleware may be misconfigured.");
+        }
 
         // Extract job data from request body
         const jobData = {
             ...req.body,
-            client: clientId
+            //client: clientId
         };
 
         // Call service layer
-        const job = await jobService.createJob(jobData);
+        const job = await jobService.createJob(jobData, clientId);
 
         // Return created job
         res.status(201).json({

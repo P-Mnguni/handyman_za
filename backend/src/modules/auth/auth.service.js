@@ -74,7 +74,7 @@ class AuthService {
                 email: userData.email.toLowerCase(),
                 phone: userData.phoneNumber,
                 passwordHash: hashedPassword,
-                role: userData.role === 'client' ? 'CUSTOMER' : 'HANDYMAN', // Map client->CUSTOMER, handyman->HANDYMAN
+                role: userData.role === 'client' ? 'client' : 'handyman', // Map client->CUSTOMER, handyman->HANDYMAN
                 refreshTokens: [],                                           // Initialize empty refresh tokens array
                 isEmailVerified: false,
                 isPhoneVerified: false,
@@ -82,7 +82,7 @@ class AuthService {
             };
 
             // handyman-specific data
-            if (userData.role === 'HANDYMAN') {
+            if (userData.role === 'handyman') {
                 baseUserData.handymanProfile = {
                     bio: userData.bio || '',
                     skills: userData.skills || [],

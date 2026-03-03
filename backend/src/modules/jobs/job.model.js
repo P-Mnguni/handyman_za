@@ -175,7 +175,7 @@ jobSchema.virtual('canBeReviewed').get(function() {
 });
 
 // 📝 Pre-save middleware to update timestamps based on status change
-jobSchema.pre('save', function(next) {
+jobSchema.pre('save', async function() {
     // When status changes to ACCEPTED
     if (this.isModified('status') && this.status === JobStatus.ACCEPTED && !this.acceptedAt) {
         this.acceptedAt = new Date();
@@ -196,7 +196,6 @@ jobSchema.pre('save', function(next) {
         this.cancelledAt = new Date();
     }
 
-    next();
 });
 
 // 📝 Instance method to check if user can modify this job
