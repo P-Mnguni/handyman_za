@@ -287,7 +287,10 @@ export const getAvailableJobs = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            data: result
+            data: {
+                jobs: result.jobs,
+                pagination: result.pagination
+            }
         });
     } catch (error) {
         next(error);
