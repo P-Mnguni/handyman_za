@@ -366,7 +366,6 @@ export const getUserJobs = async (userId, userRole, filters) => {
  * @returns {Promise<Object>} Paginated available jobs
  */
 export const getAvailableJobs = async (filters) => {
-    console.log("========== GET AVAILABLE JOBS ==========");
     const { category, city, province, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = filters;
 
     // Build query for available jobs
@@ -375,13 +374,9 @@ export const getAvailableJobs = async (filters) => {
         handyman: null
     };
 
-    console.log("Base query:", JSON.stringify(query, null, 2));
-
     if (category) query.serviceCategory = category;
     if (city) query['location.city'] = city;
     if (province) query['location.province'] = province;
-
-    console.log("Final query:", JSON.stringify(query, null, 2));
 
     // Pagination
     const skip = (page - 1) * limit;
@@ -393,8 +388,6 @@ export const getAvailableJobs = async (filters) => {
                             .skip(skip)
                             .limit(limit)
                             .lean();
-
-    console.log(`Found ${jobs.length} available jobs`);
 
     const total = await Job.countDocuments(query);
 
