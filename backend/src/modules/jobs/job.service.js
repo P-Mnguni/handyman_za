@@ -213,11 +213,6 @@ export const deleteJob = async (jobId, userId, userRole, cancellationReason) => 
  * @returns {Promise<Object>} Updated job
  */
 export const acceptJob = async (jobId, handymanId) => {
-    console.log("========== ACCEPT JOB DEBUG ==========");
-    console.log("1. jobId:", jobId);
-    console.log("2. handymanId:", handymanId);
-    console.log("3. handymanId type:", typeof handymanId);
-
     // Find job
     const job = await Job.findById(jobId);
 
@@ -225,14 +220,9 @@ export const acceptJob = async (jobId, handymanId) => {
         throw ApiError.notFound("Job not found");
     }
 
-    console.log("4. Job found:", {
-        id: job._id,
-        currentStatus: job.status,
-        currentHandyman: job.handyman
-    });
-
     // Verify handyman exists
     const handyman = await User.findById(handymanId);
+    
     if (!handyman || handyman.role !== 'handyman') {
         throw ApiError.forbidden("Only handymen can accept jobs");
     }
@@ -251,34 +241,15 @@ export const acceptJob = async (jobId, handymanId) => {
     job.status = JobStatus.ACCEPTED;
     job.acceptedAt = new Date();
 
-    console.log("5. Before save - job modified:", {
-        handyman: job.handyman,
-        status: job.status,
-        acceptedAt: job.acceptedAt
-    });
-
     await job.save();
 
     // Reload from DB to verify save worked
     const savedJob = await Job.findById(jobId);
-    console.log("6. After save - from DB:", {
-        handyman: savedJob.handyman,
-        handymanString: savedJob.handyman?.toString(),
-        handymanIdType: typeof savedJob.handyman,
-        status: savedJob.status,
-        match: savedJob.handyman?.toString() === handymanId
-    });
 
     const savedHandymanId = savedJob.handyman?.toString();
     const requestedHandymanId = handymanId.toString();
 
-    console.log(`   Comparing: saved="${savedHandymanId}", requested="${requestedHandymanId}"`);
-    console.log(`   Match: ${savedHandymanId === requestedHandymanId}`);
-
     if (!savedJob.handyman || savedHandymanId !== requestedHandymanId) {
-        console.log("❌ CRITICAL: Handyman not saved correctly!");
-        console.log(`   Saved handyman: ${savedHandymanId}`);
-        console.log(`   Requested handyman: ${requestedHandymanId}`);
         throw new Error("Failed to assign handyman to job");
     }
 
@@ -292,11 +263,6 @@ export const acceptJob = async (jobId, handymanId) => {
  * @returns {Promise<Object>} Updated job
  */
 export const startJob = async (jobId, handymanId) => {
-    console.log("========== START JOB DEBUG ==========");
-    console.log("1. jobId:", jobId);
-    console.log("2. handymanId:", handymanId);
-    console.log("3. handymanId type:", typeof handymanId);
-
     // Find job
     const job = await Job.findById(jobId);
 
@@ -304,30 +270,15 @@ export const startJob = async (jobId, handymanId) => {
         throw ApiError.notFound("Job not found");
     }
 
-    console.log("4. Job found:", {
-        id: job._id,
-        status: job.status,
-        handyman: job.handyman,
-        handymanType: typeof job.handyman,
-        handymanString: job.handyman?.toString()
-    });
-
     // Check if handyman is assigned to this job
     if (!job.handyman) {
-        console.log("❌ No handyman assigned to job");
         throw ApiError.forbidden("You are not assigned to this job");
     }
 
     const jobHandymanStr = job.handyman.toString();
     const handymanIdStr = handymanId.toString();
 
-    console.log("5. Comparing:", {
-        jobHandymanStr,
-        handymanIdStr,
-        match: jobHandymanStr === handymanIdStr
-    });
-
-    if (jobHandymanStr !== handymanId) {
+    if (jobHandymanStr !== handymanIdStr) {
         throw ApiError.forbidden("You are not assigned to this job");
     }
 
@@ -341,7 +292,6 @@ export const startJob = async (jobId, handymanId) => {
     job.startedAt = new Date();
 
     await job.save();
-    console.log("6. Job started successfully");
 
     return job;
 }

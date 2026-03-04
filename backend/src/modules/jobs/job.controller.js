@@ -206,7 +206,8 @@ export const startJob = async (req, res, next) => {
             message: "Job started successfully",
             data: { job }
         });
-    } catch (error) {
+
+    } catch (error) {        
         next(error);
     }
 };
