@@ -14,11 +14,11 @@ const DashboardLayout = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex">
             {/* Mobile sidebar backdrop */ }
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-gray-600 bg-opacity-50 transition-opacity lg:hidden"
+                    className="fixed inset-0 bg-gray-600 bg-opacity-50 transition-opacity z-20 lg:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
@@ -26,7 +26,8 @@ const DashboardLayout = () => {
             {/* Sidebar */}
             <aside
                 className={`
-                    fixed top-0 left-0 z-40 h-screen w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+                    fixed lg:static insert-y-0 left-0 z-30 w-64 bg-white shadow-lg transform 
+                    transition-transform duration-300 ease-in-out
                     ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     lg:translate-x-0 lg:static lg:z-auto
                 `}
@@ -67,9 +68,9 @@ const DashboardLayout = () => {
             </aside>
 
             {/* Main content area */}
-            <div className="lg:ml-64 min-h-screen flex flex-col">
+            <div className="flex-1 flex flex-col min-w-0">
                 {/* Top navbar */}
-                <header className="bg-white shadow-sm sticky top-0 z-30">
+                <header className="bg-white shadow-sm sticky top-0 z-10">
                     <div className="flex items-center justify-between px-4 h-16">
                         {/* Mobile menu button */}
                         <button
@@ -118,7 +119,7 @@ const DashboardLayout = () => {
                                         strokeWidth={2}
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 
                                         2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538 -.214 1.055-.595 1.436L4
-                                        17h5m6 0v1a3 30 11-6 0v-1m6 0H9"
+                                        17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                                     />
                                 </svg>
                                 <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
@@ -156,7 +157,7 @@ const DashboardLayout = () => {
                 </header>
 
                 {/* Page content */}
-                <main className="flex-1 p-4 sm:p-6 lg:p-8">
+                <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
                     <Outlet />
                 </main>
 
