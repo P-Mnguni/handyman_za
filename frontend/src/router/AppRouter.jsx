@@ -55,3 +55,37 @@ const Settings = () => (
     </div>
 )
 
+const AppRouter = () => {
+    return (
+        <BrowserRouter>
+            <Routes>
+                {/* Public routes - no layout */}
+                <Route path='/login' element={<Login />} />
+                <Route path='/register' element={<Register />} />
+
+                {/* Protected routes - with DashboardLayout */}
+                <Route path='/' element={<DashboardLayout />}>
+                    {/* Index route shows Dashboard at */}
+                    <Route index element={<Dashboard />} />
+
+                    {/* Nested routes - match the nav items in DashboardLayout */}
+                    <Route path='dashboard' element={<Dashboard />} />
+                    <Route path='jobs' element={<Jobs />} />
+                    <Route path='messages' element={<Messages />} />
+                    <Route path='profile' element={<Profile />} />
+                    <Route path='settings' element={<Settings />} />
+
+                    {/* Catch-all for unmatched routes */}
+                    <Route path='*' element={
+                        <div className='text-center py-10'>
+                            <h2 className='text-2xl font-bold text-gray-800'>404</h2>
+                            <p className='text-gray-600'>Page not found</p>
+                        </div>
+                    } />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    )
+}
+
+export default AppRouter
