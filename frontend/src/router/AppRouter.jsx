@@ -19,3 +19,17 @@ const Register = () => (
         </div>
     </div>
 )
+
+const Dashboard = () => (
+    <div>
+        <h1 className='text-2xl font-bold mb-4'>Dashboard</h1>
+        <p className='text-gray-600'>Welcome to your dashboard!</p>
+    </div>
+)
+
+const Jobs = () => (
+    <div>
+        <h1 className='text-2xl font-bold mb-4'>Jobs</h1>
+        <p className='text-gray-600'>Manage your jobs here.</p>
+    </div>
+)
