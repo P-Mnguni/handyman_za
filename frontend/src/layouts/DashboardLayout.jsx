@@ -1,7 +1,9 @@
-//import { useState } from "react";
+import { useState } from "react";
 import { Outlet, NavLink } from 'react-router-dom';
 
 const DashboardLayout = () => {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
     const navItems = [
         { path: '/dashboard', label: 'Dashboard', icon: '📊' },
         { path: '/jobs', label: 'Jobs', icon: '🛠️' },
@@ -12,8 +14,8 @@ const DashboardLayout = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
-            {/* Sidebar - fixed width, full height */}
-            <aside className="w-64 bg-white shadow-lg h-screen flex flex-col shrink-0">
+            {/* Sidebar - hidden on mobile, visible on desktop */}
+            <aside className="hidden lg:block lg:w-64 bg-white shadow-lg h-screen flex flex-col shrink-0">
                 {/* Logo */}
                 <div className="h-16 flex items-center justify-center border-b border-gray-200">
                     <h1 className="text-xl font-bold text-blue-600">Handyman.za</h1>
@@ -43,12 +45,37 @@ const DashboardLayout = () => {
                 </nav>
             </aside>
 
-            {/* Main content area - takes remaining width */}
+            {/* Main content area - takes remaining width with no left margin on mobile */}
             <div className="flex-1 flex flex-col">
                 {/* Navbar */}
                 <header className="bg-white shadow-sm h-16 shrink-0">
                     <div className="h-full px-4 flex items-center justify-between">
-                        <h2 className="text-lg font-semibold text-gray-800">Dashboard</h2>
+                        {/* Left section with hamburger menu */}
+                        <div className="flex items-center">
+                            {/* Hamburger menu button - visible only on mobile */}
+                            <button
+                                onClick={() => setSidebarOpen(true)}
+                                className="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none lg:hidden mr-3"
+                                aria-label="Open sidebar"
+                            >
+                                <svg
+                                    className="h-6 w-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 6h16M4 12h16M4 18h16"
+                                    />
+                                </svg>
+                            </button>
+                            <h2 className="text-lg font-semibold text-gray-800">Dashboard</h2>
+                        </div>
+
+                        {/* Right section */}
                         <div className="flex items-center space-x-4">
                             <button className="p-2 rounded-full text-gray-600 hover:bg-gray-100">
                                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,6 +109,46 @@ const DashboardLayout = () => {
                     </p>
                 </footer>
             </div>
+
+            {/* Mobile sidebar drawer - slides in from left */}
+            {sidebarOpen && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 lg:hidden"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+
+                    {/* Sidebar drawer */}
+                    <aside className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 flex flex-col">
+                        <div className="h-16 flex items-center justify-center border-b border-gray-200">
+                            <h1 className="text-xl font-bold text-blue-600">Handyman.za</h1>
+                        </div>
+                        <nav className="flex-1 p-4 overflow-y-auto">
+                            <ul className="space-y-2">
+                                {navItems.map((item) => (
+                                    <li key={item.path}>
+                                        <NavLink
+                                            to={item.path}
+                                            className={({ isActive }) =>
+                                            `flex items-center px-4 py-3 rounded-lg transition-colors ${
+                                                isActive
+                                                    ? 'bg-blue-50 text-blue-600'
+                                                    : 'text-gray-700 hover:bg-gray-100' 
+                                            }`
+                                        }
+                                        onClick={() => setSidebarOpen(false)}
+                                        >
+                                            <span className="mr-3 text-lg">{item.icon}</span>
+                                            <span className="font-medium">{item.label}</span>
+                                        </NavLink>
+                                    </li>
+                                ))}
+                            </ul>
+                        </nav>
+                    </aside>
+                </>
+            )}
         </div>
     );
 };
