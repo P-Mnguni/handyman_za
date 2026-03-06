@@ -22,14 +22,36 @@ const Register = () => (
 
 const Dashboard = () => (
     <div>
-        <h1 className='text-2xl font-bold mb-4'>Dashboard</h1>
-        <p className='text-gray-600'>Welcome to your dashboard!</p>
+        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+        <p className="text-gray-600">Welcome to your dashboard!</p>
     </div>
 )
 
 const Jobs = () => (
     <div>
-        <h1 className='text-2xl font-bold mb-4'>Jobs</h1>
-        <p className='text-gray-600'>Manage your jobs here.</p>
+        <h1 className="text-2xl font-bold mb-4">Jobs</h1>
+        <p className="text-gray-600">Manage your jobs here.</p>
     </div>
 )
+
+const Messages = () => (
+    <div>
+        <h1 className="text-2xl font-bold mb-4">Messages</h1>
+        <p className="text-gray-600">Your conversations will appear here.</p>
+    </div>
+)
+
+const Profile = () => (
+    <div>
+        <h1 className="text-2xl font-bold mb-4">Profile</h1>
+        <p className="text-gray-600">Your profile information.</p>
+    </div>
+)
+
+const Settings = () => (
+    <div>
+        <h1 className="text-2xl font-bold mb-4">Settings</h1>
+        <p className="text-gray-600">Application settings.</p>
+    </div>
+)
+
