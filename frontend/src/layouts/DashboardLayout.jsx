@@ -1,18 +1,10 @@
 import { useState } from "react";
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import Sidebar from "../components/Sidebar";
 
 const DashboardLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-
     const location = useLocation();
-
-    const navItems = [
-        { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-        { path: '/jobs', label: 'Jobs', icon: '🛠️' },
-        { path: '/messages', label: 'Messages', icon: '💬' },
-        { path: '/profile', label: 'Profile', icon: '👤' },
-        { path: '/settings', label: 'Settings', icon: '⚙️' },
-    ];
 
     // Function to get page title from path
     const getPageTitle = () => {
@@ -30,49 +22,22 @@ const DashboardLayout = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
-            {/* Sidebar - hidden on mobile, visible on desktop */}
-            <aside className="hidden lg:block lg:w-64 bg-white shadow-lg h-screen flex-col shrink-0">
-                {/* Logo */}
-                <div className="h-16 flex items-center justify-center border-b border-gray-200">
-                    <h1 className="text-xl font-bold text-blue-600">Handyman.za</h1>
-                </div>
+            {/* Desktop Sidebar */}
+            <div className="hidden lg:block">
+                <Sidebar />
+            </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 p-4 overflow-y-auto">
-                    <ul className="space-y-2">
-                        {navItems.map((item) => (
-                            <li key={item.path}>
-                                <NavLink
-                                    to={item.path}
-                                    className={({ isActive }) =>
-                                    `flex items-center px-4 py-3 rounded-lg transition-colors ${
-                                        isActive
-                                            ? 'bg-blue-50 text-blue-600'
-                                            : 'text-gray-700 hover:bg-gray-100'
-                                        }`
-                                    }
-                                >
-                                    <span className="mr-3 text-lg">{item.icon}</span>
-                                    <span className="font-medium">{item.label}</span>
-                                </NavLink>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-            </aside>
-
-            {/* Main content area - takes remaining width with no left margin on mobile */}
+            {/* Main content area */}
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Navbar */}
                 <header className="bg-white shadow-sm h-16 shrink-0 sticky top-0 z-30">
                     <div className="h-full px-4 flex items-center justify-between">
                         {/* Left section with hamburger menu */}
                         <div className="flex items-center">
-                            {/* Hamburger menu button - visible only on mobile */}
+                            {/* Mobile hamburger */}
                             <button
-                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                onClick={() => setSidebarOpen(true)}
                                 className="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none lg:hidden mr-3"
-                                aria-label="Toggle sidebar"
                             >
                                 <svg
                                     className="h-6 w-6"
@@ -80,21 +45,12 @@ const DashboardLayout = () => {
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
                                 >
-                                    {sidebarOpen ? (
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M4 6h16M4 12h16M4 18h16"
-                                        />
-                                    ) : (
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M4 6h16M4 12h16M4 18h16"
-                                        />
-                                    )}
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 6h16M4 12h16M4 18h16"
+                                    />
                                 </svg>
                             </button>
                             
@@ -136,9 +92,8 @@ const DashboardLayout = () => {
                 </footer>
             </div>
 
-            {/* Mobile sidebar drawer - slides in from left */}
+            {/* Mobile sidebar drawer - slides in from left */}   
             <>
-                {/* Backdrop */}
                 {sidebarOpen && (
                     <div
                         className="fixed inset-0 bg-gray-600 opacity-50 z-40 lg:hidden"
@@ -147,42 +102,15 @@ const DashboardLayout = () => {
                 )}
 
                 {/* Sidebar drawer */}
-                <div
-                    className={
-                        `fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out
-                        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                        lg:hidden`
-                    }
-                >
-                    <div className="flex flex-col h-full">
-                        <div className="h-16 flex items-center justify-center border-b border-gray-200">
-                            <h1 className="text-xl font-bold text-blue-600">Handyman.za</h1>
-                        </div>
-                        <nav className="flex-1 p-4 overflow-y-auto">
-                            <ul className="space-y-2">
-                                {navItems.map((item) => (
-                                    <li key={item.path}>
-                                        <NavLink
-                                            to={item.path}
-                                            className={({ isActive }) =>
-                                                `flex items-center px-4 py-3 rounded-lg transition-colors ${
-                                                    isActive
-                                                        ? 'bg-blue-50 text-blue-600'
-                                                        : 'text-gray-700 hover:bg-gray-100'
-                                                }`
-                                            }
-                                            onClick={() => setSidebarOpen(false)}
-                                        >
-                                            <span className="mr-3 text-lg">{item.icon}</span>
-                                            <span className="font-medium">{item.label}</span>
-                                        </NavLink>
-                                    </li>
-                                ))}
-                            </ul>
-                        </nav>
-                    </div>
+                <div className={`
+                        fixed top-0 left-0 h-full w-64 z-50 lg:hidden transform transition-transform duration-300 ease-in-out
+                        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+                    `}>
+                    <Sidebar onClose={() => setSidebarOpen(false)} />
                 </div>
+                
             </>
+            
         </div>
     );
 };
