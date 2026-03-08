@@ -49,22 +49,22 @@ const Dashboard = () => {
                     <h3 className='text-lg font-semibold text-gray-800'>Recent Jobs</h3>
                 </div>
                 <div className='overflow-x-auto'>
-                    <table className='w-full'>
+                    <table className='w-full table-fixed'>
                         <thread className='bg-gray-50'>
                             <tr>
-                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]'>
                                     Job
                                 </th>
-                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]'>
                                     Customer
                                 </th>
-                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]'>
                                     Date
                                 </th>
-                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]'>
                                     Status
                                 </th>
-                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]'>
                                     Action
                                 </th>
                             </tr>
@@ -72,15 +72,15 @@ const Dashboard = () => {
                         <tbody className='divide-y divide-gray-200'>
                             {recentJobs.map((job) => (
                                 <tr key={job.id} className='hover:bg-gray-50'>
-                                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>{job.title}</td>
-                                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-600'>{job.customer}</td>
-                                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-600'>{job.date}</td>
-                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                    <td className='px-6 py-4 text-sm font-medium text-gray-900 truncate'>{job.title}</td>
+                                    <td className='px-6 py-4 text-sm text-gray-600'>{job.customer}</td>
+                                    <td className='px-6 py-4 text-sm text-gray-600'>{job.date}</td>
+                                    <td className='px-6 py-4'>
                                         <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(job.status)}`}>
                                             {job.status}
                                         </span>
                                     </td>
-                                    <td className='px-6 py-4 whitespace-nowrap text-sm'>
+                                    <td className='px-6 py-4 text-sm'>
                                         <button className='text-blue-600 hover:text-blue-800'>View</button>
                                     </td>
                                 </tr>
