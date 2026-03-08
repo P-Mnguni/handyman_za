@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
 import Dashboard from '../pages/Dashboard';
+import Jobs from '../pages/Jobs';
 
 // Temporary placeholders (will be replaced with real pages later)
 const Login = () => (
@@ -18,13 +19,6 @@ const Register = () => (
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Register Page</h1>
             <p className="text-gray-600">Coming Soon...</p>
         </div>
-    </div>
-)
-
-const Jobs = () => (
-    <div>
-        <h1 className="text-2xl font-bold mb-4">Jobs</h1>
-        <p className="text-gray-600">Manage your jobs here.</p>
     </div>
 )
 
