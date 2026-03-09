@@ -4,8 +4,11 @@ const Sidebar = ({ onClose }) => {
     const navItems = [
         { path: '/dashboard', label: 'Dashboard', icon: '📊' },
         { path: '/jobs', label: 'Jobs', icon: '🛠️' },
-        { path: '/messages', label: 'Messages', icon: '💬' },
-        { path: '/profile', label: 'Profile', icon: '👤' },
+        { path: '/handymen', label: 'Handymen', icon: '👷' },
+        { path: '/customers', label: 'Customers', icon: '👥' },
+        { path: '/payments', label: 'Payments', icon: '💰' },
+        { path: '/reviews', label: 'Reviews', icon: '⭐' },
+        { path: '/reports', label: 'Reports', icon: '📈' },
         { path: '/settings', label: 'Settings', icon: '⚙️' },
     ];
 
@@ -42,7 +45,29 @@ const Sidebar = ({ onClose }) => {
 
             {/* Bottom section - will add logout later */}
             <div className='p-4 border-t border-gray-200'>
-                <div className='text-sm text-gray-500'>Logged in as User</div>
+                <div className='flex items-center mb-3'>
+                    <div className='h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold mr-3'>
+                        A
+                    </div>
+                    <div className='text-sm text-gray-800'>Logged in as Admin</div>
+                </div>
+                <button className='w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg 
+                transition-colors flex items-center'>
+                    <svg
+                        className='h-4 w-4 mr-2'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                    >
+                        <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M17 16l4-4m0 0l-4-4m4 4H7m6 4vv1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1'
+                        />
+                    </svg>
+                    Sign Out
+                </button>
             </div>
         </aside>
     );
