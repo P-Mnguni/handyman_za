@@ -1,6 +1,6 @@
 import StatCard from '../components/StatCard';
 
-const Dashboard = () => {
+const DashboardHome = () => {
     // Simple data - will be replaced with real API data later
     const stats = [
         { title: 'Total Jobs', value: '24', change: '+12%', icon: '🔧' },
@@ -143,4 +143,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard;
+export default DashboardHome;

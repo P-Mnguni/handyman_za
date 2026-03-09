@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
-import Dashboard from '../pages/Dashboard';
+import Dashboard from '../pages/DashboardHome';
 import Jobs from '../pages/Jobs';
+import DashboardHome from '../pages/DashboardHome';
 
 // Temporary placeholders (will be replaced with real pages later)
 const Login = () => (
@@ -98,10 +99,10 @@ const AppRouter = () => {
                     {/* Protected routes - with DashboardLayout */}
                     <Route path='/' element={<DashboardLayout />}>
                         {/* Index route shows Dashboard at */}
-                        <Route index element={<Dashboard />} />
+                        <Route index element={<DashboardHome />} />
 
                         {/* Nested routes - match the nav items in DashboardLayout */}
-                        <Route path='dashboard' element={<Dashboard />} />
+                        <Route path='dashboard' element={<DashboardHome />} />
                         <Route path='jobs' element={<Jobs />} />
                         <Route path='handymen' element={<Handymen />} />
                         <Route path='customers' element={<Customers />} />
