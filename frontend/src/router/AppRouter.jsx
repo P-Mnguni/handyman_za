@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
-import Dashboard from '../pages/DashboardHome';
 import Jobs from '../pages/Jobs';
 import DashboardHome from '../pages/DashboardHome';
+import Handymen from '../pages/Handyman';
 
 // Temporary placeholders (will be replaced with real pages later)
 const Login = () => (
@@ -19,16 +19,6 @@ const Register = () => (
         <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Register Page</h1>
             <p className="text-gray-600">Coming Soon...</p>
-        </div>
-    </div>
-)
-
-const Handymen = () => (
-    <div>
-        <h1 className="text-2xl font-bold mb-4">Handymen</h1>
-        <p className="text-gray-600">Manage handyman accounts, verifications, and performance.</p>
-        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800">⏱️ Placeholder: Handymen management coming soon...</p>
         </div>
     </div>
 )
