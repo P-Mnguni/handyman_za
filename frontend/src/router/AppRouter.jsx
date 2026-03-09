@@ -22,24 +22,67 @@ const Register = () => (
     </div>
 )
 
-const Messages = () => (
+const Handymen = () => (
     <div>
-        <h1 className="text-2xl font-bold mb-4">Messages</h1>
-        <p className="text-gray-600">Your conversations will appear here.</p>
+        <h1 className="text-2xl font-bold mb-4">Handymen</h1>
+        <p className="text-gray-600">Manage handyman accounts, verifications, and performance.</p>
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800">⏱️ Placeholder: Handymen management coming soon...</p>
+        </div>
     </div>
 )
 
-const Profile = () => (
+const Customers = () => (
     <div>
-        <h1 className="text-2xl font-bold mb-4">Profile</h1>
-        <p className="text-gray-600">Your profile information.</p>
+        <h1 className="text-2xl font-bold mb-4">Customers</h1>
+        <p className="text-gray-600">Manage customer accounts and job history.</p>
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800">⏱️ Placeholder: Customers management coming soon...</p>
+        </div>
     </div>
 )
+
+
+const Payments = () => (
+    <div>
+        <h1 className="text-2xl font-bold mb-4">Payments</h1>
+        <p className="text-gray-600">Track all transactions, payouts, and revenue.</p>
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800">⏱️ Placeholder: Payments dashboard coming soon...</p>
+        </div>
+    </div>
+)
+
+
+const Reviews = () => (
+    <div>
+        <h1 className="text-2xl font-bold mb-4">Reviews</h1>
+        <p className="text-gray-600">Monitor and manage all reviews left by customers.</p>
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800">⏱️ Placeholder: Reviews management coming soon...</p>
+        </div>
+    </div>
+)
+
+
+const Reports = () => (
+    <div>
+        <h1 className="text-2xl font-bold mb-4">Reports</h1>
+        <p className="text-gray-600">Generate and view platform analytics abd reports.</p>
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800">⏱️ Placeholder: Reports coming soon...</p>
+        </div>
+    </div>
+)
+
 
 const Settings = () => (
     <div>
         <h1 className="text-2xl font-bold mb-4">Settings</h1>
-        <p className="text-gray-600">Application settings.</p>
+        <p className="text-gray-600">Configure platform settings and preferences.</p>
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800">⏱️ Placeholder: Settings coming soon...</p>
+        </div>
     </div>
 )
 
@@ -60,8 +103,11 @@ const AppRouter = () => {
                         {/* Nested routes - match the nav items in DashboardLayout */}
                         <Route path='dashboard' element={<Dashboard />} />
                         <Route path='jobs' element={<Jobs />} />
-                        <Route path='messages' element={<Messages />} />
-                        <Route path='profile' element={<Profile />} />
+                        <Route path='handymen' element={<Handymen />} />
+                        <Route path='customers' element={<Customers />} />
+                        <Route path='payments' element={<Payments />} />
+                        <Route path='reviews' element={<Reviews />} />
+                        <Route path='reports' element={<Reports />} />
                         <Route path='settings' element={<Settings />} />
 
                         {/* Catch-all for unmatched routes */}

@@ -13,8 +13,11 @@ const DashboardLayout = () => {
 
         if (path === '/dashboard' || path === '/') return 'Dashboard';
         if (path === '/jobs') return 'Jobs';
-        if (path === '/messages') return 'Messages';
-        if (path === '/profile') return 'Profile';
+        if (path === '/handymen') return 'Handymen';
+        if (path === '/customers') return 'Customers';
+        if (path === '/payments') return 'Payments';
+        if (path === '/reviews') return 'Reviews';
+        if (path === '/reports') return 'Reports';
         if (path === '/settings') return 'Settings';
 
         // Default fallback
