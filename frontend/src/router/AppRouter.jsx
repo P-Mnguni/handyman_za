@@ -3,6 +3,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import Jobs from '../pages/Jobs';
 import DashboardHome from '../pages/DashboardHome';
 import Handymen from '../pages/Handyman';
+import Customers from '../pages/Customers';
 
 // Temporary placeholders (will be replaced with real pages later)
 const Login = () => (
@@ -22,17 +23,6 @@ const Register = () => (
         </div>
     </div>
 )
-
-const Customers = () => (
-    <div>
-        <h1 className="text-2xl font-bold mb-4">Customers</h1>
-        <p className="text-gray-600">Manage customer accounts and job history.</p>
-        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800">⏱️ Placeholder: Customers management coming soon...</p>
-        </div>
-    </div>
-)
-
 
 const Payments = () => (
     <div>
