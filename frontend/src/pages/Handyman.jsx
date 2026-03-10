@@ -128,7 +128,7 @@ const Handymen = () => {
     const renderStars = (rating) => {
         const fullStars = Math.floor(rating);
         const halfStar = rating % 1 >= 0.5;
-        const emptyStar = 5 - fullStars - (halfStar ? 1 : 0);
+        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
         return (
             <div className="flex items-center">
@@ -138,7 +138,7 @@ const Handymen = () => {
                         <span key={`full-${i}`} className="text-yellow-400">∗</span>
                     ))}
                     {halfStar && <span className="text-yellow-400">½</span>}
-                    {[...Array(emptyStar)].map((_, i) => (
+                    {[...Array(emptyStars)].map((_, i) => (
                         <span key={`empty-${i}`} className="text-gray-300">∗</span>
                     ))}
                 </div>
