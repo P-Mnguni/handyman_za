@@ -7,6 +7,12 @@ export const JobStatus = {
     CANCELED: "canceled"
 };
 
+export const JobPriority = {
+    LOW: 'low',
+    MEDIUM: 'medium',
+    HIGH: 'high'
+};
+
 // Service categories enum - expand this based on your platform's offerings
 export const ServiceCategory = {
     PLUMBING: "plumbing",

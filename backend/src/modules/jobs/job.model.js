@@ -110,6 +110,12 @@ const jobSchema = new mongoose.Schema({
         index: true
     },
 
+    priority: {
+        type: String,
+        enum: ['low', 'medium', 'high'],
+        default: 'medium'
+    },
+
     // ⭐ Review Tracking
     clientReviewed: {
         type: Boolean,
