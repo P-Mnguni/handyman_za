@@ -24,6 +24,7 @@ coverage
 # Production
 dist
 dist-str
+.env
 
 # Environment files
 .env
