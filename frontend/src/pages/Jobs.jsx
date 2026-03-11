@@ -1,84 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAllJobs } from '../api/jobService.js';
 
 const Jobs = () => {
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Sample jobs data- will be replaced with API data later
-    const jobs = [
-        {
-            id: 1,
-            customer: 'John D.',
-            service: 'Fix leaking tap',
-            category: 'Plumbing',
-            location: 'Cape Town',
-            handyman: 'Peter K.',
-            status: 'in-progress',
-            date: '2024-03-15',
-            budget: 'R450',
-            priority: 'medium'
-        },
-        {
-            id: 2,
-            customer: 'Sarah M.',
-            service: 'Electrical wiring',
-            category: 'Electrical',
-            location: 'Johannesburg',
-            handyman: 'Mike T.',
-            status: 'completed',
-            date: '2024-03-14',
-            budget: 'R850',
-            priority: 'high'
-        },
-        {
-            id: 3,
-            customer: 'Peter K.',
-            service: 'Paint bedroom',
-            category: 'Painting',
-            location: 'Durban',
-            handyman: 'Unassigned',
-            status: 'pending',
-            date: '2024-03-13',
-            budget: 'R1,200',
-            priority: 'low'
-        },
-        {
-            id: 4,
-            customer: 'Lisa R.',
-            service: 'Install ceiling fan',
-            category: 'Electrical',
-            location: 'Pretoria',
-            handyman: 'John S.',
-            status: 'in-progress',
-            date: '2024-03-12',
-            budget: 'R650',
-            priority: 'medium'
-        },
-        {
-            id: 5,
-            customer: 'Mark T.',
-            service: 'Unblock sink',
-            category: 'Plumbing',
-            location: 'Cape Town',
-            handyman: 'David W.',
-            status: 'completed',
-            date: '2024-03-11',
-            budget: 'R350',
-            priority: 'high'
-        },
-        {
-            id: 6,
-            customer: 'Jenny L.',
-            service: 'Fix geyser',
-            category: 'Plumbing',
-            location: 'Johannesburg',
-            handyman: 'Unassigned',
-            status: 'pending',
-            date: '2024-03-10',
-            budget: 'R950',
-            priority: 'high'
-        },
-    ];
+    // Fetch jobs from backend when component mounts
+    useEffect(() => {
+        fetchJobs();
+    }, []);
+
+    const fetchJobs = async () => {
+        try {
+            setLoading(true);
+            const data = await getAllJobs();
+            setJobs(data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching jobs:', err);
+            setError('Failed to load jobs. Please try again later.')
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getStatusBadge = (status) => {
         switch(status) {
@@ -90,6 +37,8 @@ const Jobs = () => {
                 return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>;
             case 'cancelled':
                 return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Cancelled</span>;
+            case 'accepted':
+                return <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Accepted</span>;
             default:
                 return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Unknown</span>;
         }
@@ -108,24 +57,79 @@ const Jobs = () => {
         }
     };
 
-    // Filter jobs based on status filter and search term
-    const filteredJobs = jobs.filter(job => {
-        // Status filter
-        if (filter !== 'all' && job.status !== filter) return false;
+    // Format date to match existing display
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleString('en-ZA', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).replace(/\//g, '-');
+    };
 
-        // Search filter
+    // Map backend job data to match existing UI structure
+    const mapJobToUI = (job) => ({
+        id: job._id,
+        customer: job.client?.name || 'Unknown',
+        service: job.title,
+        category: job.serviceCategory || 'General',
+        location: job.location?.city || 'N/A',
+        handyman: job.handyman?.name || 'Unassigned',
+        status: job.status,
+        date: formatDate(job.createdAt),
+        budget: job.budget ? `R${job.budget.toLocaleString()}` : 'Negotiable',
+        priority: job.priority || 'medium',
+        description: job.description
+    });
+
+    // Filter jobs based on status filter and search term
+    const filteredJobs = jobs
+        .map(mapJobToUI)
+        .filter(job => {
+        if (filter !== 'all' && job.status !== filter) return false;
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
             return (
                 job.customer.toLowerCase().includes(term) ||
                 job.service.toLowerCase().includes(term) ||
                 job.handyman.toLowerCase().includes(term) ||
-                job.location.toLowerCase().includes(term)
+                job.location.toLowerCase().includes(term) ||
+                job.category.toLowerCase().includes(term)
             );
         }
-
         return true;
     });
+
+    // Count jobs by status for filter buttons
+    const jobCounts = {
+        all: jobs.length,
+        pending: jobs.filter(j => j.status === 'pending').length,
+        'in-progress': jobs.filter(j => j.status === 'in_progress' || j.status === 'in-progress').length,
+        completed: jobs.filter(j => j.status === 'completed').length
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-gray-500">Loading jobs...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="space-y-6">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+                    {error}
+                </div>
+                <button
+                    onClick={fetchJobs}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Try Again
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -147,7 +151,7 @@ const Jobs = () => {
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        All Jobs ({jobs.length})
+                        All Jobs ({jobCounts.all})
                     </button>
                     <button
                         onClick={() => setFilter('pending')}
@@ -157,7 +161,7 @@ const Jobs = () => {
                                 : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
                         }`}
                     >
-                        Pending
+                        Pending ({jobCounts.pending})
                     </button>
                     <button
                         onClick={() => setFilter('in-progress')}
@@ -167,7 +171,7 @@ const Jobs = () => {
                                 : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                         }`}
                     >
-                        In Progress
+                        In Progress ({jobCounts['in-progress']})
                     </button>
                     <button
                         onClick={() => setFilter('completed')}
@@ -177,7 +181,7 @@ const Jobs = () => {
                                 : 'bg-green-50 text-green-700 hover:bg-green-100'
                         }`}
                     >
-                        Completed
+                        Completed ({jobCounts.completed})
                     </button>
                 </div>
 
@@ -206,8 +210,10 @@ const Jobs = () => {
                             />
                         </svg>
                     </div>
-                    <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700
-                    transition-colors flex items-center">
+                    <button 
+                        onClick={fetchJobs}
+                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700
+                        transition-colors flex items-center">
                         <svg 
                             className="h-5 w-5 mr-1"
                             fill="none"
@@ -218,10 +224,11 @@ const Jobs = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M12 4v16m8-8H4"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0
+                                01-15.357-2m15.357 2H15"
                             />
                         </svg>
-                        New Job
+                        Refresh
                     </button>
                 </div>
             </div>
@@ -265,6 +272,7 @@ const Jobs = () => {
                                     <td className="px-6 py-4">
                                         <div className="text-sm font-medium text-gray-900">{job.service}</div>
                                         <div className="text-xs text-gray-500 mt-1">{getPriorityBadge(job.priority)}</div>
+                                        <div className="text-xs text-gray-500 mt-1 truncate max-w-xs">{job.description}</div>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-600">{job.category}</td>
                                     <td className="px-6 py-4 text-sm text-gray-600">{job.location}</td>
