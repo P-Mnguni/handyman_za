@@ -1,5 +1,5 @@
 import { Job } from './job.model.js';
-import { JobStatus } from './job.constants.js';
+import { JobPriority, JobStatus, JobValidationMessage } from './job.constants.js';
 import User  from '../users/user.model.js';
 import ApiError from '../../utils/ApiError.js';
 import mongoose from 'mongoose';
@@ -23,12 +23,15 @@ export const createJob = async (jobData, clientId) => {
         throw ApiError.forbidden("Only clients can create jobs");
     }
 
+    const priority = jobData.priority || calculatePriority(jobData);
+
     // Create jow with pending status
     const job = await Job.create({
         ...jobData,
         client: clientId,
         status: JobStatus.PENDING,
-        handyman: null                      // Explicitly set to null
+        handyman: null,                      // Explicitly set to null
+        priority: priority
     });
 
     return job;
@@ -467,4 +470,18 @@ export const addJobReview = async (jobId, userId, userRole, reviewData) => {
     await job.save();
 
     return { message: "Review added successfully", job };
+};
+
+// Helper function to calculate priority
+const calculatePriority = (jobData) => {
+    // High priority cases
+    if (jobData.budget > 1000) return JobPriority.HIGH;
+    if (jobData.serviceCategory === 'plumbing' && jobData.isEmergency) return JobPriority.HIGH;
+
+    // Medium priority cases
+    if (jobData.budget > 500) return JobPriority.MEDIUM;
+    if (jobData.serviceCategory === 'electricity') return JobPriority.MEDIUM;
+
+    // Default to low
+    return JobPriority.LOW;
 };
