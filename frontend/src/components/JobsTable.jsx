@@ -1,24 +1,7 @@
 import React from "react";
+import StatusBadge from "./StatusBadge";
 
 const JobsTable = ({ jobs = [] }) => {
-    // Helper function to get status badge styling
-    const getStatusBadge = (status) => {
-        const statusConfig = {
-            pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
-            accepted: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Accepted' },
-            in_progress: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'In Progress' },
-            completed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Completed' },
-            cancelled: { bg: 'bg-red-100', text: 'text-red-800', label: 'Cancelled' },
-        };
-
-        const config = statusConfig[status] || statusConfig.pending;
-
-        return (
-            <span className={`px-2 py-1 text-xs rounded-full ${config.bg} ${config.text}`}>
-                {config.label}
-            </span>
-        );
-    };
 
     // Helper function for priority badge
     const getPriorityBadge = (priority) => {
@@ -149,7 +132,7 @@ const JobsTable = ({ jobs = [] }) => {
                                         {formatBudget(job.budget)}
                                     </td>
                                     <td className="px-6 py-4">
-                                        {getStatusBadge(job.status)}
+                                        <StatusBadge status={job.status} />
                                     </td>
                                     <td className="px-6 py-4">
                                         {getPriorityBadge(job.priority || 'low')}
