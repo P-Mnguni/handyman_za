@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from 'prop-types.js';
+import PropTypes from 'prop-types';
 
 const StatusBadge = ({ status }) => {
     // Normalize status string (handle both 'in_progress' and 'in-progress')
