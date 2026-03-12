@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAllJobs } from '../api/jobService.js';
+import JobsTable from '../components/JobsTable.jsx';
 
 const Jobs = () => {
     const [filter, setFilter] = useState('all');
@@ -27,36 +28,6 @@ const Jobs = () => {
         }
     };
 
-    const getStatusBadge = (status) => {
-        switch(status) {
-            case 'completed':
-                return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Completed</span>;
-            case 'in-progress':
-                return <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">In Progress</span>;
-            case 'pending':
-                return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>;
-            case 'cancelled':
-                return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Cancelled</span>;
-            case 'accepted':
-                return <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Accepted</span>;
-            default:
-                return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Unknown</span>;
-        }
-    };
-
-    const getPriorityBadge = (priority) => {
-        switch(priority) {
-            case 'high':
-                return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">High</span>
-            case 'medium':
-                return <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">Medium</span>
-            case 'low':
-                return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Low</span>
-            default:
-                return null;
-        }
-    };
-
     // Format date to match existing display
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleString('en-ZA', {
@@ -69,6 +40,7 @@ const Jobs = () => {
     // Map backend job data to match existing UI structure
     const mapJobToUI = (job) => ({
         id: job._id,
+        _id: job._id,
         customer: job.client?.name || 'Unknown',
         service: job.title,
         category: job.serviceCategory || 'General',
@@ -76,9 +48,12 @@ const Jobs = () => {
         handyman: job.handyman?.name || 'Unassigned',
         status: job.status,
         date: formatDate(job.createdAt),
-        budget: job.budget ? `R${job.budget.toLocaleString()}` : 'Negotiable',
-        priority: job.priority || 'medium',
-        description: job.description
+        budget: job.budget,
+        priority: job.priority || 'low',
+        description: job.description,
+        client: job.client,
+        createdAt: job.createdAt,
+        serviceCategory: job.serviceCategory,
     });
 
     // Filter jobs based on status filter and search term
@@ -234,105 +209,7 @@ const Jobs = () => {
             </div>
 
             {/* Jobs Table */}
-            <div className="bg-white rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full table-fixed">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
-                                    Customer
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">
-                                    Service
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                                    Category
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%]">
-                                    Location
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%]">
-                                    Handyman
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                                    Budget
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                                    Date
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[11%]">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {filteredJobs.map((job) => (
-                                <tr key={job.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{job.customer}</td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-gray-900">{job.service}</div>
-                                        <div className="text-xs text-gray-500 mt-1">{getPriorityBadge(job.priority)}</div>
-                                        <div className="text-xs text-gray-500 mt-1 truncate max-w-xs">{job.description}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{job.category}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{job.location}</td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm text-gray-900">{job.handyman}</div>
-                                        {job.handyman === 'Unassigned' && (
-                                            <button className="text-xs text-blue-600 hover:text-blue-800 mt-1">Assign</button>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{job.budget}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{job.date}</td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center space-x-3">
-                                            {getStatusBadge(job.status)}
-                                            <button className="text-gray-400 hover:text-gray-600">
-                                                <svg
-                                                    className="h-5 w-5"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 
-                                                        110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Empty State */}
-                {filteredJobs.length === 0 && (
-                    <div className="text-center py-12">
-                        <svg
-                            className="h-12 w-12 text-gray-400 mx-auto mb-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0
-                                00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                            />
-                        </svg>
-                        <h3 className="text-lg font-medium text-gray-900 mb-1">No Jobs Found</h3>
-                        <p className="text-gray-500">Try adjusting your filters or create a new job.</p>
-                    </div>
-                )}
-            </div>
+            <JobsTable jobs={filteredJobs} />
 
             {/* Summary Footer */}
             <div className="bg-white p-4 rounded-lg shadow flex justify-between items-center text-sm">
