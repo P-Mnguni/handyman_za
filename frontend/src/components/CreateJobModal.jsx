@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createJob } from "../api/jobService";
 
-const CreateJobModal = ({ isOpen, onClose, onSubmit }) => {
+const CreateJobModal = ({ isOpen, onClose, onSubmit, onJobCreated }) => {
     // Form state
     const [formData, setFormData] = useState({
         title: '',
@@ -101,6 +101,11 @@ const CreateJobModal = ({ isOpen, onClose, onSubmit }) => {
             // If onSubmit prop is provided, call it with the new job data
             if (onSubmit) {
                 await onSubmit(jobData);
+            }
+
+            // Call onJobCreated to refresh the jobs list
+            if (onJobCreated) {
+                await onJobCreated();
             }
             
             // Close modal on success
