@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createJob } from "../api/jobService";
 
 const CreateJobModal = ({ isOpen, onClose, onSubmit }) => {
     // Form state
@@ -94,14 +95,21 @@ const CreateJobModal = ({ isOpen, onClose, onSubmit }) => {
                 budget: formData.budget ? parseFloat(formData.budget) : null
             };
 
-            // Call onSubmit prop with form data
-            await onSubmit(jobData);
+            // Call the API to create the job
+            await createJob(jobData);
 
+            // If onSubmit prop is provided, call it with the new job data
+            if (onSubmit) {
+                await onSubmit(jobData);
+            }
+            
             // Close modal on success
             onClose();
         } catch (error) {
             console.error('Error creating job:', error);
-            setErrors({ submit: 'Failed to create job. Please try again.' });
+            setErrors({ 
+                submit: error.response?.data?.message || 'Failed to create job. Please try again.' 
+            });
         } finally {
             setIsSubmitting(false);
         }
