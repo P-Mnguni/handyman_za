@@ -47,7 +47,22 @@ export const getMyJobs = async () => {
 // Create a new job (client only)
 export const createJob = async (jobData) => {
     try {
-        const response = await apiClient.post('/jobs', jobData);
+        const formattedData = {
+            title: jobData.title,
+            description: jobData.description,
+            serviceCategory: jobData.serviceCategory,
+            location: {
+                address: jobData.address || '',
+                city: jobData.location,
+                province: jobData.province,
+                coordinates: jobData.coordinates || null
+            },
+            budget: jobData.budget ? parseFloat(jobData.budget) : null,
+            isNegotiable: jobData.isNegotiable || false,
+            priority: jobData.priority || 'low'
+        };
+
+        const response = await apiClient.post('/jobs', formattedData);
         return response.data;
     } catch (error) {
         console.error('Error creating job:', error);
