@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { getAllJobs } from '../api/jobService.js';
+import { createJob, getAllJobs } from '../api/jobService.js';
 import JobsTable from '../components/JobsTable.jsx';
+import CreateJobModal from "../components/CreateJobModal.jsx";
 
 const Jobs = () => {
     const [filter, setFilter] = useState('all');
@@ -8,6 +9,7 @@ const Jobs = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Fetch jobs from backend when component mounts
     useEffect(() => {
@@ -25,6 +27,18 @@ const Jobs = () => {
             setError('Failed to load jobs. Please try again later.')
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Handle job creation
+    const handleCreateJob = async (jobData) => {
+        try {
+            await createJob(jobData);
+            await fetchJobs();                          // Refresh the jobs first
+            setIsModalOpen(false);                      // Close modal on success
+        } catch (err) {
+            console.error('Error creating job:', err);  // Error handled by modal component
+            throw err;
         }
     };
 
@@ -109,9 +123,31 @@ const Jobs = () => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-800">Jobs Management</h1>
-                <p className="text-gray-600 mt-1">View and manage all service requests across the platform.</p>
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">Jobs Management</h1>
+                    <p className="text-gray-600 mt-1">View and manage all service requests across the platform.</p>
+                </div>
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors
+                    flex items-center shadow-sm"
+                >
+                    <svg
+                        className="h-5 w-5 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 4v16m8-8H4"
+                        />
+                    </svg>
+                    Create Job
+                </button>
             </div>
             
             {/* Filters and Actions */}
@@ -160,51 +196,29 @@ const Jobs = () => {
                     </button>
                 </div>
 
-                {/* Search and Create button */}
-                <div className="flex gap-3">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Search Jobs..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none
-                            focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
+                {/* Search */}
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="Search Jobs..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none
+                        focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
+                    />
+                    <svg
+                        className="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                         />
-                        <svg
-                            className="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                            />
-                        </svg>
-                    </div>
-                    <button 
-                        onClick={fetchJobs}
-                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700
-                        transition-colors flex items-center">
-                        <svg 
-                            className="h-5 w-5 mr-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0
-                                01-15.357-2m15.357 2H15"
-                            />
-                        </svg>
-                        Refresh
-                    </button>
+                    </svg>
                 </div>
             </div>
 
@@ -216,11 +230,34 @@ const Jobs = () => {
                 <div className="text-gray-600">
                     Showing <span className="font-medium">{filteredJobs.length}</span> of <span className="font-medium">{jobs.length}</span> jobs
                 </div>
-                <div className="flex space-x-4">
-                    <button className="text-gray-600 hover:text-gray-900">Previous</button>
-                    <button className="text-gray-600 hover:text-gray-900">Next</button>
-                </div>
+                <button 
+                    onClick={fetchJobs}
+                    className="text-gray-600 hover:text-gray-900 flex items-center"
+                >
+                    <svg 
+                        className="h-4 w-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0
+                            01-15.357-2m15.357 2H15"
+                        />
+                    </svg>
+                    Refresh
+                </button>
             </div>
+            
+            {/* Create Job Modal */}
+            <CreateJobModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleCreateJob}
+            />
         </div>
     );
 };
