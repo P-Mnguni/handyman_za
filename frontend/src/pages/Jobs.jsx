@@ -11,11 +11,7 @@ const Jobs = () => {
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Fetch jobs from backend when component mounts
-    useEffect(() => {
-        fetchJobs();
-    }, []);
-
+    // fetchJobs as a reusable function
     const fetchJobs = async () => {
         try {
             setLoading(true);
@@ -29,6 +25,11 @@ const Jobs = () => {
             setLoading(false);
         }
     };
+
+    // Fetch jobs from backend when component mounts
+    useEffect(() => {
+        fetchJobs();
+    }, []);
 
     // Handle job creation
     const handleCreateJob = async (jobData) => {
@@ -58,8 +59,8 @@ const Jobs = () => {
         customer: job.client?.name || 'Unknown',
         service: job.title,
         category: job.serviceCategory || 'General',
-        location: job.location?.city || 'N/A',
-        handyman: job.handyman?.name || 'Unassigned',
+        locationDisplay: job.location?.city || 'N/A',
+        handymanDisplay: job.handyman?.name || 'Unassigned',
         status: job.status,
         date: formatDate(job.createdAt),
         budget: job.budget,
@@ -68,6 +69,8 @@ const Jobs = () => {
         client: job.client,
         createdAt: job.createdAt,
         serviceCategory: job.serviceCategory,
+        location: job.location,
+        handyman: job.handyman
     });
 
     // Filter jobs based on status filter and search term
@@ -80,8 +83,8 @@ const Jobs = () => {
             return (
                 job.customer.toLowerCase().includes(term) ||
                 job.service.toLowerCase().includes(term) ||
-                job.handyman.toLowerCase().includes(term) ||
-                job.location.toLowerCase().includes(term) ||
+                job.handymanDisplay.toLowerCase().includes(term) ||
+                job.locationDisplay.toLowerCase().includes(term) ||
                 job.category.toLowerCase().includes(term)
             );
         }
@@ -257,6 +260,7 @@ const Jobs = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={handleCreateJob}
+                onJobCreated={fetchJobs}
             />
         </div>
     );
