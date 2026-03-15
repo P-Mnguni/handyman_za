@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createJob, getAllJobs } from '../api/jobService.js';
 import JobsTable from '../components/JobsTable.jsx';
 import CreateJobModal from "../components/CreateJobModal.jsx";
+import LoadingSpinner from "../components/LoadingSpinner.jsx";
 
 const Jobs = () => {
     const [filter, setFilter] = useState('all');
@@ -13,14 +14,15 @@ const Jobs = () => {
 
     // fetchJobs as a reusable function
     const fetchJobs = async () => {
+        setLoading(true);
+        setError(null);
+        
         try {
-            setLoading(true);
             const data = await getAllJobs();
             setJobs(data);
-            setError(null);
         } catch (err) {
             console.error('Error fetching jobs:', err);
-            setError('Failed to load jobs. Please try again later.')
+            setError(err.response?.data?.message || 'Failed to load jobs. Please try again later.')
         } finally {
             setLoading(false);
         }
@@ -99,26 +101,37 @@ const Jobs = () => {
         completed: jobs.filter(j => j.status === 'completed').length
     };
 
+    // Show loading spinner
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-gray-500">Loading jobs...</div>
-            </div>
-        );
+        return <LoadingSpinner size="large" text="Loading jobs..." />
     }
 
     if (error) {
         return (
-            <div className="space-y-6">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-                    {error}
+            <div className="flex flex-col items-center justify-center min-h-400 space-y-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md text-center">
+                    <svg 
+                        className="h-12 w-12 text-red-500 mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4m0 4h.01M21 12a 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <h3 className="text-lg font-semibold text-red-800 mb-2">Something went wrong</h3>
+                    <p className="text-red-600 mb-4">{error}</p>
+                    <button
+                        onClick={fetchJobs}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                        Try Again
+                    </button>
                 </div>
-                <button
-                    onClick={fetchJobs}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    Try Again
-                </button>
             </div>
         );
     }
