@@ -108,7 +108,7 @@ const Jobs = () => {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-400 space-y-4">
+            <div className="flex flex-col items-center justify-center min-h-100 space-y-4">
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md text-center">
                     <svg 
                         className="h-12 w-12 text-red-500 mx-auto mb-4"
