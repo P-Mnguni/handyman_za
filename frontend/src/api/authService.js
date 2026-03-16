@@ -32,3 +32,25 @@ export const login = async (email, password) => {
         }
     }
 };
+
+/**
+ * Register a new user
+ * @param {object} userData - User registration data
+ * @returns {Promise} - Returns created user data
+ */
+export const register = async (userData) => {
+    try {
+        const response = await apiClient.post('/auth/register', userData);
+        return response.data;
+    } catch (error) {
+        console.error('Registration error:', error);
+
+        if (error.response?.status === 409) {
+            throw new Error('Email already exists');
+        } else if (!error.response) {
+            throw new Error('Network error. Please check your connection.');
+        } else {
+            throw new Error(error.response?.data?.message || 'Registration failed. Please try again.');
+        }
+    }
+};
