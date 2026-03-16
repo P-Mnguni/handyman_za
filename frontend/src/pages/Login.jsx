@@ -81,7 +81,7 @@ const Login = () => {
                             </label>
                             <div className="relative">
                                 <input
-                                    type={showPassword}
+                                    type={showPassword ? 'text' : 'password'}
                                     id="password"
                                     name="password"
                                     value={formData.password}
@@ -190,7 +190,7 @@ const Login = () => {
                     <p className="mt-6 text-center text-sm text-gray-500">
                         Don't have an account?{' '}
                         <Link to="/register" className="text-blue-600 hover:text-blue-800 hover:underline">
-                            Contact administrator
+                            Register
                         </Link>
                     </p>
                 </div>
