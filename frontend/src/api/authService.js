@@ -54,3 +54,18 @@ export const register = async (userData) => {
         }
     }
 };
+
+/**
+ * Logout user (invalidate refresh token)
+ * @returns {Promise}
+ */
+export const logout = async () => {
+    try {
+        const response = await apiClient.post('/auth/logout');
+        return response.data;
+    } catch (error) {
+        console.error('Logout error:', error);
+        throw new Error(error.response?.data?.message || 'Logout failed');
+    }
+};
+
