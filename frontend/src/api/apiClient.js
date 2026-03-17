@@ -109,6 +109,7 @@ apiClient.isAuthenticated = () => {
 // Log the base URL in development
 if (import.meta.env.DEV) {
     console.log('🔌 API Client configured with baseURL:', apiClient.defaults.baseURL);
+    console.log('🔐 Auth interceptor active - tokens will be attached automatically');
 }
 
 export default apiClient;
