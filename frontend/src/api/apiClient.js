@@ -7,12 +7,35 @@ const apiClient = axios.create({
 
     // Default headers
     headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
     },
 
     // Timeout after 30 seconds
     timeout: 30000,
 });
+
+// Request interceptor to add JWT token to every request
+apiClient.interceptors.request.use(
+    (config) => {
+        // Get token from localStorage
+        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+
+        // If token exists, add it to the Authorization header
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+
+            if (import.meta.env.DEV) {
+                console.log('🔐 Token attached to request:', config.url);
+            }
+        }
+
+        return config;
+    },
+    (error) => {
+        // Handle request errors
+        return Promise.reject(error);
+    }
+);
 
 // Log the base URL in development
 if (import.meta.env.DEV) {
