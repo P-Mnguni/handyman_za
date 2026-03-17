@@ -96,3 +96,14 @@ export const getCurrentUser = async () => {
         throw error;
     }
 };
+
+// Exports
+const authService = {
+    login,
+    register,
+    logout,
+    refreshToken,
+    getCurrentUser
+};
+
+export default authService;
