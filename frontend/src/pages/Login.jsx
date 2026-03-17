@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { login } from "../api/authService";
 
 const Login = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
     const [showPassword, setShowPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); 
+    const [error, setError] = useState(null);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -15,27 +18,39 @@ const Login = () => {
             ...prev,
             [name]: value
         }));
+        // Clears error when user starts typing
+        if (error) setError(null);
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
 
         try {
-            // Log for now - will connect to backend next
-            console.log('Login attempt:', formData);
+            // Call the login API
+            const response = await login(formData.email, formData.password);
 
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Stores the tokens
+            if (response.tokens) {
+                localStorage.setItem('accessToken', response.tokens.accessToken);
+                localStorage.setItem('refreshToken', response.tokens.refreshToken);
+            } else if (response.token) {
+                // Fallback if backend returns single token
+                localStorage.setItem('token', response.token);
+            }
 
-            // TODO: Connect to auth service
-            // const response = await login(formData.email, formData.password);
-            // Store token in localStorage/context
-            // Redirect to dashboard
+            // Store user info
+            if (response.user) {
+                localStorage.setItem('user', JSON.stringify(response.user));
+            }
 
-        } catch (error) {
-            console.error('Login failed:', error);
-            // TODO: Show error message to user
+            // Redirect to dashboard on success
+            navigate('/dashboard');
+
+        } catch (err) {
+            console.error('Login failed:', err);
+            setError(err.message || 'Login failed. Please check your credentials and try again.');
         } finally {
             setIsLoading(false);
         }
@@ -55,6 +70,13 @@ const Login = () => {
                 <div className="p-8">
                     <h2 className="text-2xl font-semibold text-gray-800 mb-6">Welcome Back</h2>
 
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p className="text-sm text-red-600">{error}</p>
+                        </div>
+                    )}
+
                     <form onSubmit={handleLogin} className="space-y-5">
                         {/* Email Field */}
                         <div>
@@ -69,8 +91,10 @@ const Login = () => {
                                 onChange={handleChange}
                                 placeholder="admin@handyman.za"
                                 required
+                                disabled={isLoading}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2
-                                focus:ring-blue-500 focus:border-transparent transition-colors"
+                                focus:ring-blue-500 focus:border-transparent transition-colors disabled:bg-gray-100
+                                disabled:cursor-not-allowed"
                             />
                         </div>
 
@@ -89,12 +113,14 @@ const Login = () => {
                                     placeholder="••••••••"
                                     required
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2
-                                    focus:ring-blue-500 focus:border-transparent transition-colors pr-10"
+                                    focus:ring-blue-500 focus:border-transparent transition-colors pr-10 disabled:bg-gray-100
+                                    disabled:cursor-not-allowed"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                                    disabled={isLoading}
+                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 disabled:opacity-50"
                                 >
                                     {showPassword ? (
                                         <svg
@@ -142,7 +168,11 @@ const Login = () => {
                         {/* Remember Me & Forgot Password */}
                         <div className="flex items-center justify-between text-sm">
                             <label className="flex items-center">
-                                <input type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                                <input 
+                                    type="checkbox"
+                                    disabled={isLoading} 
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
+                                />
                                 <span className="ml-2 text-gray-600">Remember me</span>
                             </label>
                             <a href="#" className="text-blue-600 hover:text-blue-800 hover:underline">Forgot password</a>
