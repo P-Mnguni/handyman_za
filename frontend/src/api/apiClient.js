@@ -37,6 +37,62 @@ apiClient.interceptors.request.use(
     }
 );
 
+// Response interceptor for handling common errors
+apiClient.interceptors.response.use(
+    (response) => {
+        // Any status code within 2xx triggers this
+        return response;
+    },
+    async (error) => {
+        const originalRequest = error.config;
+
+        // Handle 401 Unauthorized errors (token expires)
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            // Check if we have a refresh token
+            const refreshToken = localStorage.getItem('refreshToken');
+
+            if (refreshToken) {
+                try {
+                    // Attempt to refresh the token
+                    const response = await axios.post(
+                        `${apiClient.defaults.baseURL}/auth/refresh-token`,
+                        { refreshToken }
+                    );
+
+                    // Store the new token
+                    const { accessToken } = response.data;
+                    localStorage.setItem('accessToken', accessToken);
+
+                    // Update the Authorization header
+                    originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+                    // Retry the original request
+                    return apiClient(originalRequest);
+                } catch (refreshError) {
+                    // Refresh failed - redirect to login
+                    localStorage.clear();
+                    window.location.href = '/login';
+                    return Promise.reject(refreshError);
+                }
+            } else {
+                // No refresh token - redirect to login
+                localStorage.clear();
+                window.location.href = '/login';
+            }
+        }
+
+        // Handle network errors
+        if (!error.response) {
+            console.error('🌐 Network error - backend might be down');
+            return Promise.reject(new Error('Network error. Please check your connection.'));
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 // Log the base URL in development
 if (import.meta.env.DEV) {
     console.log('🔌 API Client configured with baseURL:', apiClient.defaults.baseURL);
