@@ -93,6 +93,19 @@ apiClient.interceptors.response.use(
     }
 );
 
+// Add a method to clear auth data (useful for logout)
+apiClient.clearAuth = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+};
+
+// Check if user is authenticated
+apiClient.isAuthenticated = () => {
+    return !!(localStorage.getItem('accessToken') || localStorage.getItem('token'));
+};
+
 // Log the base URL in development
 if (import.meta.env.DEV) {
     console.log('🔌 API Client configured with baseURL:', apiClient.defaults.baseURL);
