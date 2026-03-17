@@ -1,5 +1,7 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
+import ProtectedRoute from '../routes/ProtectedRoute';
+
 import Jobs from '../pages/Jobs';
 import DashboardHome from '../pages/DashboardHome';
 import Handymen from '../pages/Handyman';
@@ -56,37 +58,42 @@ const AppRouter = () => {
         <BrowserRouter>
             <div className='h-screen'>
                 <Routes>
-                    {/* Public routes - no layout */}
+                    {/* Public routes */}
                     <Route path='/login' element={<Login />} />
                     <Route path='/register' element={<Register />} />
 
-                    {/* Protected routes - with DashboardLayout */}
-                    <Route path='/' element={<DashboardLayout />}>
-                        {/* Index route shows Dashboard at */}
-                        <Route index element={<DashboardHome />} />
+                    {/* Protected routes - authentication required */}
+                    <Route element={<ProtectedRoute />}>
+                        <Route element={<DashboardLayout />}>
+                            {/* Index route shows Dashboard at */}
+                            <Route index element={<DashboardHome />} />
 
-                        {/* Nested routes - match the nav items in DashboardLayout */}
-                        <Route path='dashboard' element={<DashboardHome />} />
-                        <Route path='jobs' element={<Jobs />} />
-                        <Route path='handymen' element={<Handymen />} />
-                        <Route path='customers' element={<Customers />} />
-                        <Route path='payments' element={<Payments />} />
-                        <Route path='reviews' element={<Reviews />} />
-                        <Route path='reports' element={<Reports />} />
-                        <Route path='settings' element={<Settings />} />
+                            {/* Main dashboard routes */}
+                            <Route path='dashboard' element={<DashboardHome />} />
+                            <Route path='jobs' element={<Jobs />} />
+                            <Route path='handymen' element={<Handymen />} />
+                            <Route path='customers' element={<Customers />} />
+                            <Route path='payments' element={<Payments />} />
+                            <Route path='reviews' element={<Reviews />} />
+                            <Route path='reports' element={<Reports />} />
+                            <Route path='settings' element={<Settings />} />
 
-                        {/* Catch-all for unmatched routes */}
-                        <Route path='*' element={
-                            <div className='text-center py-10'>
-                                <h2 className='text-2xl font-bold text-gray-800'>404</h2>
-                                <p className='text-gray-600'>Page not found</p>
-                            </div>
-                        } />
+                            {/* Catch-all for unmatched routes */}
+                            <Route path='*' element={
+                                <div className='text-center py-10'>
+                                    <h2 className='text-2xl font-bold text-gray-800'>404</h2>
+                                    <p className='text-gray-600'>Page not found</p>
+                                </div>
+                            } />
+                        </Route>
                     </Route>
+
+                    {/* Catch-all for unmatched public routes (outside dashboard) */}
+                    <Route path='*' element={<Navigate to="/login" replace />} />
                 </Routes>
             </div>
         </BrowserRouter>
-    )
-}
+    );
+};
 
 export default AppRouter
