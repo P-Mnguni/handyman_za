@@ -27,4 +27,33 @@ const ProtectedRoute = () => {
     return <Outlet />;
 };
 
+// Alternative: Component with role-based access control
+export const RoleBasedRoute = ({ allowedRoles }) => {
+    const isAuthenticated = () => {
+        return !!(localStorage.getItem('accessToken') || localStorage.getItem('token'));
+    };
+
+    const getUserRole = () => {
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            return user?.role || 'client';
+        } catch {
+            return null;
+        }
+    };
+
+    if (!isAuthenticated()) {
+        return <Navigate to="/login" replace />;
+    }
+
+    const userRole = getUserRole();
+
+    if (allowedRoles && !allowedRoles.includes(userRole)) {
+        // User doesn't have required role
+        return <Navigate to="/dashboard" replace />;
+    }
+
+    return <Outlet />;
+}
+
 export default ProtectedRoute;
