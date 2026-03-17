@@ -113,7 +113,7 @@ class AuthService {
 
             // Save refresh token to database
             user.refreshTokens.push({
-                token: tokens.refreshTokens,
+                token: tokens.refreshToken,
                 expiresAt: this.getRefreshTokenExpiry(),
                 deviceInfo: userData.deviceInfo || 'unknown'
             });
@@ -204,7 +204,7 @@ class AuthService {
 
             // Add new refresh token
             user.refreshTokens.push({
-                token: tokens.refreshTokens,
+                token: tokens.refreshToken,
                 expiresAt,
                 deviceInfo
             });
