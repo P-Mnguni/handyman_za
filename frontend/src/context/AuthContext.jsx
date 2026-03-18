@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from "react";
+import { getCurrentUser } from "../api/authService";
 
 // Create context
 const AuthContext = createContext(null);
@@ -9,23 +10,37 @@ export const AuthProvider = ({ children }) => {
     const [accessToken, setAccessToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Initialize auth state from localStorage on mount
+    // Restore session on app load
     useEffect(() => {
-        let isMounted = true;
-
-        const storedToken = localStorage.getItem('accessToken');
-        const storedUser = localStorage.getItem('user');
+        const restoreSession = async () => {
+            const storedToken = localStorage.getItem('accessToken');
+            const storedUser = localStorage.getItem('user');
         
-        if (storedToken && storedUser && isMounted) {
-            setAccessToken(storedToken);
-            setUser(JSON.parse(storedUser));
-        }
+            if (storedToken && storedUser) {
+                try {
+                    // Set token first so API calls work
+                    setAccessToken(storedToken);
+                    
+                    // Verify token still valid and get fresh user data
+                    const userData = await getCurrentUser();
+                    setUser(userData);
 
-        setLoading(false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        return () => {
-            isMounted = false;
+                    // Update stored user with fresh data
+                    localStorage.setItem('user',JSON.stringify(userData));
+                } catch (error) {
+                    console.error('Session restore failed:', error);
+                    // Token is invalid or expired - clear everything
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('user');
+                    setAccessToken(null);
+                    setUser(null);
+                }
+            }
+
+            setLoading(false);
         };
+        
+        restoreSession();
     }, []);
 
     // Login function
@@ -64,6 +79,11 @@ export const AuthProvider = ({ children }) => {
             logout();
         }
     };
+
+    // Don't render children until session checked
+    if (loading) {
+        return <LoadingSpinner size="medium" color="gray" text="Loading. Please wait..." />
+    }
 
     const value = {
         user,
