@@ -55,42 +55,41 @@ const Settings = () => (
 
 const AppRouter = () => {
     return (
-            <div className='h-screen'>
-                <Routes>
-                    {/* Public routes */}
-                    <Route path='/login' element={<Login />} />
-                    <Route path='/register' element={<Register />} />
+        <div className='h-screen'>
+            <Routes>
+                {/* Public routes */}                    
+                <Route path='/login' element={<Login />} />
+                <Route path='/register' element={<Register />} />
+                {/* Protected routes - authentication required */}
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<DashboardLayout />}>
+                        {/* Index route shows Dashboard at */}
+                        <Route index element={<DashboardHome />} />
 
-                    {/* Protected routes - authentication required */}
-                    <Route element={<ProtectedRoute />}>
-                        <Route element={<DashboardLayout />}>
-                            {/* Index route shows Dashboard at */}
-                            <Route index element={<DashboardHome />} />
+                        {/* Main dashboard routes */}
+                        <Route path='dashboard' element={<DashboardHome />} />
+                        <Route path='jobs' element={<Jobs />} />
+                        <Route path='handymen' element={<Handymen />} />
+                        <Route path='customers' element={<Customers />} />
+                        <Route path='payments' element={<Payments />} />
+                        <Route path='reviews' element={<Reviews />} />
+                        <Route path='reports' element={<Reports />} />
+                        <Route path='settings' element={<Settings />} />
 
-                            {/* Main dashboard routes */}
-                            <Route path='dashboard' element={<DashboardHome />} />
-                            <Route path='jobs' element={<Jobs />} />
-                            <Route path='handymen' element={<Handymen />} />
-                            <Route path='customers' element={<Customers />} />
-                            <Route path='payments' element={<Payments />} />
-                            <Route path='reviews' element={<Reviews />} />
-                            <Route path='reports' element={<Reports />} />
-                            <Route path='settings' element={<Settings />} />
-
-                            {/* Catch-all for unmatched routes */}
-                            <Route path='*' element={
-                                <div className='text-center py-10'>
-                                    <h2 className='text-2xl font-bold text-gray-800'>404</h2>
-                                    <p className='text-gray-600'>Page not found</p>
-                                </div>
-                            } />
-                        </Route>
+                        {/* Catch-all for unmatched routes */}
+                        <Route path='*' element={
+                            <div className='text-center py-10'>
+                                <h2 className='text-2xl font-bold text-gray-800'>404</h2>
+                                <p className='text-gray-600'>Page not found</p>
+                            </div>
+                        } />
                     </Route>
+                </Route>
 
-                    {/* Catch-all for unmatched public routes (outside dashboard) */}
-                    <Route path='*' element={<Navigate to="/login" replace />} />
-                </Routes>
-            </div>
+                {/* Catch-all for unmatched public routes (outside dashboard) */}
+                <Route path='*' element={<Navigate to="/login" replace />} />
+            </Routes>
+        </div>
     );
 };
 
