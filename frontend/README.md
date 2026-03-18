@@ -146,17 +146,46 @@ frontend/
 
 ## 🔌 Backend Integration
 
-This dashboard is designed to work with the Handyman.za backend API:
+This frontend connects to the Handyman.za backend API. Expected endpoints:
 
-- **Base URL**:
-    http://localhost:5000/api/v1
-- **Authentication**: JWT tokens
-- **Endpoints**:
-    - POST /auth/login      - User login
-    - POST /auth/register   - User registration
-    - GET /jobs             - List jobs
-    - GET /users            - List users (admin)
-    - (More endpoints coming)
+### 🔐 Authentication
+
+- `POST /auth/register`         - Create new account
+- `POST /auth/login`            - Get JWT tokens
+- `POST /auth/refresh-token`    - Refresh access token
+- `GET /auth/me`                - Get current user
+
+### 🏢 Jobs
+
+- `GET /jobs`                   - List all jobs
+- `GET /jobs/:id`               - Get single job
+- `POST /jobs`                  - Create new job
+- `PATCH /jobs/:id`             - Update job
+- `DELETE /jobs/:id`            - Cancel job
+- `POST /jobs/:id/accept`       - Accept job (handyman)
+- `POST /jobs/:id/start`        - Start job (handyman)
+- `POST /jobs/:id/complete`     - Complete job (handyman)
+
+## 🎯 Key Features Demonstrated
+
+### Professional Error Handling
+- Loading states for all async operations
+- User-friendly error messages
+- Retry mechanisms
+- Network error detection
+
+### Modern React Patterns
+- Custom hooks for reusable logic
+- Context for state management (coming soon)
+- Component composition
+- Separation of concerns (API layer, components, pages)
+
+### Enterprise-Grade Structure
+- Service layer for API calls
+- Protected routes with auth guards
+- Reusable UI components
+- Consistent styling with Tailwing
+- Mobile-responsive design
 
 ## 👥 User Roles
 
