@@ -1,9 +1,65 @@
 # Handyman.za Admin Dashboard
 
-A modern, production-ready admin dashboard for the Handyman.za platform. 
-Built with React, Vite, and Tailwind CSS.
+A modern React dashboard for the Handyman.za platform - a marketplace connecting 
+customers with professional handymen. This admin dashboard provides comprehensive 
+management of jobs, handymen, customers, and platform analytics.
+
+## 🛠️ Tech Stack
+
+- **React** 18 - UI library
+- **Vite** - Build tool and dev server
+- **React Router** 6 - Routing and Navigation
+- **Tailwind CSS** 4 - Styling and UI components
+- **Axios** - API clients with interceptors
+- **Context API** - State management (for auth)
+
+
+## 📂 Project Structure
+
+```
+frontend/
+|-- src/
+|  |-- api                      # API service layer
+|  |  |-- apiClient.js          # Axios instance with interceptors
+|  |  |-- authService.js        # Authentication API calls
+|  |  |-- jobService.js         # Jobs API calls
+|  |-- components/              # Reusable UI components
+|  |  |-- Sidebar.jsx           # Dashboard navigation
+|  |  |-- Topbar.jsx            # Header with user menu
+|  |  |-- StatCard.jsx          # Dashboard stats card
+|  |  |-- StatusBadge.jsx       # Job status indicators
+|  |  |-- JobsTable.jsx         # Jobs data table
+|  |  |-- CreateJobModal.jsx    # Job creation form
+|  |  |-- LoadingSpinner.jsx    # Loading states
+|  |-- layouts/                 # Layout components
+|  |  |-- DashboardLayout.jsx   # Main dashboard layout
+|  |-- pages/                   # Page components
+|  |  |-- DashboardHome.jsx     # Overview dashboard
+|  |  |-- Jobs.jsx              # Jobs management
+|  |  |-- Handymen.jsx          # Handyman management
+|  |  |-- Customers.jsx         # Customer management
+|  |  |-- Login.jsx             # Authentication
+|  |  |-- Register.jsx          # User registration
+|  |  |-- ...(other pages coming)
+|  |-- routes/                  # Routing configuration
+|  |  |-- ProtectedRoute.jsx    # Auth guard
+|  |-- router/                  # Routing configuration
+|  |  |-- AppRouter.jsx         # Main router
+|  |-- App.jsx                  # (legacy, will be removed)
+|  |-- main.jsx                 # Entry point
+|-- public/                     # Static assets
+|-- index.html                  # HTML template
+|-- package.json                # Dependencies
+|-- tailwind.config.js          # Tailwind configuration
+|-- postcss.config.js           # PostCSS configuration
+|-- .gitignore                  # Git ignore rules
+|-- README.md                   
+```
+
 
 ## 🚀 Features
+
+## ✅ Implemented
 
 - **Complete Admin Dashboard**
     - 📊 Dashboard overview with key metrics
@@ -15,10 +71,13 @@ Built with React, Vite, and Tailwind CSS.
     - 📈 Reports (coming soon)
     - ⚙️ Settings (coming soon)
 
-- **Authentication Ready**
-    - Login/Register pages (placeholders ready)
-    - Protected routes structure
-    - Role-based access (Admin focus)
+- **Authentication & Authorization**
+    - User login with JWT authentication
+    - User registration with validation
+    - Protected routes with redirects
+    - Token storage in localStorage
+    - Axios interceptors for automatic token attachment
+    - 401 handling and token refresh
 
 - **Modern UI/UX**
     - Responsive design (mobile, tablet, desktop)
@@ -34,51 +93,23 @@ Built with React, Vite, and Tailwind CSS.
     - Component-based architecture
     - ESLint ready
 
-## 📂 Project Structure
-
-```
-frontend/
-|-- src/
-|  |-- components/              # Reusable UI components
-|  |  |-- Sidebar.jsx           # Navigation sidebar
-|  |  |-- Topbar.jsx            # Top navigation bar
-|  |  |-- StatCard.jsx          # Statistics card
-|  |-- layouts/                 # Layout components
-|  |  |-- DashboardLayout.jsx
-|  |-- pages/                   # Page components
-|  |  |-- DashboardHome.jsx
-|  |  |-- Jobs.jsx
-|  |  |-- Handymen.jsx
-|  |  |-- Customers.jsx
-|  |  |-- (more coming)
-|  |-- router/                  # Routing configuration
-|  |  |-- AppRouter.jsx
-|  |-- App.jsx                  # (legacy, will be removed)
-|  |-- main.jsx                 # Entry point
-|-- public/                     # Static assets
-|-- index.html                  # HTML template
-|-- package.json                # Dependencies
-|-- tailwind.config.js          # Tailwind configuration
-|-- postcss.config.js           # PostCSS configuration
-|-- .gitignore                  # Git ignore rules
-|-- README.md                   
-```
-
-## 🛠️ Tech Stack
-
-- **React** 18 - UI library
-- **Vite** - Build tool and dev server
-- **React Router** 6 - Navigation
-- **Tailwind CSS** 4 - Styling
-- **Axios** - API calls (ready to use)
+- **In Progress**
+    - Handyman management
+    - Customer management
+    - Payment tracking
+    - Reviews moderation
+    - Analytics dashboard
 
 ## 🚦 Getting Started
 
 ### Prerequisites
+- Node.js 16+
+- npm or yarn
+- Backend server running (handyman_za/backend)
 
 1. Clone the repository
     ```bash
-    git clone <P-Mnguni/Handyman.za>
+    git clone https://github.com/P-Mnguni/handyman_za/frontend.git
     cd frontend
     ```
 
@@ -87,12 +118,23 @@ frontend/
     npm install
     ```
 
-3. Start the development server:
+3. Environment variables
+    Create a '.env' file in the root directory:
+    ```env
+    VITE_API_URL=http://localhost:5000/api/v1
+    ```
+
+4. Start the development server:
     ```bash
     npm run dev
     ```
 
-4. Open your browser at
+5. Build for production
+    ```bash
+    npm run build
+    ```
+
+6. Open your browser at
     http://localhost:5173
 
 ### Available Scripts
