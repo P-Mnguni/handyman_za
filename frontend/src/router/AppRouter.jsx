@@ -55,7 +55,6 @@ const Settings = () => (
 
 const AppRouter = () => {
     return (
-        <BrowserRouter>
             <div className='h-screen'>
                 <Routes>
                     {/* Public routes */}
@@ -92,7 +91,6 @@ const AppRouter = () => {
                     <Route path='*' element={<Navigate to="/login" replace />} />
                 </Routes>
             </div>
-        </BrowserRouter>
     );
 };
 
