@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../api/authService";
+import { login as apiLogin } from "../api/authService";
+import AuthContext from "../context/AuthContext";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -11,6 +12,7 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false); 
     const [error, setError] = useState(null);
+    const { login } = useContext(AuthContext);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -29,28 +31,19 @@ const Login = () => {
 
         try {
             // Call the login API
-            const response = await login(formData.email, formData.password);
+            const response = await apiLogin(formData.email, formData.password);
 
-            // Stores the tokens
-            if (response.tokens) {
-                localStorage.setItem('accessToken', response.tokens.accessToken);
-                localStorage.setItem('refreshToken', response.tokens.refreshToken);
-            } else if (response.token) {
-                // Fallback if backend returns single token
-                localStorage.setItem('token', response.token);
-            }
+            const accessToken = response.tokens.accessToken;
+            const user = response.user;
 
-            // Store user info
-            if (response.user) {
-                localStorage.setItem('user', JSON.stringify(response.user));
-            }
+            login(accessToken, user);
 
             // Redirect to dashboard on success
             navigate('/dashboard');
 
         } catch (err) {
             console.error('Login failed:', err);
-            setError(err.message || 'Login failed. Please check your credentials and try again.');
+            setError(err.response?.data?.message || 'Login failed. Please check your credentials and try again.');
         } finally {
             setIsLoading(false);
         }
