@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import { getCurrentUser } from "../api/authService";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 // Create context
 const AuthContext = createContext(null);

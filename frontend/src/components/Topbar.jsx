@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AuthContext from '../context/AuthContext';
 
 const Topbar = ({ pageTitle, onMenuClick  }) => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -7,6 +8,14 @@ const Topbar = ({ pageTitle, onMenuClick  }) => {
 
     const notificationsRef = useRef(null);
     const profileRef = useRef(null);
+
+    const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    }
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -126,9 +135,9 @@ const Topbar = ({ pageTitle, onMenuClick  }) => {
                             className='flex items-center space-x-2 focus:outline-none'>
                             <div className='h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center
                             text-white font-semibold'>
-                                U
+                                {user?.name?.charAt(0) || 'U'}
                             </div>
-                            <span className='text-sm font-medium text-gray-700 hidden md:block'>User Name</span>
+                            <span className='text-sm font-medium text-gray-700 hidden md:block'>{user?.name || 'User'}</span>
                             <svg
                                 className='h-4 w-4 text-gray-500 hidden md:block'
                                 fill='none'
@@ -156,8 +165,12 @@ const Topbar = ({ pageTitle, onMenuClick  }) => {
                                             Settings
                                         </a>
                                         <hr className='my-1' />
-                                        <button className='w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100'>
-                                            Sign out
+                                        <button 
+                                            onClick={handleLogout}
+                                            className='ml-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium
+                                            rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+                                        >
+                                            Logout
                                         </button>
                                     </div>
                                 </div>
