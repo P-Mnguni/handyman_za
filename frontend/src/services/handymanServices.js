@@ -77,3 +77,13 @@ export const verifyHandyman = async (handymanId) => {
     }
 };
 
+// Suspend a handyman (temporary ban)
+export const suspendHandyman = async (handymanId) => {
+    try {
+        const response = await apiClient.post(`/handymen/${handymanId}/suspend`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error suspending handyman ${handymanId}:`, error);
+        throw error;
+    }
+};
