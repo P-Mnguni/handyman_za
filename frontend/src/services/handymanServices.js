@@ -33,3 +33,13 @@ export const getHandymanStats = async (handymanId) => {
     }
 };
 
+// Create a new handyman profile (admin only)
+export const createHandyman = async (handymanData) => {
+    try {
+        const response = await apiClient.post('/handyman', handymanData);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating handyman:', error);
+        throw error;
+    }
+};
