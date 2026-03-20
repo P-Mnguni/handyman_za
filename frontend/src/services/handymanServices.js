@@ -54,3 +54,14 @@ export const updateHandyman = async (handymanId, handymanData) => {
         throw error;
     }
 };
+
+// Delete a handyman (admin only)
+export const deleteHandyman = async (handymanId) => {
+    try {
+        const response = await apiClient.delete(`/handymen/${handymanId}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error deleting handyman ${handymanId}:`, error);
+        throw error;
+    }
+};
