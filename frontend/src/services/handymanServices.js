@@ -110,3 +110,15 @@ export const getHandymanJobs = async (handymanId, status = '') => {
         throw error;
     }
 };
+
+// Get available handymen for a job
+export const getAvailableHandymen = async (jobId = null) => {
+    try {
+        const params = jobId ? { jobId } : {};
+        const response = await apiClient.get(`/handymen/available`, { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching available handymen:', error);
+        throw error;
+    }
+};
