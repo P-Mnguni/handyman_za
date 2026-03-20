@@ -10,3 +10,15 @@ export const getHandymen = async (params = {}) => {
         throw error;
     }
 };
+
+// Get a single handyman by ID
+export const getHandymanById = async (handymanId) => {
+    try {
+        const response = await apiClient.get(`/handymen/${handymanId}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching handyman ${handymanId}`, error);
+        throw error;
+    }
+};
+
