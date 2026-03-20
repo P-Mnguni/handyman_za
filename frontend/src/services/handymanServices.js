@@ -87,3 +87,14 @@ export const suspendHandyman = async (handymanId) => {
         throw error;
     }
 };
+
+// Get handyman's reviews
+export const getHandymanReviews = async (handymanId) => {
+    try {
+        const response = await apiClient.get(`/handymen/${handymanId}/reviews`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching reviews for handymen ${handymanId}:`, error);
+        throw error;
+    }
+};
