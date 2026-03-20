@@ -22,3 +22,14 @@ export const getHandymanById = async (handymanId) => {
     }
 };
 
+// Get handyman stats (ratings, completed jobs, etc.)
+export const getHandymanStats = async (handymanId) => {
+    try {
+        const response = await apiClient.get(`/handymen/${handymanId}/stats`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching stats for handyman ${handymanId}:`, error);
+        throw error;
+    }
+};
+
