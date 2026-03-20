@@ -65,3 +65,15 @@ export const deleteHandyman = async (handymanId) => {
         throw error;
     }
 };
+
+// Verify a handyman (approve their profile)
+export const verifyHandyman = async (handymanId) => {
+    try {
+        const response = await apiClient.post(`/handymen/${handymanId}/verify`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error verifying handyman ${handymanId}:`, error);
+        throw error;
+    }
+};
+
