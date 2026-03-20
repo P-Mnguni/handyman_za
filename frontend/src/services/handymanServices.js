@@ -98,3 +98,15 @@ export const getHandymanReviews = async (handymanId) => {
         throw error;
     }
 };
+
+// Get handyman's jobs
+export const getHandymanJobs = async (handymanId, status = '') => {
+    try {
+        const params = status ? { status } : {};
+        const response = await apiClient.get(`/handymen/${handymanId}/jobs`, { params });
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching jobs for handyman ${handymanId}:`, error);
+        throw error;
+    }
+};
