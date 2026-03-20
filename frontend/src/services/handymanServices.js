@@ -36,10 +36,21 @@ export const getHandymanStats = async (handymanId) => {
 // Create a new handyman profile (admin only)
 export const createHandyman = async (handymanData) => {
     try {
-        const response = await apiClient.post('/handyman', handymanData);
+        const response = await apiClient.post('/handymen', handymanData);
         return response.data;
     } catch (error) {
         console.error('Error creating handyman:', error);
+        throw error;
+    }
+};
+
+// Update handyman profile
+export const updateHandyman = async (handymanId, handymanData) => {
+    try {
+        const response = await apiClient.patch(`/handymen/${handymanId}`, handymanData);
+        return response.data;
+    } catch (error) {
+        console.error(`Error updating handyman ${handymanId}`, error);
         throw error;
     }
 };
