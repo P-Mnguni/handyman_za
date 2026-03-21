@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createJob, getAllJobs } from '../api/jobService.js';
-import JobsTable from '../components/JobsTable.jsx';
-import CreateJobModal from "../components/CreateJobModal.jsx";
+import JobsTable from '../components/Jobs/JobsTable.jsx';
+import CreateJobModal from "../components/Jobs/CreateJobModal.jsx";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
 
 const Jobs = () => {
