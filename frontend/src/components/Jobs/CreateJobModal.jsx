@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createJob } from "../api/jobService";
+import { createJob } from "../../api/jobService";
 
 const CreateJobModal = ({ isOpen, onClose, onSubmit, onJobCreated }) => {
     // Form state
