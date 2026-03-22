@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getHandymen } from "../services/handymanServices";
 import LoadingSpinner from "../components/LoadingSpinner";
+import HandymenTable from "../components/handymen/HandymenTable";
 
 const Handymen = () => {
     const [filter, setFilter] = useState('all');
@@ -27,23 +28,6 @@ const Handymen = () => {
         }
     };
 
-    const getStatusBadge = (status) => {
-        const colors = {
-            verified: 'bg-green-100 text-green-800',
-            pending: 'bg-yellow-100 text-yellow-800',
-            suspended: 'bg-red-100 text-red-800',
-            inactive: 'bg-gray-100 text-gray-800'
-        };
-        return colors[status] || 'bg-gray-100 text-gray-800'
-    };;
-
-    const getRatingStars = (rating) => {
-        if (!rating) return 'No ratings';
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating & 1 >= 0.5;
-        return `${'∗'.repeat(fullStars)}${hasHalfStar ? '½' : ''}${'▿'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0))} (${rating})`;
-    };
-
     // Filter handymen based on status and search
     const filteredHandymen = handymen.filter(handyman => {
         if (filter !== 'all' && handyman.status !== filter) return false;
@@ -66,6 +50,19 @@ const Handymen = () => {
         pending: handymen.filter(h => h.status === 'pending').length,
         suspended: handymen.filter(h => h.status === 'suspended').length
     };
+
+    // Placeholder handlers (to be implemented later)
+    const handleView = (handyman) => {
+        console.log('View handyman:', handyman);
+    };
+
+    const handleVerify = (handyman) => {
+        console.log('Verify handyman:', handyman);
+    };
+
+    const handleSuspend = (handyman) => {
+        console.log('Suspend handyman:', handyman);
+    }
 
     if (loading) {
         return <LoadingSpinner size="large" color="gray" text="Loading handymen..." />;
@@ -155,7 +152,7 @@ const Handymen = () => {
                     </button>
                 </div>
 
-                {/* Search and actions */}
+                {/* Search and Refresh */}
                 <div className="flex gap-3">
                     <div className="relative">
                         <input
@@ -203,150 +200,14 @@ const Handymen = () => {
                 </div>
             </div>
 
-            {/*last update Handymen Grid/Table */}
-            {filteredHandymen.length === 0 ? (
-                <div className="bg-white rounded-lg shadow p-12 text-center">
-                    <svg
-                        className="h-12 w-12 text-gray-400 mx-auto mb-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0
-                            015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3
-                            3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                    </svg>
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">No handymen found</h3>
-                    <p className="text-gray-500">{searchTerm || filter !== 'all'
-                                                    ? 'Try adjusting your filters or search term.'
-                                                    : 'No handymen are registered on the platform yet.'}
-                    </p>                    
-                </div>
-            ) : (
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Handyman
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Skills
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Location
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Rating
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Jobs Completed
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Joined
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {filteredHandymen.map((handyman) => (
-                                    <tr key={handyman._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center">
-                                                <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center
-                                                text-white font-semibold">
-                                                    {handyman.name?.charAt(0) || 'H'}
-                                                </div>
-                                                <div className="ml-3">
-                                                    <div className="text-sm font-medium text-gray-900">{handyman.name}</div>
-                                                    <div className="text-sm text-gray-500">{handyman.email}</div>
-                                                    {handyman.phone && <div className="text-xs text-gray-400">{handyman.phone}</div>}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-wrap gap-1">
-                                                {handyman.skills?.slice(0, 3).map((skill, idx) => (
-                                                    <span key={idx} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                                                        {skill}
-                                                    </span>
-                                                ))}
-                                                {handyman.skills?.length > 3 && (
-                                                    <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
-                                                        +{handyman.skills.length - 3}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
-                                                {handyman.location?.city || 'N/A'}
-                                                {handyman.location?.area && <div className="text-xs text-gray-400">
-                                                    {handyman.location.area}
-                                                </div>}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-yellow-600">
-                                                {getRatingStars(handyman.rating)}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
-                                            {handyman.completedJobs || 0}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 text-xs rounded-full capitalize ${getStatusBadge(handyman.status)}`}>
-                                                {handyman.status || 'pending'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">
-                                            {handyman.createdAt ? new Date(handyman.createdAt).toLocaleDateString('en-ZA') : 'N/A'}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center space-x-3">
-                                                <button className="text-blue-600 hover:text-blue-800 text-sm">
-                                                    View
-                                                </button>
-                                                {handyman.status === 'pending' && (
-                                                    <button className="text-green-600 hover:text-green-800 text-sm">
-                                                        Verify
-                                                    </button>
-                                                )}
-                                                <button className="text-gray-400 hover:text-gray-600">
-                                                    <svg
-                                                        className="h-5 w-5"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2
-                                                            1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                                                        />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
+            {/* Handymen Table Component */}
+            <HandymenTable
+                handymen={filteredHandymen}
+                onView={handleView}
+                onVerify={handleVerify}
+                onSuspend={handleSuspend}
+            />
+            
             {/* Summary Footer */}
             <div className="bg-white p-4 rounded-lg shadow flex justify-between items-center text-sm">
                 <div className="text-gray-600">
