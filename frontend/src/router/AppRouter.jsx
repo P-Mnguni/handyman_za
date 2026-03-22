@@ -4,7 +4,7 @@ import ProtectedRoute from '../routes/ProtectedRoute';
 
 import Jobs from '../pages/Jobs';
 import DashboardHome from '../pages/DashboardHome';
-import Handymen from '../pages/Handyman';
+import Handymen from '../pages/Handymen';
 import Customers from '../pages/Customers';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
