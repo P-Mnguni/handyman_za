@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createHandyman } from "../../services/handymanServices";
 
 const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
@@ -18,6 +19,8 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
 
     const [skillInput, setSkillInput] = useState('');
     const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
 
     if (!isOpen) return null;
 
@@ -43,6 +46,8 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
+        // Clear submit error when user makes changes
+        if (submitError) setSubmitError('');
     };
 
     const handleAddSkill = () => {
@@ -93,7 +98,7 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!validateForm()) return;
@@ -105,15 +110,29 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
             hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null
         };
 
-        // For now, just log the data
-        console.log('Creating handyman:', handymanData);
+        // Remove firstName and lastName as they're combined into name
+        delete handymanData.firstName;
+        delete handymanData.lastName;
 
-        // Later: call API here
-        // await createHandyman(handymanData);
+        setIsSubmitting(true);
+        setSubmitError('');
 
-        // Call onSuccess if provided, then close
-        if (onSuccess) onSuccess(handymanData);
-        onClose();
+        try {
+            await createHandyman(handymanData);
+            
+            // Call onSuccess if provided, then close
+            if (onSuccess) {
+                await onSuccess(handymanData);
+            }
+
+            // Close modal
+            onClose();
+        } catch (err) {
+            console.error('Error creating handyman:', err);
+            setSubmitError(err.response?.data?.message || 'Failed to create handyman. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleClose = () => {
@@ -134,6 +153,7 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
         });
         setSkillInput('');
         setErrors({});
+        setSubmitError('');
         onClose();
     };
 
@@ -153,6 +173,13 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+                        {/* Submit Error */}
+                        {submitError && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+                                {submitError}
+                            </div>
+                        )}
+
                         {/* Name Fields */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -164,7 +191,9 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="firstName"
                                     value={formData.firstName}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    disabled={isSubmitting}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                        disabled:bg-gray-100 disabled:cursor-not-allowed ${
                                         errors.firstName ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                 />
@@ -182,7 +211,9 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="lastName"
                                     value={formData.lastName}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    disabled={isSubmitting}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
+                                        disabled:bg-gray-100 disabled:cursor-not-allowed ${
                                         errors.lastName ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                 />
@@ -203,7 +234,9 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    disabled={isSubmitting}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
+                                        disabled:bg-gray-100 disabled:cursor-not-allowed ${
                                         errors.email ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                 />
@@ -221,8 +254,9 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
+                                    disabled={isSubmitting}
                                     className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 
-                                        focus:ring-blue-500`}
+                                        focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                 />
                             </div>
                         </div>
@@ -238,7 +272,9 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    disabled={isSubmitting}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
+                                        disabled:bg-gray-100 disabled:cursor-not-allowed ${
                                         errors.password ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                 />
@@ -256,7 +292,9 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="hourlyRate"
                                     value={formData.hourlyRate}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    disabled={isSubmitting}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
+                                        disabled:bg-gray-100 disabled:cursor-not-allowed ${
                                         errors.hourlyRate ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                     placeholder="e.g., 250"
@@ -278,7 +316,9 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="location.city"
                                     value={formData.location.city}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    disabled={isSubmitting}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
+                                        disabled:bg-gray-100 disabled:cursor-not-allowed ${
                                         errors['location.city'] ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                     placeholder="e.g., Durban"
@@ -297,8 +337,9 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     name="location.area"
                                     value={formData.location.area}
                                     onChange={handleChange}
+                                    disabled={isSubmitting}
                                     className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2
-                                        focus:ring-blue-500`}
+                                        focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                     placeholder="e.g., Musgrave Centre"
                                 />
                             </div>
@@ -315,14 +356,17 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                     value={skillInput}
                                     onChange={(e) => setSkillInput(e.target.value)}
                                     onKeyPress={handleKeyPress}
+                                    disabled={isSubmitting}
                                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 
-                                    focus:ring-blue-500"
+                                    focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                     placeholder="e.g., Plumbing, Electrical, Painting"
                                 />
                                 <button
                                     type="button"
                                     onClick={handleAddSkill}
-                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                    disabled={isSubmitting}
+                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors
+                                    disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Add
                                 </button>
@@ -337,6 +381,7 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveSkill(skill)}
+                                            disabled={isSubmitting}
                                             className="text-blue-600 hover:text-blue-800 ml-1"
                                         >
                                             ×
@@ -355,16 +400,45 @@ const CreateHandymanModal = ({ isOpen, onClose, onSuccess }) => {
                                 <button
                                     type="button"
                                     onClick={handleClose}
+                                    disabled={isSubmitting}
                                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 
-                                    transition-colors"
+                                    transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    disabled={isSubmitting}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors
+                                    disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
-                                    Create Handyman
+                                    {isSubmitting ? (
+                                        <>
+                                            <svg
+                                                className="animate-spin h-4 w-4 mr-2"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                ></circle>
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.963 7.962 0 014 12H0c0
+                                                    3.042 1.135 5.824 3 7.93813-2.647z"
+                                                />
+                                            </svg>
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        'Create Handyman'
+                                    )}
                                 </button>
                             </div>
                         </div>
