@@ -225,3 +225,36 @@ const verifyHandyman = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Suspend handyman
+ * @route   POST /api/v1/handymen/:id/suspend
+ * @access  Private/Admin
+ */
+const suspendHandyman = async (req, res) => {
+    try {
+        const handyman = await User.findById(req.params.id);
+
+        if (!handyman) {
+            return res.status(404).json({ message: 'Handyman not found' });
+        }
+
+        if (handyman.role !== 'handyman') {
+            return res.status(400).json({ message: 'User is not a handyman' });
+        }
+
+        handyman.status = 'suspend';
+        await handyman.save();
+
+        res.status(200).json({
+            message: 'Handyman suspended successfully',
+            handyman
+        });
+    } catch (error) {
+        console.error('Error suspending handyman:', error);
+        res.status(500).json({
+            message: 'Failed to suspend handyman',
+            error: error.message
+        });
+    }
+};
