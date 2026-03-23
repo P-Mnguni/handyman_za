@@ -22,3 +22,32 @@ const getHandymen = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Get single handyman by ID
+ * @route   GET /api/v1/handymen/:id
+ * @access  Private/Admin
+ */
+const getHandymanByID = async (req, res) => {
+    try {
+        const handymen = await User.findById(req.params.id)
+                                    .select('-password')
+
+        if (!handyman) {
+            return res.status(404).json({ message: 'Handyman not found' })
+        }
+
+        if (handyman.role !== 'handyman') {
+            return res.status(400).json({ message: 'User is not a handyman' });
+        }
+
+        res.status(200).json(handyman);
+    } catch (error) {
+        console.error('Error fetching handyman:', error);
+        res.status(500).json({
+            message: 'Failed to fetch handyman',
+            error: error.message
+        });
+    }
+};
+
