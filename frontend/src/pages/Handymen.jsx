@@ -12,10 +12,7 @@ const Handymen = () => {
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetchHandymen();
-    }, []);
-
+    // Extract fetch function to reuse
     const fetchHandymen = async () => {
         try {
             setLoading(true);
@@ -29,6 +26,10 @@ const Handymen = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchHandymen();
+    }, []);
 
     // Filter handymen based on status and search
     const filteredHandymen = handymen.filter(handyman => {
