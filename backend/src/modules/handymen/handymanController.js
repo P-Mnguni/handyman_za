@@ -116,3 +116,50 @@ const createHandyman = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Update handyman profile
+ * @route   PUT /api/v1/handymen/:id
+ * @access  Private/Admin
+ */
+const updateHandyman = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        // Prevents role change
+        if (updates.role) {
+            delete updates.role;
+        }
+
+        // Prevent password updates through this endpoint
+        if (updates.password) {
+            delete updates.password;
+        }
+
+        const handyman = await User.findByIdAndUpdate(
+            id,
+            { $set: updates },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!handyman) {
+            return res.status(404).json({ message: 'Handyman not found' })
+        }
+
+        if (handyman.role !== 'handyman') {
+            return res.status(400).json({ message: 'User is not a handyman' });
+        }
+
+        res.status(200).json({
+            message: 'Handyman updated successfully',
+            handyman
+        });
+    } catch (error) {
+        console.error('Error updating handyman:', error);
+        res.status(500).json({
+            message: 'Failed to update handyman',
+            error: error.message
+        });
+    }
+};
