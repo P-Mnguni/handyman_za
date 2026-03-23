@@ -296,3 +296,43 @@ const getHandymanStats = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Get available handymen (for job assignment)
+ * @route   GET /api/v1/handymen/available
+ * @access  Private
+ */
+const getAvailableHandymen = async (req, res) => {
+    try {
+        const { jobId } = req.query;
+
+        // Find verified, not suspended handymen
+        const availableHandymen = await User.find({
+            role: 'handyman',
+            status: 'verified'
+        }).select('name email skills location hourlyRate rating');
+
+        // TODO: Add logic to filter by location proximity
+        // TODO: Add logic to exclude handymen already assigned to jobs at same time
+
+        res.status(200).json(availableHandymen);
+    } catch (error) {
+        console.error('Error fetching available handymen:', error);
+        res.status(500).json({
+            message: 'Failed to fetch available handymen',
+            error: error.message
+        });
+    }
+};
+
+module.exports = {
+    getHandymen,
+    getHandymanByID,
+    createHandyman,
+    updateHandyman,
+    deleteHandyman,
+    verifyHandyman,
+    suspendHandyman,
+    getHandymanStats,
+    getAvailableHandymen
+};
