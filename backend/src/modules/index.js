@@ -2,6 +2,7 @@ import express from 'express';
 import { env } from '../config/env.js';
 import authRoutes from './auth/auth.routes.js';
 import jobRoutes from './jobs/job.routes.js';
+import handymenRoutes from './handymen/handymanRoutes.js';
 import { success } from 'zod';
 import { no } from 'zod/v4/locales';
 //import { useImperativeHandle } from 'react';
@@ -98,14 +99,7 @@ usersRouter.patch('/:userId/suspend', (req, res) => placeholderResponse(res, 'Su
 router.use('/users', usersRouter);
 
 // Handymen Module
-const handymenRouter = express.Router();
-handymenRouter.get('/', (req, res) => placeholderResponse(res, 'List handymen with filters'));
-handymenRouter.get('/nearby', (req, res) => placeholderResponse(res, 'Find nearby handymen'));
-handymenRouter.get('/:handymanId', (req, res) => placeholderResponse(res, 'Get handyman profile'));
-handymenRouter.post('/profile', (req, res) => placeholderResponse(res, 'Create/update handyman profile'));
-handymenRouter.get('/profile/me', (req, res) => placeholderResponse(res, 'Get my handyman profile'));
-handymenRouter.patch('/:handymanId/verify', (req, res) => placeholderResponse(res, 'Verify handyman (admin only)'));
-router.use('/handymen', handymenRouter);
+router.use('/handymen', handymenRoutes);
 
 // Jobs Module (Core)
 router.use('/jobs', jobRoutes);
