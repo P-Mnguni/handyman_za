@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getHandymen } from "../services/handymanServices";
 import LoadingSpinner from "../components/LoadingSpinner";
 import HandymenTable from "../components/handymen/HandymenTable";
+import CreateHandymanModal from "../components/Handymen/CreateHandymanModal";
 
 const Handymen = () => {
     const [filter, setFilter] = useState('all');
@@ -9,6 +10,7 @@ const Handymen = () => {
     const [handymen, setHandymen] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         fetchHandymen();
@@ -177,6 +179,26 @@ const Handymen = () => {
                             />
                         </svg>                    
                     </div>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700
+                        transition-colors flex items-center"
+                    >
+                        <svg
+                            className="h-5 w-5 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        Add Handyman
+                    </button>
                     <button 
                         onClick={fetchHandymen}
                         className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 
@@ -223,6 +245,15 @@ const Handymen = () => {
                     </button>
                 </div>
             </div>
+
+            <CreateHandymanModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => {
+                    // Will refresh handyman list later
+                    fetchHandymen()
+                }}
+            />
         </div>
     );
 };
