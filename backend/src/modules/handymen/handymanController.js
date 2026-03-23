@@ -163,3 +163,32 @@ const updateHandyman = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Delete handyman
+ * @route   DELETE /api/v1/handymen/:id
+ * @access  Private/Admin
+ */
+const deleteHandyman = async (req, res) => {
+    try {
+        const handyman = await User.findById(req.params.id);
+
+        if (!handyman) {
+            return res.status(404).json({ message: 'Handyman not found' });
+        }
+
+        if (handyman.role !== 'handyman') {
+            return res.status(400).json({ message: 'User is not a handyman' });
+        }
+
+        await handyman.deleteOne();
+
+        res.status(200).json({ message: 'Handyman deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting handyman:', error);
+        res.status(500).json({
+            message: 'Failed to delete handyman',
+            error: error.message
+        });
+    }
+};
