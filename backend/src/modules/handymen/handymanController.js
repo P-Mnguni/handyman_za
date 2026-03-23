@@ -258,3 +258,41 @@ const suspendHandyman = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Get handyman stats (jobs completed, rating, etc)
+ * @route   GET /api/v1/handymen/:id/stats
+ * @access  Private/Admin
+ */
+const getHandymanStats = async (req, res) => {
+    try {
+        const handyman = await User.findById(req.params.id)
+                                    .select('completedJobs ratings name email');
+
+        if (!handyman) {
+            return res.status(404).json({ message: 'Handyman not found' });
+        }
+
+        if (handyman.role !== 'handyman') {
+            return res.status(400).json({ message: 'User is not a handyman' });
+        }
+
+        // More stats to be added here 
+        // e.g., Total earning, recent jobs, average response time
+        // would require querying the Jobs model
+        
+        res.status(200).json({
+            id: handyman._id,
+            name: handyman.name,
+            email: handyman.email,
+            completedJob: handyman.completedJob || 0,
+            rating: handyman.rating || 0
+        });
+    } catch (error) {
+        console.error('Error fetching handyman stats:', error);
+        res.status(500).json({
+            message: 'Failed to reach handyman stats',
+            error: error.message
+        });
+    }
+};
