@@ -51,3 +51,68 @@ const getHandymanByID = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Create a new handyman
+ * @route   POST /api/v1/handymen
+ * @access  Private/Admin
+ */
+const createHandyman = async (req, res) => {
+    try {
+        const {
+            name,
+            email,
+            password,
+            phone,
+            skills,
+            location,
+            hourlyRate,
+            bio
+        } = req.body;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User with this email already exists' });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create handyman user - force role to handyman
+        const handyman = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role: 'handyman',
+            phone: phone || '',
+            skills: skills || [],
+            location: location || {
+                city: '',
+                area: ''
+            },
+            hourlyRate: hourlyRate || null,
+            bio: bio || '',
+            status: 'pending',                  // waiting for admin approval
+            completedJob: 0,
+            rating: 0
+        });
+
+        await handyman.save();
+
+        // Return handyman without password
+        const handymanResponse = handyman.toObject();
+        delete handymanResponse.password;
+
+        res.status(201).json({
+            message: 'Handyman created successfully',
+            handyman: handymanResponse
+        });
+    } catch (error) {
+        console.error('Error creating handyman:', error);
+        res.status(500).json({
+            message: 'Failed to create handyman',
+            error: error.message
+        });
+    }
+};
