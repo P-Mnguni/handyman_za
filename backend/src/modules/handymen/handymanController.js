@@ -192,3 +192,36 @@ const deleteHandyman = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Verify handyman (admin approval)
+ * @route   POST /api/v1/handymen/:id/verify
+ * @access  Private/Admin
+ */
+const verifyHandyman = async (req, res) => {
+    try {
+        const handyman = await User.findById(req.params.id);
+
+        if (!handyman) {
+            return res.status(404).json({ message: 'Handyman not found' });
+        }
+
+        if (handyman.role !== 'handyman') {
+            return res.status(400).json({ message: 'User is not a handyman' });
+        }
+
+        handyman.status = 'verified';
+        await handyman.save();
+
+        res.status(200).json({
+            message: 'Handyman verified successfully',
+            handyman
+        });
+    } catch (error) {
+        console.error('Error verifying handyman:', error);
+        res.status(500).json({
+            message: 'Failed to verify handyman',
+            error: error.message
+        });
+    }
+};
