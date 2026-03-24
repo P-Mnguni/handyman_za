@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
  * @route   GET /api/v1/handymen
  * @access  Private/Admin
  */
-const getHandymen = async (req, res) => {
+export const getHandymen = async (req, res) => {
     try {
         // Query users with role 'handyman'
         const handymen = await User.find({ role: 'handyman' })
@@ -28,7 +28,7 @@ const getHandymen = async (req, res) => {
  * @route   GET /api/v1/handymen/:id
  * @access  Private/Admin
  */
-const getHandymanByID = async (req, res) => {
+export const getHandymanByID = async (req, res) => {
     try {
         const handymen = await User.findById(req.params.id)
                                     .select('-password')
@@ -56,7 +56,7 @@ const getHandymanByID = async (req, res) => {
  * @route   POST /api/v1/handymen
  * @access  Private/Admin
  */
-const createHandyman = async (req, res) => {
+export const createHandyman = async (req, res) => {
     try {
         const {
             name,
@@ -122,7 +122,7 @@ const createHandyman = async (req, res) => {
  * @route   PUT /api/v1/handymen/:id
  * @access  Private/Admin
  */
-const updateHandyman = async (req, res) => {
+export const updateHandyman = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
@@ -169,7 +169,7 @@ const updateHandyman = async (req, res) => {
  * @route   DELETE /api/v1/handymen/:id
  * @access  Private/Admin
  */
-const deleteHandyman = async (req, res) => {
+export const deleteHandyman = async (req, res) => {
     try {
         const handyman = await User.findById(req.params.id);
 
@@ -198,7 +198,7 @@ const deleteHandyman = async (req, res) => {
  * @route   POST /api/v1/handymen/:id/verify
  * @access  Private/Admin
  */
-const verifyHandyman = async (req, res) => {
+export const verifyHandyman = async (req, res) => {
     try {
         const handyman = await User.findById(req.params.id);
 
@@ -231,7 +231,7 @@ const verifyHandyman = async (req, res) => {
  * @route   POST /api/v1/handymen/:id/suspend
  * @access  Private/Admin
  */
-const suspendHandyman = async (req, res) => {
+export const suspendHandyman = async (req, res) => {
     try {
         const handyman = await User.findById(req.params.id);
 
@@ -264,7 +264,7 @@ const suspendHandyman = async (req, res) => {
  * @route   GET /api/v1/handymen/:id/stats
  * @access  Private/Admin
  */
-const getHandymanStats = async (req, res) => {
+export const getHandymanStats = async (req, res) => {
     try {
         const handyman = await User.findById(req.params.id)
                                     .select('completedJobs ratings name email');
@@ -302,7 +302,7 @@ const getHandymanStats = async (req, res) => {
  * @route   GET /api/v1/handymen/available
  * @access  Private
  */
-const getAvailableHandymen = async (req, res) => {
+export const getAvailableHandymen = async (req, res) => {
     try {
         const { jobId } = req.query;
 
@@ -323,16 +323,4 @@ const getAvailableHandymen = async (req, res) => {
             error: error.message
         });
     }
-};
-
-module.exports = {
-    getHandymen,
-    getHandymanByID,
-    createHandyman,
-    updateHandyman,
-    deleteHandyman,
-    verifyHandyman,
-    suspendHandyman,
-    getHandymanStats,
-    getAvailableHandymen
 };

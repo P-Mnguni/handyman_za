@@ -1,17 +1,7 @@
 import express from 'express';
 import { authorize } from '../../middlewares/role.middleware.js';
 import { authenticate } from '../auth/auth.middleware.js';
-import {
-    getHandymen,
-    getHandymanById,
-    createHandyman,
-    updateHandyman,
-    deleteHandyman,
-    verifyHandyman,
-    suspendHandyman,
-    getHandymanStats,
-    getAvailableHandymen
-} from './handymanController.js'
+import * as handymanController from './handymanController.js'
 
 const router = express.Router();
 
@@ -24,12 +14,12 @@ router.use(authenticate);
 router.get(
     '/', 
     authorize('admin'), 
-    getHandymen
+    handymanController.getHandymen
 );
 
 router.get(
     '/available',
-    getAvailableHandymen
+    handymanController.getAvailableHandymen
 );
 
 
@@ -37,44 +27,44 @@ router.get(
 router.get(
     '/:id',
     authorize('admin'),
-    getHandymanById
+    handymanController.getHandymanByID
 );
 
 router.put(
     '/:id',
     authorize('admin'),
-    updateHandyman
+    handymanController.updateHandyman
 );
 
 router.delete(
     '/:id',
     authorize('admin'),
-    deleteHandyman
+    handymanController.deleteHandyman
 );
 
 // Admin-only management routes
 router.post(
     '/',
     authorize('admin'),
-    createHandyman
+    handymanController.createHandyman
 );
 
 router.post(
     '/:id/verify',
     authorize('admin'),
-    verifyHandyman
+    handymanController.verifyHandyman
 );
 
 router.post(
     '/:id/suspend',
     authorize('admin'),
-    suspendHandyman
+    handymanController.suspendHandyman
 );
 
 router.get(
     '/:id/stats',
     authorize('admin'),
-    getHandymanStats
+    handymanController.getHandymanStats
 );
 
 export default router;
