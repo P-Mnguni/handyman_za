@@ -13,15 +13,15 @@ import { token } from 'morgan';
 export const register = async (req, res, next) => {
     try {
         const deviceInfo = req.headers["user-agent"] || "unknown";
+        const userData = req.body;
 
-        // Combine firstName and lastName for storage in User model
-        const fullName = `${req.body?.firstName} ${req.body?.lastName}`.trim();
+        // Force role to client
+        userData.role = 'client';
 
         // Prepare data for service
         const registrationData = {
-            ...req.body,
+            ...userData,
             deviceInfo,
-            fullName
         };
 
         const result = await authService.register(registrationData);

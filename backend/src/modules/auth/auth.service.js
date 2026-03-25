@@ -43,8 +43,8 @@ class AuthService {
     async register(userData) {
         try {    
             // Validation
-            if (!userData.email || !userData.password || !userData.fullName || !userData.role) {
-                throw ApiError.badRequest('Email, password, full name, and role are required');
+            if (!userData.email || !userData.password || !userData.firstName || !userData.lastName || !userData.role) {
+                throw ApiError.badRequest('Email, password, first name, last name, and role are required');
             }
 
             // Check if user exists
@@ -70,7 +70,7 @@ class AuthService {
 
             // Base user data
             const baseUserData = {
-                fullName: userData.fullName,
+                fullName: userData.firstName + ' ' + userData.lastName,
                 email: userData.email.toLowerCase(),
                 phone: userData.phoneNumber,
                 passwordHash: hashedPassword,
