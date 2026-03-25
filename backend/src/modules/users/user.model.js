@@ -178,15 +178,15 @@ userSchema.virtual('isActive').get(function() {
 });
 
 userSchema.virtual('isHandyman').get(function() {
-    return this.role === 'HANDYMAN';
+    return this.role === 'handyman';
 });
 
-userSchema.virtual('isCustomer').get(function() {
-    return this.role === 'CUSTOMER';
+userSchema.virtual('isClient').get(function() {
+    return this.role === 'client';
 });
 
 userSchema.virtual('isAdmin').get(function() {
-    return this.role === 'ADMIN';
+    return this.role === 'admin';
 });
 
 // 🔐 Password hashing middleware

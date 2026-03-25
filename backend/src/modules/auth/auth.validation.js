@@ -53,10 +53,10 @@ const phoneNumberSchema = Joi.string()
                         });
 
 const roleSchema = Joi.string()
-                        .valid('client', 'handyman')
+                        .valid('client', 'handyman', 'admin')
                         .required()
                         .messages({
-                            'any.only': 'Role must ne either client or handyman',
+                            'any.only': 'Role must be either client, handyman, or admin',
                             'any.required': 'Role is required'
                         });
 

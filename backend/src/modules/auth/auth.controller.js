@@ -28,7 +28,7 @@ export const register = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: result.message || 'Customer registered successfully. Please verify email.',
+            message: result.response.message,
             data: result
         });
     } catch (error) {

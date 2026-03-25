@@ -74,8 +74,8 @@ class AuthService {
                 email: userData.email.toLowerCase(),
                 phone: userData.phoneNumber,
                 passwordHash: hashedPassword,
-                role: userData.role === 'client' ? 'client' : 'handyman', // Map client->CUSTOMER, handyman->HANDYMAN
-                refreshTokens: [],                                           // Initialize empty refresh tokens array
+                role: userData.role === 'client' ? 'client' : userData.role === 'handyman' ? 'handyman' : 'admin', 
+                refreshTokens: [],                                           
                 isEmailVerified: false,
                 isPhoneVerified: false,
                 status: 'ACTIVE'
@@ -122,18 +122,30 @@ class AuthService {
 
             // The toJSON() method automatically remove passwordHash
             const userResponse = user.toJSON();
+            
+            // Response message logic
+            let message;
+            if (userData.role === 'client') {
+                message = 'Client registered successfully. Please verify your email.';
+            } else if (userData.role === 'handyman') {
+                message = 'Handy registered successfully. Please wait for verification';
+            } else if (userData.role === 'admin') {
+                message = 'Admin account created successfully.'
+            }
 
             // Prepare response based on role 
             const response = {
                 user: userResponse,
-                message: userData.role === 'client' 
-                                        ? 'Client registered successfully. Please verify your email.'
-                                        : 'Handyman registered successfully. Please wait for verification.'
+                message
             };
 
             // Add handyman profile to response if applicable
             if (userData.role === 'handyman') {
                 response.handymanProfile = userResponse.handymanProfile;
+            }
+
+            if (userData.role === 'admin') {
+                response.isAdmin = true;
             }
         
             return {
