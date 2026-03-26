@@ -45,12 +45,12 @@ router.get(
 /**
  * @route   GET /api/v1/jobs
  * @desc    Get all jobs (with role checks in service)
- * @access  Private (Client/Handyman/Admin with proper permissions)
+ * @access  Private (Admin)
  */
 router.get(
     "/",
     authenticate,
-    role.user(),
+    authorize("admin"),
     jobController.getAllJobs
 );
 

@@ -18,8 +18,9 @@ const Jobs = () => {
         setError(null);
         
         try {
-            const data = await getAllJobs();
-            setJobs(data);
+            const response = await getAllJobs();
+            console.log('Jobs API response:', response)
+            setJobs(response.data?.jobs || []);
         } catch (err) {
             console.error('Error fetching jobs:', err);
             setError(err.response?.data?.message || 'Failed to load jobs. Please try again later.')

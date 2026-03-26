@@ -45,13 +45,13 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // Login function
-    const login = (accessToken, userData) => {
+    const login = (token, userData) => {
         // Store in localStorage
-        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('accessToken', token);
         localStorage.setItem('user', JSON.stringify(userData));
 
         // Update state
-        setAccessToken(accessToken);
+        setAccessToken(token);
         setUser(userData);
     };
 

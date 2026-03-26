@@ -165,10 +165,9 @@ const CreateJobModal = ({ isOpen, onClose, onSubmit, onJobCreated }) => {
     ];
 
     return (
-        <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black opacity-50 transition-opacity"
-            onClick={handleOverlayClick}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black opacity-50 transition-opacity">
+            <div className="fixed inset-0 bg-black opacity-50 transition-opacity" onClick={handleOverlayClick} />
+            
             {/* Modal Card */}
             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
                 {/* Header */}
@@ -409,6 +408,7 @@ const CreateJobModal = ({ isOpen, onClose, onSubmit, onJobCreated }) => {
                 </form>
             </div>
         </div>
+        
     );
 };
 

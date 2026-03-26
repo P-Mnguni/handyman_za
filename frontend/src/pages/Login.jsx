@@ -32,11 +32,27 @@ const Login = () => {
         try {
             // Call the login API
             const response = await apiLogin(formData.email, formData.password);
+            console.log('1. Full API response:', response);
+            console.log('2. Response structure keys:', Object.keys(response));
+            console.log('3. Response.tokens:', response.data.tokens);
 
-            const accessToken = response.tokens.accessToken;
-            const user = response.user;
+            const accessToken = response.data.tokens?.accessToken || response.data.accessToken;
+            const user = response.data.user.fullName;
+
+            console.log('4. Extracted accessToken:', accessToken);
+            console.log('5. Extracted user:', user);
+
+            if (!accessToken) {
+                console.error('No token found in response!');
+                setError('Invalid server response - no token');
+                return;
+            }
 
             login(accessToken, user);
+
+            console.log('6. Called login() - checking localStorage after');
+            console.log('7. localStorage accessToken:', localStorage.getItem('accessToken'));
+            console.log('8. localStorage user:', localStorage.getItem('user'));
 
             // Redirect to dashboard on success
             navigate('/dashboard');
