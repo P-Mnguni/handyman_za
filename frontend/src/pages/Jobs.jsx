@@ -19,7 +19,6 @@ const Jobs = () => {
         
         try {
             const response = await getAllJobs();
-            console.log('Jobs API response:', response)
             setJobs(response.data?.jobs || []);
         } catch (err) {
             console.error('Error fetching jobs:', err);

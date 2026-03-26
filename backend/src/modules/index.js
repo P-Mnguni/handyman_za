@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
                 methods: ['POST'],
             },
             users: {
-                path: '/users',
+                path: '/customers',
                 description: 'User management',
                 methods: ['GET', 'PUT', 'PATCH'],
             },

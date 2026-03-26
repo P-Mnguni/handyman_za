@@ -119,7 +119,7 @@ export function createApp() {
             document: 'https://docs.handyman.za',
             endpoints: {
                 auth: '/api/v1/auth',
-                users: '/api/v1/users',
+                users: '/api/v1/customers',
                 handymen: '/api/v1/handymen',
                 jobs: '/api/v1/jobs',
                 services: '/api/v1/services',
