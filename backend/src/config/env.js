@@ -26,8 +26,7 @@ const envSchema = z.object({
     BCRYPT_ROUNDS: z.string().transform(Number).default("12"),
 
     // Frontend URLs for CORS
-    FRONTEND_URL: z.string().default('http://localhost:3000'),
-
+    FRONTEND_URL: z.string().default('http://localhost:5173'),
     ADMIN_URL: z.string().default("http://localhost:3001"),
 });
 
@@ -72,7 +71,7 @@ if (result.success) {
             JWT_ACCESS_EXPIRES: process.env.JWT_ACCESS_EXPIRES || '15m',
             JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production',
             JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES || '7d',
-            FRONTEND_URL: 'http://localhost:3000',
+            FRONTEND_URL: 'http://localhost:5173',
             ADMIN_URL: 'http://localhost:3001',
             BCRYPT_ROUNDS: process.env.BCRYPT_ROUNDS
         };

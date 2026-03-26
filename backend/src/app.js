@@ -38,12 +38,7 @@ export function createApp() {
     }));
 */
     // Enable CORS
-    app.use(cors({
-        origin: env.corsOrigins,
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    }));
+    app.use(cors());
 
     // ==================
     // 2. Request Parsing

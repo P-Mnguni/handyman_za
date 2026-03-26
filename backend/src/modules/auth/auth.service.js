@@ -188,8 +188,9 @@ class AuthService {
 
             // Find user
             const user = await User.findByEmail(email).select("+passwordHash +refreshTokens");
-            
+           
             if (!user) {
+                console.log('User not found');
                 throw ApiError.unauthorized('Invalid credentials');
             }
 
