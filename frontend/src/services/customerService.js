@@ -66,3 +66,14 @@ export const updateCustomer = async (customerId, customerData) => {
         throw error;
     }
 };
+
+// Delete a customer (admin only)
+export const deleteCustomer = async (customerId) => {
+    try {
+        const response = await apiClient.delete(`/customers/${customerId}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error deleting customer ${customerId}:`, error);
+        throw error;
+    }
+};
