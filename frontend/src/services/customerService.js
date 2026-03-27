@@ -55,3 +55,14 @@ export const createCustomer = async (customerData) => {
         throw error;
     }
 };
+
+// Update customer profile
+export const updateCustomer = async (customerId, customerData) => {
+    try {
+        const response = await apiClient.patch(`/customers/${customerId}`, customerData);
+        return response.data;
+    } catch (error) {
+        console.error(`Error updating customer ${customerId}:`, error);
+        throw error;
+    }
+};
