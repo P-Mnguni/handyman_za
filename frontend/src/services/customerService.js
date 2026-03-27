@@ -77,3 +77,14 @@ export const deleteCustomer = async (customerId) => {
         throw error;
     }
 };
+
+// Suspend customer account
+export const suspendCustomer = async (customerId) => {
+    try {
+        const response = await apiClient.post(`/customers/${customerId}/suspend`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error suspending customer ${customerId}:`, error);
+        throw error;
+    }
+};
