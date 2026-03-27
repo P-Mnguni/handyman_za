@@ -21,3 +21,14 @@ export const getCustomerById = async (customerId) => {
         throw error;
     }
 };
+
+// Get customer stats (total spent, jobs count, etc.)
+export const getCustomerStats = async (customerId) => {
+    try {
+        const response = await apiClient.get(`/customers/${customerId}/stats`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching stats for customer ${customerId}:`, error);
+        throw error;
+    }
+};
