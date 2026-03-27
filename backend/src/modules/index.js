@@ -3,6 +3,7 @@ import { env } from '../config/env.js';
 import authRoutes from './auth/auth.routes.js';
 import jobRoutes from './jobs/job.routes.js';
 import handymenRoutes from './handymen/handymanRoutes.js';
+import customerRoutes from './customers/customerRoutes.js';
 import { success } from 'zod';
 import { no } from 'zod/v4/locales';
 //import { useImperativeHandle } from 'react';
@@ -90,13 +91,7 @@ router.get('/', (req, res) => {
 router.use('/auth', authRoutes);
 
 // Users Module
-const usersRouter = express.Router();
-usersRouter.get('/', (req, res) => placeholderResponse(res, 'List users'));
-usersRouter.get('/me', (req, res) => placeholderResponse(res, 'Get current user profile'));
-usersRouter.put('/me', (req, res) => placeholderResponse(res, 'Update user profile'));
-usersRouter.get('/:userId', (req, res) => placeholderResponse(res, 'Get user by ID'));
-usersRouter.patch('/:userId/suspend', (req, res) => placeholderResponse(res, 'Suspend user (admin only)'));
-router.use('/users', usersRouter);
+router.use('/customers', customerRoutes);
 
 // Handymen Module
 router.use('/handymen', handymenRoutes);
