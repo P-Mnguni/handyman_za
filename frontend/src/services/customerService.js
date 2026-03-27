@@ -44,3 +44,14 @@ export const getCustomerJobs = async (customerId, status = '') => {
         throw error;
     }
 };
+
+// Create a new customer (admin only)
+export const createCustomer = async (customerData) => {
+    try {
+        const response = await apiClient.post('/customers', customerData);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating customer:', error);
+        throw error;
+    }
+};
