@@ -196,125 +196,127 @@ const Customers = () => {
                 </div>
             </div>
 
-            {/* Customers Table last update */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full table-fixed">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">
-                                    Customer
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
-                                    Contact
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%]">
-                                    Location
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                                    Jobs
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%]">
-                                    Total Spent
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                                    Joined
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[11%]">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {filteredCustomers.map((customer) => (
-                                <tr key={customer.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center 
-                                            text-purple-600 font-semibold mr-3">
-                                                {customer.avatar}
-                                            </div>
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-900">{customer.name}</div>
-                                                <div className="text-xs text-gray-500">{customer.email}</div>
-                                                <div className="mt-1">{getVerificationBadge(customer.verified)}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm text-gray-900">{customer.phone}</div>
-                                        <div className="text-xs text-gray-500">Last active: {customer.lastActive}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm text-gray-600">{customer.location}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-gray-900">{customer.totalJobs}</div>
-                                        <div className="text-xs text-gray-500">
-                                            {customer.completedJobs} completed · {customer.cancelledJobs} cancelled
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-gray-900">{customer.totalSpent}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm text-gray-600">{customer.joinedDate}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {getStatusBadge(customer.status)}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center space-x-3">
-                                            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">View</button>
-                                            <button className="text-gray-400 hover:text-gray-600">
-                                                <svg
-                                                    className="h-5 w-5"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2
-                                                        1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* Customers Table */}
+            {filteredCustomers.length === 0 ? (
+                <div className="bg-white rounded-lg shadow p-12 text-center">
+                    <svg
+                        className="h-12 w-12 text-gray-400 mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0
+                            015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3
+                            3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                    </svg>
+                    <h3 className="text-lg font-medium text-gray-900 mb-1">No customer found</h3>
+                    <p className="text-gray-500">
+                        {searchTerm || filter !== 'all'
+                            ? 'Try adjusting your filters or search term.'
+                            : 'No customers are registered on the platform.'}
+                    </p>
                 </div>
-
-                {/* Empty state */}
-                {filteredCustomers.length === 0 && (
-                    <div className="text-center py-12">
-                        <svg
-                            className="h-12 w-12 text-gray-400 mx-auto mb-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4
-                                0 018 0z"
-                            />
-                        </svg>
-                        <h3 className="text-lg font-medium text-gray-900 mb-1">No customers found</h3>
-                        <p className="text-gray-500">Try adjusting your filters or add a new customer.</p>
+            ) : (
+                <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Customer
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Contact
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Location
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Total Spent
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Jobs
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Joined
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredCustomers.map((customer) => {
+                                    <tr key={customer._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center">
+                                                <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center
+                                                text-white font-semibold">
+                                                    {customer.name?.charAt(0) || 'C'}
+                                                </div>
+                                                <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                                                <div className="text-xs text-gray-500">ID: {customer._id?.slice(-6)}</div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm text-gray-900">{customer.email}</div>
+                                            {customer.phone && <div className="text-xs text-gray-500">{customer.phone}</div>}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            {customer.location?.city || 'N/A'}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                            {customer.totalSpent ? `R${customer.totalSpent.toLocaleString()}` : 'R0'}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            {customer.completedJobs || 0}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 text-xs rounded-full capitalize ${getStatusBadge(customer.status)}`}>
+                                                {customer.status || 'active'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                            {formatDate(customer.createdAt)}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center space-x-3">
+                                                <button className="text-blue-600 hover:text-blue-800 text-sm">
+                                                    View
+                                                </button>
+                                                <button className="text-gray-400 hover:text-gray-600">
+                                                    <svg
+                                                        className="h-5 w-5"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M12 5v.01M12 12v.01M12 19.v01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010
+                                                            2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                })}
+                            </tbody>
+                        </table>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Customer Insights Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -335,7 +337,7 @@ const Customers = () => {
                                         <span className="text-sm font-medium text-gray-500 w-6">{index + 1}.</span>
                                         <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center
                                         text-purple-600 font-semibold text-xs mr-3">
-                                            {customer.avatar}
+                                            {customer.name?.charAt(0) || 'C'} + {customer.lastName?.charAt(0) || 'U'}
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-gray-900">{customer.name}</p>
