@@ -88,3 +88,14 @@ export const suspendCustomer = async (customerId) => {
         throw error;
     }
 };
+
+// Reactivate customer account
+export const activateCustomer = async (customerId) => {
+    try {
+        const response = await apiClient.post(`/customers/${customerId}/activate`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error activating customer ${customerId}:`, error);
+        throw error;
+    }
+};
