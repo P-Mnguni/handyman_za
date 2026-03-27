@@ -32,3 +32,15 @@ export const getCustomerStats = async (customerId) => {
         throw error;
     }
 };
+
+// Get customer's job history
+export const getCustomerJobs = async (customerId, status = '') => {
+    try {
+        const params = status ? { status } : {};
+        const response = await apiClient.get(`/customers/${customerId}/jobs`, { params });
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching jobs for customer ${customerId}:`, error);
+        throw error;
+    }
+};
