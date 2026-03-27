@@ -1,191 +1,108 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getCustomers } from "../services/customerService";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Customers = () => {
+    const [customers, setCustomers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Sample customers data - will be replaced with API data
-    const customers = [
-        {
-            id: 1,
-            name: 'John Dlamini',
-            email: 'john.d@example.com',
-            phone: '+27 71 234 5678',
-            location: 'Johannesburg',
-            totalJobs: 8,
-            completedJobs: 6,
-            cancelledJobs: 2,
-            totalSpent: 'R4,250',
-            status: 'active',
-            joinedDate: '2023-09-15',
-            lastActive: '2024-03-14',
-            verified: true,
-            avatar: 'JD'
-        },
-        {
-            id: 2,
-            name: 'Sarah Mokoena',
-            email: 'sarah.m@example.com',
-            phone: '+27 82 345 6789',
-            location: 'Cape Town',
-            totalJobs: 12,
-            completedJobs: 11,
-            cancelledJobs: 1,
-            totalSpent: 'R8,950',
-            status: 'active',
-            joinedDate: '2023-06-22',
-            lastActive: '2024-03-15',
-            verified: true,
-            avatar: 'SM'
-        },
-        {
-            id: 3,
-            name: 'Peter van Wyk',
-            email: 'peter.v@example.com',
-            phone: '+27 73 456 7890',
-            location: 'Durban',
-            totalJobs: 3,
-            completedJobs: 2,
-            cancelledJobs: 1,
-            totalSpent: 'R1,450',
-            status: 'inactive',
-            joinedDate: '2024-01-10',
-            lastActive: '2024-02-28',
-            verified: true,
-            avatar: 'PV'
-        },
-        {
-            id: 4,
-            name: 'Lisa Reddy',
-            email: 'lisa.r@example.com',
-            phone: '+27 64 567 8901',
-            location: 'Pretoria',
-            totalJobs: 15,
-            completedJobs: 14,
-            cancelledJobs: 1,
-            totalSpent: 'R12,300',
-            status: 'active',
-            joinedDate: '2023-05-05',
-            lastActive: '2024-03-15',
-            verified: true,
-            avatar: 'LR'
-        },
-        {
-            id: 5,
-            name: 'Mark Thompson',
-            email: 'mark.t@example.com',
-            phone: '+27 75 678 9012',
-            location: 'Johannesburg',
-            totalJobs: 1,
-            completedJobs: 0,
-            cancelledJobs: 1,
-            totalSpent: 'R0',
-            status: 'suspended',
-            joinedDate: '2024-02-18',
-            lastActive: '2024-02-20',
-            verified: false,
-            avatar: 'MT'
-        },
-        {
-            id: 6,
-            name: 'Thabo Ndlovu',
-            email: 'thabo.n@example.com',
-            phone: '+27 86 789 0123',
-            location: 'Cape Town',
-            totalJobs: 6,
-            completedJobs: 5,
-            cancelledJobs: 1,
-            totalSpent: 'R3,850',
-            status: 'active',
-            joinedDate: '2023-11-30',
-            lastActive: '2024-03-12',
-            verified: true,
-            avatar: 'TN'
-        },
-        {
-            id: 7,
-            name: 'Jenny Liebenberg',
-            email: 'jenny.l@example.com',
-            phone: '+27 77 890 1234',
-            location: 'Durban',
-            totalJobs: 2,
-            completedJobs: 2,
-            cancelledJobs: 0,
-            totalSpent: 'R1,950',
-            status: 'pending',
-            joinedDate: '2024-03-01',
-            lastActive: '2024-03-10',
-            verified: false,
-            avatar: 'JL'
-        },
-        {
-            id: 8,
-            name: 'David Williams',
-            email: 'david.w@example.com',
-            phone: '+27 78 901 2345',
-            location: 'Port Elizabeth',
-            totalJobs: 9,
-            completedJobs: 8,
-            cancelledJobs: 1,
-            totalSpent: 'R6,750',
-            status: 'active',
-            joinedDate: '2023-08-12',
-            lastActive: '2024-03-13',
-            verified: true,
-            avatar: 'DW'
-        },
-    ];
-
-    const getStatusBadge = (status) => {
-        switch(status) {
-            case 'active':
-                return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>;
-            case 'inactive':
-                return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Inactive</span>;
-            case 'suspended':
-                return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Suspended</span>;
-            case 'pending':
-                return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending Verification</span>;
-            default:
-                return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Unknown</span>;
+    const fetchCustomers = async () => {
+        try {
+            setLoading(true);
+            const response = await getCustomers();
+            // Handle nested response structure (similar to jobs)
+            const customersData = response.data?.customers || response.data || [];
+            setCustomers(customersData);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching customers:', err);
+            setError('Failed to load customers. Please try again later.');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const getVerificationBadge = (verified) => {
-        return verified
-            ? <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Verified</span>
-            : <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Unverified</span>
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
+    
+    const getStatusBadge = (status) => {
+        const colors = {
+            active: 'bg-green-100 text-green-800',
+            suspended: 'bg-red-100 text-red-800',
+            inactive: 'bg-gray-100 text-gray-800'
+        };
+        return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
     };
-
-    // Calculate customer statistics
-    const stats = {
-        total: customers.length,
-        active: customers.filter(c=> c.status === 'active').length,
-        inactive: customers.filter(c => c.status === 'inactive').length,
-        suspended: customers.filter(c => c.status === 'suspended').length,
-        pending: customers.filter(c => c.status === 'pending').length,
-        verified: customers.filter(c => c.verified).length,
-        totalJobs: customers.reduce((sum, c) => sum + c.totalJobs, 0),
-        totalSpent: customers.reduce((sum, c) => {
-            const amount = parseFloat(c.totalSpent.replace('R', '').replace('.', ''));
-            return sum + amount;
-        }, 0),
-    };
-
+    
     // Filter customers based on status and search
     const filteredCustomers = customers.filter(customer => {
-        if (filter !== 'all' && customer.status !== filter) return false;
+        if (filter !== 'all' && customer.status.toLowerCase() !== filter) return false;
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
             return (
-                customer.name.toLowerCase().includes(term) ||
-                customer.email.toLowerCase().includes(term) ||
-                customer.phone.includes(term) ||
-                customer.location.toLowerCase().includes(term)
+                customer.name?.toLowerCase().includes(term) ||
+                customer.email?.toLowerCase().includes(term) ||
+                customer.phone?.includes(term) ||
+                customer.location?.city?.toLowerCase().includes(term)
             );
         }
         return true;
     });
+
+    // Calculate customer statistics
+    const statusCounts = {
+        all: customers.length,
+        active: customers.filter(c=> c.status?.toLowerCase() === 'active').length,
+        suspended: customers.filter(c => c.status?.toLowerCase() === 'suspended').length,
+    };
+
+    // Format date
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        return new Date(dateString).toLocaleDateString('en-ZA', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
+
+    if (loading) {
+        return <LoadingSpinner size="large" color="gray" text="Loading customers..." />;
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-100 space-y-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md text-center">
+                    <svg 
+                        className="h-12 w-12 text-red-500 mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4m0 4h.01M21 12a 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <h3 className="text-lg font-semibold text-red-800 mb-2">Something went wrong</h3>
+                    <p className="text-red-600 mb-4">{error}</p>
+                    <button
+                        onClick={fetchCustomers}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -195,43 +112,7 @@ const Customers = () => {
                 <p className="text-gray-600 mt-1">View and manage all customers using platform.</p>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-                <div className="bg-white p-4 rounded-lg shadow col-span-1">
-                    <p className="text-xs text-gray-500">Total Customers</p>
-                    <p className="text-xl font-bold text-gray-800">{stats.total}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow col-span-1">
-                    <p className="text-xs text-gray-500">Active</p>
-                    <p className="text-xl font-bold text-green-600">{stats.active}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow col-span-1">
-                    <p className="text-xs text-gray-500">Inactive</p>
-                    <p className="text-xl font-bold text-gray-600">{stats.inactive}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow col-span-1">
-                    <p className="text-xs text-gray-500">Suspended</p>
-                    <p className="text-xl font-bold text-red-600">{stats.suspended}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow col-span-1">
-                    <p className="text-xs text-gray-500">Pending</p>
-                    <p className="text-xl font-bold text-yellow-600">{stats.pending}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow col-span-1">
-                    <p className="text-xs text-gray-500">Verified</p>
-                    <p className="text-xl font-bold text-blue-600">{stats.verified}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow col-span-1">
-                    <p className="text-xs text-gray-500">Total Jobs</p>
-                    <p className="text-xl font-bold text-gray-800">{stats.totalJobs}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow col-span-1">
-                    <p className="text-xs text-gray-500">Total Spent</p>
-                    <p className="text-xl font-bold text-gray-800">R{stats.totalSpent.toLocaleString()}</p>
-                </div>
-            </div>
-
-            {/* Filters and Actions */}
+            {/* Filters and Search */}
             <div className="bg-white p-4 rounded-lg shadow flex flex-col lg:flex-row gap-4 justify-between">
                 {/* Status filters */}
                 <div className="flex flex-wrap gap-2">
@@ -243,7 +124,7 @@ const Customers = () => {
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                        All ({stats.total})
+                        All ({statusCounts.all})
                     </button>
                     <button
                         onClick={() => setFilter('active')}
@@ -253,17 +134,7 @@ const Customers = () => {
                                 : 'bg-green-50 text-green-700 hover:bg-green-100'
                         }`}
                     >
-                        Active ({stats.active})
-                    </button>
-                    <button
-                        onClick={() => setFilter('inactive')}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                            filter === 'inactive'
-                                ? 'bg-gray-600 text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                    >
-                        Inactive ({stats.inactive})
+                        Active ({statusCounts.active})
                     </button>
                     <button
                         onClick={() => setFilter('suspended')}
@@ -273,21 +144,11 @@ const Customers = () => {
                                 : 'bg-red-50 text-red-700 hover:bg-red-100'
                         }`}
                     >
-                        Suspended ({stats.suspended})
-                    </button>
-                    <button
-                        onClick={() => setFilter('pending')}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                            filter === 'pending'
-                                ? 'bg-yellow-600 text-white'
-                                : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-                        }`}
-                    >
-                        Pending ({stats.pending})
+                        Suspended ({statusCounts.suspended})
                     </button>
                 </div>
 
-                {/* Search and actions */}
+                {/* Search and refresh */}
                 <div className="flex gap-3">
                     <div className="relative">
                         <input
@@ -312,8 +173,10 @@ const Customers = () => {
                             />
                         </svg>
                     </div>
-                    <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700
-                    transition-colors flex items-center">
+                    <button 
+                        onClick={fetchCustomers}
+                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700
+                        transition-colors flex items-center">
                         <svg
                             className="h-5 w-5 mr-1"
                             fill="none"
@@ -324,15 +187,16 @@ const Customers = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M12 4v16m8-8H4"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0
+                                01-15.357-2m15.357 2H15"
                             />
                         </svg>
-                        Add Customer
+                        Refresh
                     </button>
                 </div>
             </div>
 
-            {/* Customers Table */}
+            {/* Customers Table last update */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full table-fixed">
