@@ -307,3 +307,48 @@ export const activateCustomer = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Get customer stats (total spent, total count, etc.)
+ * @route   GET /api/v1/customers/:id/stats
+ * @access  Private/Admin
+ */
+export const getCustomerStats = async (req, res) => {
+    try {
+        const customer = await User.findById(req.params.id)
+                                    .select('completedJobs totalSpent name email location');
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Customer not found'
+            });
+        }
+
+        if (customer.role !== 'client') {
+            return res.status(400).json({
+                success: false,
+                message: 'User is not a customer'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                id: customer._id,
+                name: customer.name,
+                email: customer.email,
+                completedJobs: customer.completedJobs || 0,
+                totalSpent: customer.totalSpent || 0,
+                location: customer.location
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching customer stats:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch customer stats',
+            error: error.message
+        });
+    }
+};
