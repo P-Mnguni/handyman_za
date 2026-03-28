@@ -266,3 +266,44 @@ export const suspendCustomer = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Activate customer account
+ * @route   POST /api/v1/customers/:id/activate
+ * @access  Private/Admin
+ */
+export const activateCustomer = async (req, res) => {
+    try {
+        const customer = await User.findById(req.params.id);
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Customer not found'
+            });
+        }
+
+        if (customer.role !== 'client') {
+            return res.status(400).json({
+                success: false,
+                message: 'User is not a customer'
+            });
+        }
+
+        customer.status = 'active';
+        await customer.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Customer activated successfully',
+            data: customer
+        });
+    } catch (error) {
+        console.error('Error activating customer:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to activate customer',
+            error: error.message
+        });
+    }
+};
