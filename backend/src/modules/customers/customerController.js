@@ -186,3 +186,42 @@ export const updateCustomer = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Delete customer
+ * @route   DELETE /api/v1/customers/:id
+ * @access  Private/Admin
+ */
+export const deleteCustomer = async (req, res) => {
+    try {
+        const customer = await User.findById(req.params.id);
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Customer not found'
+            });
+        }
+
+        if (customer.role !== 'client') {
+            return res.status(400).json({
+                success: false,
+                message: 'User is not a customer'
+            });
+        }
+
+        await customer.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: 'Customer deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting customer:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete customer',
+            error: error.message
+        });
+    }
+};
