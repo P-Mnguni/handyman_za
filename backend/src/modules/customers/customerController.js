@@ -1,5 +1,5 @@
 import { success } from "zod";
-import User from "../users/user.model";
+import User from "../users/user.model.js";
 import bcrypt from "bcryptjs";
 
 /**
