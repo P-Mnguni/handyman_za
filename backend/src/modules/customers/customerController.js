@@ -225,3 +225,44 @@ export const deleteCustomer = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Suspend customer account
+ * @route   POST /api/v1/customers/:id/suspend
+ * @access  Private/Admin
+ */
+export const suspendCustomer = async (req, res) => {
+    try {
+        const customer = await User.findById(req.params.id);
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Customer not found'
+            });
+        }
+
+        if (customer.role !== 'client') {
+            return res.status(400).json({
+                success: false,
+                message: 'User is not a customer'
+            });
+        }
+
+        customer.status = 'suspended';
+        await customer.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Customer suspended successfully',
+            data: customer
+        });
+    } catch (error) {
+        console.error('Error suspending customer:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to suspend customer',
+            error: error.message
+        });
+    }
+};
