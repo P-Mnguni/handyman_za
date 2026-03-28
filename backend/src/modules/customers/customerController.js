@@ -34,7 +34,7 @@ const getCustomers = async (req, res) => {
  * @route   GET /api/v1/customers/:id
  * @access  Private/Admin
  */
-export const getCustomerById = async (req, res) => {
+const getCustomerById = async (req, res) => {
     try {
         const customer = await User.findById(req.params.id)
                                     .select('-password');
@@ -62,6 +62,71 @@ export const getCustomerById = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch customer',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * @desc    Create a new customer (client)
+ * @route   POST /api/v1/customers
+ * @access  Private/Admin
+ */
+const createCustomer = async (req, res) => {
+    try {
+        const {
+            name,
+            email,
+            password,
+            phone,
+            location
+        } = req.body;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'User with this email already exists'
+            });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create customer user - force role to 'client'
+        const customer = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role: 'client',
+            phone: phone || '',
+            location: location || {
+                city: '',
+                area: ''
+            },
+            status: 'active',
+            completedJobs: 0,
+            totalSpent: 0
+        });
+
+        await customer.save();
+
+        // Return customer without password
+        const customerResponse = customer.toObject();
+        delete customerResponse.password;
+
+        res.status(201).json({
+            success: true,
+            message: 'Customer created successfully',
+            data: customerResponse
+        });
+    } catch (error) {
+        console.error('Error creating customer:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create customer',
             error: error.message
         });
     }
