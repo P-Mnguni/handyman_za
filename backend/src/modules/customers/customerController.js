@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
  * @route   GET /api/v1/customers
  * @access  Private/Admin
  */
-const getCustomers = async (req, res) => {
+export const getCustomers = async (req, res) => {
     try {
         // Query users with role 'client'
         const customers = await User.find({ role: 'client' })
@@ -34,7 +34,7 @@ const getCustomers = async (req, res) => {
  * @route   GET /api/v1/customers/:id
  * @access  Private/Admin
  */
-const getCustomerById = async (req, res) => {
+export const getCustomerById = async (req, res) => {
     try {
         const customer = await User.findById(req.params.id)
                                     .select('-password');
@@ -72,7 +72,7 @@ const getCustomerById = async (req, res) => {
  * @route   POST /api/v1/customers
  * @access  Private/Admin
  */
-const createCustomer = async (req, res) => {
+export const createCustomer = async (req, res) => {
     try {
         const {
             name,
@@ -127,6 +127,61 @@ const createCustomer = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to create customer',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * @desc    Update customer profile
+ * @route   PUT /api/v1/customers/:id
+ * @access  Private/Admin
+ */
+export const updateCustomer = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        // Prevent role changes
+        if (updates.role) {
+            delete updates.role;
+        }
+
+        // Prevent password updates through this endpoint
+        if (updates.password) {
+            delete updates.password;
+        }
+
+        const customer = await User.findByIdAndUpdate(
+            id,
+            { $set: updates },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Customer not found'
+            });
+        }
+
+        if (customer.role !== 'client') {
+            return res.status(400).json({
+                success: false,
+                message: 'User is not a customer'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Customer updated successfully',
+            data: customer
+        });
+    } catch (error) {
+        console.error('Error updating customer:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update customer',
             error: error.message
         });
     }
