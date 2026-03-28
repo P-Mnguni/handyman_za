@@ -28,3 +28,41 @@ const getCustomers = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Get single customer by ID
+ * @route   GET /api/v1/customers/:id
+ * @access  Private/Admin
+ */
+export const getCustomerById = async (req, res) => {
+    try {
+        const customer = await User.findById(req.params.id)
+                                    .select('-password');
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Customer not found'
+            });
+        }
+
+        if (customer.role !== 'client') {
+            return res.status(400).json({
+                success: false,
+                message: 'User is not a customer'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: customer
+        });
+    } catch (error) {
+        console.error('Error fetching customer:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch customer',
+            error: error.message
+        });
+    }
+};
