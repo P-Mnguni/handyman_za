@@ -352,3 +352,41 @@ export const getCustomerStats = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Get customer's job history
+ * @route   GET /api/v1/customers/:id/jobs
+ * @access  Private/Admin
+ */
+export const getCustomerJobs = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.query;
+
+        // Import Job model
+        const { Job } = require('../jobs/job.model.js');
+
+        // Build query
+        const query = { client: id };
+        if (status) {
+            query.status = status;
+        }
+
+        const jobs = await Job.find(query)
+                                .populate('handyman', 'name email')
+                                .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: jobs.length,
+            data: jobs
+        });
+    } catch (error) {
+        console.error('Error fetching customer jobs:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch customer jobs',
+            error: error.message
+        });
+    }
+};
