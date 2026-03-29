@@ -65,7 +65,7 @@ const Handymen = () => {
 
     const handleSuspend = (handyman) => {
         console.log('Suspend handyman:', handyman);
-    }
+    };
 
     if (loading) {
         return <LoadingSpinner size="large" color="gray" text="Loading handymen..." />;
