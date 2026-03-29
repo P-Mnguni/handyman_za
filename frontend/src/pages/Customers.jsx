@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getCustomers } from "../services/customerService";
 import LoadingSpinner from "../components/LoadingSpinner";
 import CustomerTable from "../components/Customers/CustomerTable";
+import CreateCustomerModal from "../components/Customers/CreateCustomerModal";
 
 const Customers = () => {
     const [customers, setCustomers] = useState([]);
@@ -9,6 +10,7 @@ const Customers = () => {
     const [error, setError] = useState(null);
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const fetchCustomers = async () => {
         try {
@@ -177,6 +179,26 @@ const Customers = () => {
                             />
                         </svg>
                     </div>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700
+                        transition-colors flex items-center"
+                    >
+                        <svg
+                            className="h-5 w-5 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        Add Customer
+                    </button>
                     <button 
                         onClick={fetchCustomers}
                         className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700
@@ -277,6 +299,12 @@ const Customers = () => {
                     </div>
                 </div>
             </div>
+
+            <CreateCustomerModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={fetchCustomers}
+            />
         </div>
     );
 };
