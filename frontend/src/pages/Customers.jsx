@@ -208,6 +208,17 @@ const Customers = () => {
                 onActivate={handleActivate}
             />
 
+            {/* Summary Footer */}
+            <div className="bg-white p-4 rounded-lg shadow flex justify-between items-center text-sm">
+                <div className="text-gray-600">
+                    Showing <span className="font-medium">{filteredCustomers.length}</span> of <span className="font-medium">{customers.length}</span> customers
+                </div>
+                <div className="flex space-x-4">
+                    <button className="text-gray-600 hover:text-gray-900">Previous</button>
+                    <button className="text-gray-600 hover:text-gray-900">Next</button>
+                </div>
+            </div>
+
             {/* Customer Insights Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Top Customers */}
@@ -264,17 +275,6 @@ const Customers = () => {
                             ))
                         }
                     </div>
-                </div>
-            </div>
-
-            {/* Summary Footer */}
-            <div className="bg-white p-4 rounded-lg shadow flex justify-between items-center text-sm">
-                <div className="text-gray-600">
-                    Showing <span className="font-medium">{filteredCustomers.length}</span> of <span className="font-medium">{customers.length}</span> customers
-                </div>
-                <div className="flex space-x-4">
-                    <button className="text-gray-600 hover:text-gray-900">Previous</button>
-                    <button className="text-gray-600 hover:text-gray-900">Next</button>
                 </div>
             </div>
         </div>
