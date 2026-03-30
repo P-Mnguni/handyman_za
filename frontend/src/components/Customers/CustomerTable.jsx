@@ -1,6 +1,10 @@
 import React from "react";
 
 const CustomerTable = ({ customers, onView, onSuspend, onActivate }) => {
+    console.log('CustomerTable received:', customers);
+    console.log('Is array?', Array.isArray(customers));
+    console.log('Length:', customers?.length);
+
     // Helper function to get status badge color
     const getStatusBadge = (status) => {
         const colors = {
@@ -78,16 +82,16 @@ const CustomerTable = ({ customers, onView, onSuspend, onActivate }) => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {customers.map((customer) => {
+                        {customers.map((customer) => (
                             <tr key={customer._id} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center">
                                         <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center 
                                         text-white font-semibold">
-                                            {customer.name?.charAt(0) || 'C'}
+                                            {customer.fullName.charAt(0) || 'C'}
                                         </div>
                                         <div className="ml-3">
-                                            <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                                            <div className="text-sm font-medium text-gray-900">{customer.fullName}</div>
                                             <div className="text-xs text-gray-500">ID: {customer._id}</div>
                                         </div>
                                     </div>
@@ -156,7 +160,7 @@ const CustomerTable = ({ customers, onView, onSuspend, onActivate }) => {
                                     </div>
                                 </td>
                             </tr>
-                        })}
+                        ))}
                     </tbody>
                 </table>
             </div>
@@ -165,3 +169,4 @@ const CustomerTable = ({ customers, onView, onSuspend, onActivate }) => {
 };
 
 export default CustomerTable;
+                                    

@@ -16,8 +16,15 @@ const Customers = () => {
         try {
             setLoading(true);
             const response = await getCustomers();
+            console.log('Full API response:', response);
+            console.log('Response structure:', Object.keys(response));
+            console.log('Response data:', response.data);
+
             // Handle nested response structure (similar to jobs)
             const customersData = response.data?.customers || response.data || [];
+            console.log('Extracted customers data:', customersData);
+            console.log('Is array?', Array.isArray(customersData));
+            console.log('Count:', customersData.length);
             setCustomers(customersData);
             setError(null);
         } catch (err) {
@@ -47,7 +54,7 @@ const Customers = () => {
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
             return (
-                customer.name?.toLowerCase().includes(term) ||
+                customer.fullName?.toLowerCase().includes(term) ||
                 customer.email?.toLowerCase().includes(term) ||
                 customer.phone?.includes(term) ||
                 customer.location?.city?.toLowerCase().includes(term)
@@ -109,6 +116,12 @@ const Customers = () => {
             </div>
         );
     }
+
+    console.log('=== BEFORE RENDER ===');
+    console.log('Customer state:', customers);
+    console.log('Filtered customers:', filteredCustomers);
+    console.log('Loading:', loading);
+    console.log('Error:', error);
 
     return (
         <div className="space-y-6">
@@ -260,10 +273,10 @@ const Customers = () => {
                                         <span className="text-sm font-medium text-gray-500 w-6">{index + 1}.</span>
                                         <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center
                                         text-purple-600 font-semibold text-xs mr-3">
-                                            {customer.name?.charAt(0) || 'C'} + {customer.lastName?.charAt(0) || 'U'}
+                                            {customer.fullName?.charAt(0) || 'C'} + {customer.lastName?.charAt(0) || 'U'}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-gray-900">{customer.name}</p>
+                                            <p className="text-sm font-medium text-gray-900">{customer.fullName}</p>
                                             <p className="text-xs text-gray-500">{customer.totalJobs} jobs</p>
                                         </div>
                                     </div>
@@ -287,7 +300,7 @@ const Customers = () => {
                                         <div className="h-2 w-2 rounded-full bg-green-500 mr-3"></div>
                                         <div>
                                             <p className="text-sm text-gray-800">
-                                                <span className="font-medium">{customer.name}</span> was active
+                                                <span className="font-medium">{customer.fullName}</span> was active
                                             </p>
                                             <p className="text-xs text-gray-500">{customer.lastActive}</p>
                                         </div>
