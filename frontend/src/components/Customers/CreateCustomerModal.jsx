@@ -77,7 +77,7 @@ const CreateCustomerModal = ({ isOpen, onClose, onSuccess }) => {
         // Prepare data for API
         const customerData = {
             ...formData,
-            name: `${formData.firstName} ${formData.lastName}`.trim()
+            fullName: `${formData.firstName} ${formData.lastName}`.trim()
         };
 
         // Remove firstName and lastName
