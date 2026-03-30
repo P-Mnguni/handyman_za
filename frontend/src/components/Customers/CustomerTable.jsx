@@ -1,9 +1,6 @@
 import React from "react";
 
 const CustomerTable = ({ customers, onView, onSuspend, onActivate }) => {
-    console.log('CustomerTable received:', customers);
-    console.log('Is array?', Array.isArray(customers));
-    console.log('Length:', customers?.length);
 
     // Helper function to get status badge color
     const getStatusBadge = (status) => {

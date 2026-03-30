@@ -16,15 +16,10 @@ const Customers = () => {
         try {
             setLoading(true);
             const response = await getCustomers();
-            console.log('Full API response:', response);
-            console.log('Response structure:', Object.keys(response));
-            console.log('Response data:', response.data);
 
             // Handle nested response structure (similar to jobs)
             const customersData = response.data?.customers || response.data || [];
-            console.log('Extracted customers data:', customersData);
-            console.log('Is array?', Array.isArray(customersData));
-            console.log('Count:', customersData.length);
+    
             setCustomers(customersData);
             setError(null);
         } catch (err) {
@@ -116,12 +111,6 @@ const Customers = () => {
             </div>
         );
     }
-
-    console.log('=== BEFORE RENDER ===');
-    console.log('Customer state:', customers);
-    console.log('Filtered customers:', filteredCustomers);
-    console.log('Loading:', loading);
-    console.log('Error:', error);
 
     return (
         <div className="space-y-6">
